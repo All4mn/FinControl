@@ -8,6 +8,7 @@ require('dotenv').config();
 const express = require('express');
 const cors    = require('cors');
 const { testConnection } = require('../config/database');
+const authMiddleware = require('../middlewares/authMiddleware');
 
 // ─── Importar Rotas ──────────────────────────────────────────────────────────
 const authRoutes      = require('../routes/authRoutes');
@@ -54,6 +55,7 @@ app.get('/health', (_req, res) => {
 
 // ─── Registrar Rotas ─────────────────────────────────────────────────────────
 app.use('/auth',       authRoutes);
+app.use(authMiddleware);
 app.use('/usuarios',   usuarioRoutes);
 app.use('/contas',     contaRoutes);
 app.use('/transacoes', transacaoRoutes);
@@ -67,8 +69,11 @@ app.use((_req, res) => {
 
 // ─── Middleware de Erro Global ────────────────────────────────────────────────
 app.use((err, _req, res, _next) => {
-  console.error('Erro não tratado:', err);
-  res.status(500).json({ sucesso: false, mensagem: 'Erro interno do servidor' });
+  console.error('❌ Erro não tratado:', err.message || err);
+  console.error('Stack:', err.stack);
+  const status = err.status || 500;
+  const mensagem = err.message || 'Erro interno do servidor';
+  res.status(status).json({ sucesso: false, mensagem });
 });
 
 // ─── Inicializar Servidor ────────────────────────────────────────────────────

@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "nodemon server/index.js",
+    "init-db": "node init-db.js",
     "test": "echo \"Testes não configurados\" && exit 0"
   },
   "keywords": [],

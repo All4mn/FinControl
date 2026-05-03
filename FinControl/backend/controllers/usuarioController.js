@@ -18,7 +18,12 @@ const UsuarioController = {
 
   async buscarPorId(req, res) {
     try {
+      const usuarioLogadoId = req.user?.id;
       const { id } = req.params;
+      if (Number(id) !== usuarioLogadoId) {
+        return res.status(403).json({ sucesso: false, mensagem: 'Acesso negado' });
+      }
+
       const usuario = await UsuarioModel.findById(id);
       if (!usuario) {
         return res.status(404).json({ sucesso: false, mensagem: 'Usuário não encontrado' });
@@ -32,7 +37,12 @@ const UsuarioController = {
 
   async atualizar(req, res) {
     try {
+      const usuarioLogadoId = req.user?.id;
       const { id } = req.params;
+      if (Number(id) !== usuarioLogadoId) {
+        return res.status(403).json({ sucesso: false, mensagem: 'Acesso negado' });
+      }
+
       const { nome, email } = req.body;
       const usuario = await UsuarioModel.update(id, { nome, email });
       if (!usuario) {
@@ -47,7 +57,12 @@ const UsuarioController = {
 
   async deletar(req, res) {
     try {
+      const usuarioLogadoId = req.user?.id;
       const { id } = req.params;
+      if (Number(id) !== usuarioLogadoId) {
+        return res.status(403).json({ sucesso: false, mensagem: 'Acesso negado' });
+      }
+
       const deletado = await UsuarioModel.delete(id);
       if (!deletado) {
         return res.status(404).json({ sucesso: false, mensagem: 'Usuário não encontrado' });

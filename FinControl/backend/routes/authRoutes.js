@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const AuthController = require('../controllers/authController');
+const authMiddleware = require('../middlewares/authMiddleware');
 
 // POST /auth/registro  — Registrar novo usuário
 router.post('/registro', AuthController.registro);
@@ -14,6 +15,6 @@ router.post('/registro', AuthController.registro);
 router.post('/login', AuthController.login);
 
 // GET  /auth/me        — Dados do usuário logado
-router.get('/me', AuthController.me);
+router.get('/me', authMiddleware, AuthController.me);
 
 module.exports = router;

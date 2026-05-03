@@ -5,7 +5,7 @@
 
 const CategoriaModel = require('../models/categoriaModel');
 
-const getUsuarioId = (req) => req.headers['x-usuario-id'] || 1;
+const getUsuarioId = (req) => req.user?.id || Number(req.headers['x-usuario-id']) || 1;
 
 const CategoriaController = {
   async listar(req, res) {
