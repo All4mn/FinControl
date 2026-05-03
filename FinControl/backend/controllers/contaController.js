@@ -5,8 +5,8 @@
 
 const ContaModel = require('../models/contaModel');
 
-// Busca o usuário autenticado no header Authorization ou via cabeçalho legado.
-const getUsuarioId = (req) => req.user?.id || Number(req.headers['x-usuario-id']) || 1;
+// Stub de usuario_id — em produção, virá do middleware JWT (req.usuario.id)
+const getUsuarioId = (req) => req.headers['x-usuario-id'] || 1;
 
 const ContaController = {
   async listar(req, res) {

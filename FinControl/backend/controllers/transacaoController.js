@@ -5,7 +5,7 @@
 
 const TransacaoModel = require('../models/transacaoModel');
 
-const getUsuarioId = (req) => req.user?.id || Number(req.headers['x-usuario-id']) || 1;
+const getUsuarioId = (req) => req.headers['x-usuario-id'] || 1;
 
 const TransacaoController = {
   async listar(req, res) {

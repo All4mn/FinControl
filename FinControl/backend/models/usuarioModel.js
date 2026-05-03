@@ -11,7 +11,7 @@ const UsuarioModel = {
    */
   async findAll() {
     const { rows } = await pool.query(
-      'SELECT id, nome_usuario, email_usuario, criado_em FROM usuario ORDER BY criado_em DESC'
+      'SELECT id, nome, email, criado_em FROM usuarios ORDER BY criado_em DESC'
     );
     return rows;
   },
@@ -22,7 +22,7 @@ const UsuarioModel = {
    */
   async findById(id) {
     const { rows } = await pool.query(
-      'SELECT id, nome_usuario, email_usuario, criado_em FROM usuario WHERE id = $1',
+      'SELECT id, nome, email, criado_em FROM usuarios WHERE id = $1',
       [id]
     );
     return rows[0] || null;
@@ -34,7 +34,7 @@ const UsuarioModel = {
    */
   async findByEmail(email) {
     const { rows } = await pool.query(
-      'SELECT * FROM usuario WHERE email_usuario = $1',
+      'SELECT * FROM usuarios WHERE email = $1',
       [email]
     );
     return rows[0] || null;
@@ -46,9 +46,9 @@ const UsuarioModel = {
    */
   async create({ nome, email, senha_hash }) {
     const { rows } = await pool.query(
-      `INSERT INTO usuario (nome_usuario, email_usuario, senha_usuario)
+      `INSERT INTO usuarios (nome, email, senha_hash)
        VALUES ($1, $2, $3)
-       RETURNING id, nome_usuario, email_usuario, criado_em`,
+       RETURNING id, nome, email, criado_em`,
       [nome, email, senha_hash]
     );
     return rows[0];
@@ -59,31 +59,14 @@ const UsuarioModel = {
    * @param {number} id
    * @param {Object} dados - { nome, email }
    */
-  async update(id, dados) {
-    const fields = [];
-    const values = [];
-    let idx = 1;
-
-    if ('nome' in dados && dados.nome) {
-      fields.push(`nome_usuario = $${idx++}`);
-      values.push(dados.nome);
-    }
-    if ('email' in dados && dados.email) {
-      fields.push(`email_usuario = $${idx++}`);
-      values.push(dados.email);
-    }
-
-    if (fields.length === 0) return null;
-
-    fields.push(`atualizado_em = NOW()`);
-    values.push(id);
-
-    const query = `UPDATE usuario
-                   SET ${fields.join(', ')}
-                   WHERE id = $${idx}
-                   RETURNING id, nome_usuario, email_usuario, atualizado_em`;
-
-    const { rows } = await pool.query(query, values);
+  async update(id, { nome, email }) {
+    const { rows } = await pool.query(
+      `UPDATE usuarios
+       SET nome = $1, email = $2, atualizado_em = NOW()
+       WHERE id = $3
+       RETURNING id, nome, email, atualizado_em`,
+      [nome, email, id]
+    );
     return rows[0] || null;
   },
 
@@ -93,7 +76,7 @@ const UsuarioModel = {
    */
   async delete(id) {
     const { rowCount } = await pool.query(
-      'DELETE FROM usuario WHERE id = $1',
+      'DELETE FROM usuarios WHERE id = $1',
       [id]
     );
     return rowCount > 0;

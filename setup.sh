@@ -1450,16 +1450,53 @@ log_step "Criando Frontend com Vite + React"
 
 cd FinControl/frontend
 
-# Criar projeto Vite React
-log_info "Inicializando projeto Vite..."
-npm create vite@latest . -- --template react --yes > /dev/null 2>&1 || \
-  npx create-vite@latest . --template react > /dev/null 2>&1
+# Criar projeto Vite manualmente (sem npm create que trava esperando download)
+log_info "Inicializando projeto Vite manualmente..."
 
-log_info "Instalando dependências do frontend..."
-npm install > /dev/null 2>&1
+# package.json do frontend
+cat > package.json << 'PKGJSON'
+{
+  "name": "fincontrol-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  }
+}
+PKGJSON
 
-log_info "Instalando axios..."
-npm install axios > /dev/null 2>&1
+# index.html na raiz (padrão Vite)
+cat > index.html << 'INDEXHTML'
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FinControl</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+INDEXHTML
+
+# vite.config.js
+cat > vite.config.js << 'VITECONFIG'
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+})
+VITECONFIG
+
+log_info "Instalando dependências do frontend (react, vite, axios)..."
+npm install --save react react-dom axios > /dev/null 2>&1
+npm install --save-dev vite @vitejs/plugin-react > /dev/null 2>&1
 
 log_success "Frontend Vite + React inicializado"
 

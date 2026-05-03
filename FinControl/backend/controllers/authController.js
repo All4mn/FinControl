@@ -72,7 +72,7 @@ const AuthController = {
         return res.status(401).json({ sucesso: false, mensagem: 'Credenciais inválidas' });
       }
 
-      const senhaCorreta = usuario.senha_usuario === hashSenha(senha);
+      const senhaCorreta = usuario.senha_hash === hashSenha(senha);
       if (!senhaCorreta) {
         return res.status(401).json({ sucesso: false, mensagem: 'Credenciais inválidas' });
       }
@@ -101,7 +101,7 @@ const AuthController = {
   async me(req, res) {
     return res.status(200).json({
       sucesso: true,
-      usuario: req.user || null,
+      mensagem: 'Endpoint /auth/me — implemente middleware JWT para autenticar',
     });
   },
 };
