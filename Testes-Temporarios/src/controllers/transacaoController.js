@@ -24,6 +24,7 @@ const TransacaoController = {
       const novaTransacao = await TransacaoModel.create(req.body);
       return res.status(201).send({ sucesso: true, dados: novaTransacao });
     } catch (err) {
+      console.error("ERRO AO CRIAR TRANSAÇÃO:", err.message); // <-- Adicione esta linha
       return res.status(500).send({ sucesso: false, mensagem: 'Erro interno' });
     }
   },
