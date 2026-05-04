@@ -1,9 +1,97 @@
 @url = http://localhost:3000
 
-###
+# ==================== USUÁRIOS ====================
+### Buscar todos os usuários
 GET {{url}}/usuarios
 
-
-###
-
+### Buscar usuário por ID
 GET {{url}}/usuarios/1
+
+### Criar usuário
+POST {{url}}/usuarios
+Content-Type: application/json
+
+{
+  "nome_usuario": "Teste User",
+  "email_usuario": "teste@email.com",
+  "senha_usuario": "123456",
+  "telefone_usuario": "11999999999"
+}
+
+### Atualizar usuário
+PUT {{url}}/usuarios/1
+Content-Type: application/json
+
+{
+  "nome_usuario": "Teste Atualizado",
+  "email_usuario": "teste.atualizado@email.com",
+  "senha_usuario": "novasenha",
+  "telefone_usuario": "11888888888"
+}
+
+### Deletar usuário
+DELETE {{url}}/usuarios/1
+
+
+# ==================== CATEGORIAS ====================
+### Buscar categorias
+GET {{url}}/categorias
+
+### Criar categoria
+POST {{url}}/categorias
+Content-Type: application/json
+
+{
+  "nome_categoria": "Alimentação"
+}
+
+
+# ==================== MÉTODOS ====================
+### Buscar métodos
+GET {{url}}/metodos
+
+### Criar método
+POST {{url}}/metodos
+Content-Type: application/json
+
+{
+  "nome_metodo": "Cartão de Crédito"
+}
+
+
+# ==================== CONTAS ====================
+### Buscar contas
+GET {{url}}/contas
+
+### Criar conta
+POST {{url}}/contas
+Content-Type: application/json
+
+{
+  "id_usuario": 1,
+  "id_moeda": 1, 
+  "nome_conta": "Conta Corrente Nubank",
+  "saldo_conta": 1500.50
+}
+
+
+# ==================== TRANSAÇÕES ====================
+### Buscar transações
+GET {{url}}/transacoes
+
+### Criar transação
+POST {{url}}/transacoes
+Content-Type: application/json
+
+{
+  "id_conta": 1,
+  "id_categoria": 1,
+  "id_metodo": 1,
+  "id_carteira": null,
+  "valor": 150.00,
+  "descricao": "Compra no mercado",
+  "quitado": true,
+  "arquivado": false,
+  "data": "2024-05-04T10:00:00Z",
+  "entrada": "A"
+}
