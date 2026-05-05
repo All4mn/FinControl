@@ -96,6 +96,14 @@ Content-Type: application/json
   "entrada": "true"
 }
 
+###
+
+### Atualizar transação
+PUT {{url}}/transacoes/6/archive
+
+
+
+
 
 #==========logs===========#
 

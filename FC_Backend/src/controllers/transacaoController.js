@@ -9,6 +9,16 @@ const TransacaoController = {
       return res.status(500).send({ sucesso: false, mensagem: 'Erro interno' });
     }
   },
+  async archive(req,res){
+    try {
+      const { id } = req.params;
+      const transacao = await TransacaoModel.archive(id);
+      if (!transacao) return res.status(404).send({ sucesso: false, mensagem: 'Transação não encontrada' });
+      return res.status(200).send({ sucesso: true, dados: transacao });
+    } catch (err) {
+      return res.status(500).send({ sucesso: false, mensagem: 'Erro interno' });
+    }
+  },
   async buscarPorId(req, res) {
     try {
       const { id } = req.params;
@@ -47,7 +57,8 @@ const TransacaoController = {
     } catch (err) {
       return res.status(500).send({ sucesso: false, mensagem: 'Erro interno' });
     }
-  }
+  },
+
 };
 
 export default TransacaoController;
