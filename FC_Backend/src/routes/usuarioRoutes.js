@@ -5,6 +5,7 @@ export async function usuarioRoutes(app) {
     app.get('/', UsuarioController.listar);
     app.get('/:id', UsuarioController.buscarPorId);
     app.post('/', UsuarioController.criar);
+    app.post('/login-google', UsuarioController.loginGoogle);
     app.put('/:id', UsuarioController.atualizar);
     app.delete('/:id', UsuarioController.deletar);
 }

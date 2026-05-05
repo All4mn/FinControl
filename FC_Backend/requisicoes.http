@@ -96,16 +96,18 @@ Content-Type: application/json
   "entrada": "true"
 }
 
-###
+### Login Google
+POST {{url}}/usuarios/login-google
+Content-Type: application/json
 
-### Atualizar transação
-PUT {{url}}/transacoes/6/archive
+{
+  "idToken": "SEU_ID_TOKEN_GOOGLE_AQUI"
+}
 
+### Atualizar cadastro após login Google
+PUT {{url}}/usuarios/1
+Content-Type: application/json
 
-
-
-
-#==========logs===========#
-
-###
-GET {{url}}/logs
+{
+  "telefone_usuario": "11999999999"
+}
