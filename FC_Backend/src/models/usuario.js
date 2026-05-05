@@ -3,7 +3,7 @@
 // Queries SQL para a tabela de usuario
 // =============================================================================
 
-import database from '../config/db.js';
+import database from "../config/db.js";
 
 class UsuarioModel {
   /**
@@ -41,14 +41,22 @@ class UsuarioModel {
   /**
    * Cria um novo usuário.
    */
-  async create({ nome_usuario, email_usuario, senha_usuario, telefone_usuario }) {
+  async create({ nome_usuario, email_usuario }) {
     const response = await database.query(
       `INSERT INTO usuario (nome_usuario, email_usuario, senha_usuario, telefone_usuario)
        VALUES ($1, $2, $3, $4)
        RETURNING id_usuario, nome_usuario, email_usuario, telefone_usuario`,
-      [nome_usuario, email_usuario, senha_usuario, telefone_usuario]
+      [nome_usuario, email_usuario, senha_usuario, telefone_usuario],
     );
     return response.rows[0];
+  }
+
+  async buscarPorEmail(email) {
+    const response = await database.query(
+      "SELECT id_usuario, nome_usuario, email_usuario, senha_usuario FROM usuario WHERE email_usuario = $1",
+      [email],
+    );
+    return response.rows[0] || null;
   }
 
   /**
@@ -67,13 +75,16 @@ class UsuarioModel {
   /**
    * Atualiza dados de um usuário.
    */
-  async update(id, { nome_usuario, email_usuario, senha_usuario, telefone_usuario }) {
+  async update(
+    id,
+    { nome_usuario, email_usuario, senha_usuario, telefone_usuario },
+  ) {
     const response = await database.query(
       `UPDATE usuario
        SET nome_usuario = $1, email_usuario = $2, senha_usuario = $3, telefone_usuario = $4
        WHERE id_usuario = $5
        RETURNING id_usuario, nome_usuario, email_usuario, telefone_usuario`,
-      [nome_usuario, email_usuario, senha_usuario, telefone_usuario, id]
+      [nome_usuario, email_usuario, senha_usuario, telefone_usuario, id],
     );
     return response.rows[0] || null;
   }
@@ -83,8 +94,8 @@ class UsuarioModel {
    */
   async delete(id) {
     const response = await database.query(
-      'DELETE FROM usuario WHERE id_usuario = $1',
-      [id]
+      "DELETE FROM usuario WHERE id_usuario = $1",
+      [id],
     );
     return response.rowCount > 0;
   }

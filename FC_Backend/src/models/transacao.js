@@ -10,7 +10,17 @@ class TransacaoModel {
     const response = await database.query('SELECT * FROM transacao ORDER BY data DESC');
     return response.rows;
   }
-
+  
+  async archive(id) {
+    const response = await database.query(
+      `UPDATE transacao 
+       SET arquivado = true
+       WHERE id_transacao = $1
+       RETURNING *`,
+      [id]
+    );
+    return response.rows[0] || null;
+  }
   async findById(id) {
     const response = await database.query('SELECT * FROM transacao WHERE id_transacao = $1', [id]);
     return response.rows[0] || null;
@@ -42,7 +52,7 @@ class TransacaoModel {
   async delete(id) {
     const response = await database.query('DELETE FROM transacao WHERE id_transacao = $1', [id]);
     return response.rowCount > 0;
-  }
+  } //a gente nao deleta as transações, só arquiva. Talvez esse método possa ser removido ou modificado para arquivar a transação em vez de deletar.
 }
 
 export default new TransacaoModel();
