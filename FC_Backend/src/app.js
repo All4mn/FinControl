@@ -12,6 +12,7 @@ import { categoriaRoutes } from "./routes/categoriaRoutes.js";
 import { metodoRoutes } from "./routes/metodoRoutes.js";
 import { contaRoutes } from "./routes/contaRoutes.js";
 import { transacaoRoutes } from "./routes/transacaoRoutes.js";
+import { logsRoutes } from "./routes/logsRoutes.js";
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.register(categoriaRoutes, { prefix: '/categorias' });
 app.register(metodoRoutes, { prefix: '/metodos' });
 app.register(contaRoutes, { prefix: '/contas' });
 app.register(transacaoRoutes, { prefix: '/transacoes' });
+app.register(logsRoutes, { prefix: '/logs' });
 
 const start = async () => {
     try {

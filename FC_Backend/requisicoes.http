@@ -95,3 +95,9 @@ Content-Type: application/json
   "data": "2026-05-04 16:52:11.299",
   "entrada": "true"
 }
+
+
+#==========logs===========#
+
+###
+GET {{url}}/logs
