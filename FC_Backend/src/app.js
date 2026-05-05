@@ -39,6 +39,7 @@ const start = async () => {
         await app.listen({ port: 3000 });
         console.log("Servidor Fastify rodando na porta 3000");
         console.log("Conectando ao banco de dados...");
+        // console.log(process.env.DB_CONNECTION_STRING); // <-- Adicione esta linha para verificar a string de conexão se der undefined então falta configurar a variável de ambiente
     } catch (err) {
         app.log.error(err);
         process.exit(1);
