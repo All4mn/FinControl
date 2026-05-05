@@ -1,4 +1,7 @@
+import { OAuth2Client } from 'google-auth-library';
 import UsuarioModel from '../models/usuario.js';
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const UsuarioController = {
   async listar(req, res) {
@@ -32,6 +35,43 @@ const UsuarioController = {
       return res.status(201).send({ sucesso: true, dados: novoUsuario });
     } catch (err) {
       console.error('Erro ao criar usuário:', err.message);
+      return res.status(500).send({ sucesso: false, mensagem: 'Erro interno' });
+    }
+  },
+
+  async loginGoogle(req, res) {
+    try {
+      const { idToken } = req.body;
+      if (!idToken) {
+        return res.status(400).send({ sucesso: false, mensagem: 'idToken é obrigatório' });
+      }
+
+      const ticket = await googleClient.verifyIdToken({
+        idToken,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+      if (!payload) {
+        return res.status(401).send({ sucesso: false, mensagem: 'idToken inválido' });
+      }
+
+      const googleId = payload.sub;
+      const email = payload.email;
+      const nome = payload.name || payload.given_name || 'Usuário Google';
+
+      let usuario = await UsuarioModel.findByGoogleId(googleId);
+      if (!usuario) {
+        usuario = await UsuarioModel.createWithGoogle({
+          google_id: googleId,
+          nome_usuario: nome,
+          email_usuario: email,
+        });
+      }
+
+      const cadastroIncompleto = !usuario.telefone_usuario;
+      return res.status(200).send({ sucesso: true, dados: usuario, cadastroIncompleto });
+    } catch (err) {
+      console.error('Erro ao fazer login com Google:', err.message);
       return res.status(500).send({ sucesso: false, mensagem: 'Erro interno' });
     }
   },
