@@ -1,0 +1,262 @@
+/* Importando uma fonte clean e profissional */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+html {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: #ffffff;
+}
+
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-width: 100%;
+  width: 100%;
+  font-family: 'Poppins', sans-serif;
+  background-color: #ffffff;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* --- CABEÇALHO --- */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  /* Degradê verde responsivo */
+  background: linear-gradient(180deg, #98f077 0%, rgba(255, 255, 255, 0) 100%);
+  height: 120px;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #000;
+}
+
+.logoText {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.btnCadastro {
+  background-color: #0bbb14;
+  color: #ffffff;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.btnCadastro:hover {
+  background-color: #099a10;
+  transform: scale(1.02);
+}
+
+/* --- CONTEÚDO PRINCIPAL --- */
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  gap: 20px;
+}
+
+.loginCard {
+  background-color: #d9d9d9;
+  border-radius: 20px;
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 30px;
+}
+
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.inputGroup {
+  background-color: #ffffff;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  /* Foco em acessibilidade: área de clique grande e contraste */
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.inputGroup:focus-within {
+  border-color: #0bbb14; /* Feedback visual claro ao digitar */
+}
+
+.inputIcon {
+  color: #666;
+  margin-right: 12px;
+}
+
+.input {
+  border: none;
+  outline: none;
+  flex: 1;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #333;
+}
+
+.forgotPassword {
+  font-size: 0.85rem;
+  color: #555;
+  text-decoration: underline;
+  align-self: center;
+  margin-bottom: 24px;
+  cursor: pointer;
+}
+
+.forgotPassword:hover {
+  color: #000;
+}
+
+.btnEntrar {
+  background-color: #38cd27;
+  color: #ffffff;
+  border: none;
+  border-radius: 30px;
+  padding: 14px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 6px rgba(56, 205, 39, 0.3);
+}
+
+.btnEntrar:hover {
+  background-color: #2db51e;
+  transform: translateY(-2px);
+}
+
+/* --- BOTÃO GOOGLE --- */
+.btnGoogle {
+  background-color: #ffffff;
+  border: none;
+  border-radius: 30px;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 400px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  font-family: inherit;
+  transition: background-color 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.btnGoogle:hover {
+  background-color: #f5f5f5;
+}
+
+.googleText {
+  color: #333;
+}
+
+/* --- ÍCONE DE ACESSIBILIDADE --- */
+.accessibilityWrapper {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.accessibilityIcon {
+  background-color: #0d47a1;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* --- RODAPÉ --- */
+.footer {
+  width: 100%;
+  min-width: 100%;
+  box-sizing: border-box;
+  background-color: #262626;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 15px 20px;
+  font-size: 0.85rem;
+  flex-wrap: wrap; /* Para telas menores */
+  gap: 10px;
+}
+
+.footerItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --- RESPONSIVIDADE --- */
+@media (max-width: 600px) {
+  .header {
+    padding: 15px 20px;
+  }
+  
+  .logoText {
+    font-size: 1.2rem;
+  }
+
+  .loginCard {
+    padding: 30px 20px;
+  }
+  
+  .footer {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .accessibilityWrapper {
+    display: none; /* Em mobile, ícones flutuantes assim podem atrapalhar, ajuste conforme regra de negócio */
+  }
+}
