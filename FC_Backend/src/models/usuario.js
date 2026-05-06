@@ -11,7 +11,7 @@ class UsuarioModel {
    */
   async findAll() {
     const response = await database.query(
-      'SELECT id_usuario, nome_usuario, email_usuario, telefone_usuario, google_id FROM usuario ORDER BY id_usuario DESC'
+      'SELECT id_usuario, nome_usuario, email_usuario, telefone_usuario, google_id_usuario FROM usuario ORDER BY id_usuario DESC'
     );
     return response.rows;
   }
@@ -21,7 +21,7 @@ class UsuarioModel {
    */
   async findById(id) {
     const response = await database.query(
-      'SELECT id_usuario, nome_usuario, email_usuario, telefone_usuario, google_id FROM usuario WHERE id_usuario = $1',
+      'SELECT id_usuario, nome_usuario, email_usuario, telefone_usuario, google_id_usuario FROM usuario WHERE id_usuario = $1',
       [id]
     );
     return response.rows[0] || null;

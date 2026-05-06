@@ -5,7 +5,7 @@
 GET {{url}}/usuarios
 
 ### Buscar usuário por ID
-GET {{url}}/usuarios/1
+GET {{url}}/usuarios/6
 
 ### Criar usuário
 POST {{url}}/usuarios
@@ -19,12 +19,12 @@ Content-Type: application/json
 }
 
 ### Atualizar usuário
-PUT {{url}}/usuarios/1
+PUT {{url}}/usuarios/6
 Content-Type: application/json
 
 {
   "nome_usuario": "Teste Atualizado",
-  "email_usuario": "teste.atualizado@email.com",
+  "email_usuario": "teste.atualizado@email.coin",
   "senha_usuario": "novasenha",
   "telefone_usuario": "11888888888"
 }
