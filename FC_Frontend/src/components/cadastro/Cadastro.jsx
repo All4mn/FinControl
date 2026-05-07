@@ -70,6 +70,7 @@ export default function Cadastro() {
   };
 
   const handleSubmit = async (e) => {
+    console.log(formData.nome, formData.email, formData.telefone, formData.senha);
     e.preventDefault();
 
     if (!validarFormulario()) return;
@@ -77,12 +78,19 @@ export default function Cadastro() {
     setCarregando(true);
 
     try {
-      const response = await axios.post("http://localhost:3000/usuarios", {
+      const dados = {
         nome_usuario: formData.nome,
         email_usuario: formData.email,
         senha_usuario: formData.senha,
         telefone_usuario: formData.telefone.replace(/\D/g, ""),
-      });
+      };
+      // const response = await axios.post("http://localhost:3000/usuarios", {
+      //   nome_usuario: `${formData.nome}`,
+      //   email_usuario: `${formData.email}`,
+      //   senha_usuario: `${formData.senha}`,
+      //   telefone_usuario: `${formData.telefone.replace(/\D/g, "")}`,
+      // });
+      const response = await axios.post("http://localhost:3000/usuarios", dados); //forma mais apropriada de enviar dados para o backend
 
       console.log("Cadastro realizado:", response.data);
       alert("Cadastro realizado com sucesso! Faça login para continuar.");
@@ -99,6 +107,7 @@ export default function Cadastro() {
     }
   };
 
+
   return (
     <div className={styles.page}>
       <Header logado={false} />
@@ -106,6 +115,7 @@ export default function Cadastro() {
       <main className={styles.main}>
         <div className={styles.card}>
           <h1 className={styles.titulo}>Crie sua Conta</h1>
+          <button onClick={teste}>ss</button>
 
           {erro && (
             <div className={styles.erro}>

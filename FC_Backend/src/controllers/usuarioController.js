@@ -14,6 +14,26 @@ const UsuarioController = {
     }
   },
 
+  async login(req, res) {
+    try {
+      const { email_usuario, senha_usuario } = req.body;
+      if (!email_usuario || !senha_usuario) {
+        return res
+          .status(400)
+          .send({ sucesso: false, mensagem: "Email e senha são obrigatórios" });
+      }
+      const usuario = await UsuarioModel.findByLogin({ email_usuario, senha_usuario });
+      if (!usuario) {
+        return res.status(401)
+          .send({ sucesso: false, mensagem: "Email ou senha incorretos" });
+      }
+      return res.status(200).send({ sucesso: true, dados: usuario });
+    } catch (err) {
+      console.error("Erro no login:", err.message);
+      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
+    }
+  },
+
   async buscarPorId(req, res) {
     try {
       const { id } = req.params;

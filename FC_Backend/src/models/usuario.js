@@ -11,11 +11,18 @@ class UsuarioModel {
    */
   async findAll() {
     const response = await database.query(
-      'SELECT id_usuario, nome_usuario, email_usuario, telefone_usuario, google_id_usuario FROM usuario ORDER BY id_usuario DESC'
+      // 'SELECT id_usuario, nome_usuario, email_usuario, telefone_usuario, google_id_usuario FROM usuario ORDER BY id_usuario DESC'
+      'SELECT * FROM usuario ORDER BY id_usuario DESC'
     );
     return response.rows;
   }
-
+   async findByLogin({ email_usuario, senha_usuario }) {
+    const response = await database.query(
+      'SELECT id_usuario, nome_usuario, email_usuario, telefone_usuario FROM usuario WHERE email_usuario = $1 AND senha_usuario = $2',
+      [email_usuario, senha_usuario]
+    )
+    return response.rows[0] || null;
+   }
   /**
    * Busca usuário por ID.
    */
@@ -41,7 +48,7 @@ class UsuarioModel {
   /**
    * Cria um novo usuário.
    */
-  async create({ nome_usuario, email_usuario }) {
+  async create({ nome_usuario, email_usuario, senha_usuario, telefone_usuario }) {
     const response = await database.query(
       `INSERT INTO usuario (nome_usuario, email_usuario, senha_usuario, telefone_usuario)
        VALUES ($1, $2, $3, $4)

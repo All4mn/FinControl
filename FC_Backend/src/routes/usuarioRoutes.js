@@ -2,6 +2,7 @@ import UsuarioController from '../controllers/usuarioController.js';
 
 export async function usuarioRoutes(app) {
     // Como definimos o prefixo '/usuarios' no app.js, a rota '/' equivale a '/usuarios'
+    app.post('/login', UsuarioController.login);
     app.get('/', UsuarioController.listar);
     app.get('/:id', UsuarioController.buscarPorId);
     app.post('/', UsuarioController.criar);
