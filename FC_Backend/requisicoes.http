@@ -13,9 +13,9 @@ Content-Type: application/json
 
 {
   "nome_usuario": "Teste User",
-  "email_usuario": "teste@email.com",
+  "email_usuario": "teste@gmail.com",
   "senha_usuario": "123456",
-  "telefone_usuario": "11999999999"
+  "telefone_usuario": "11000000000"
 }
 
 ### Atualizar usuário
@@ -24,7 +24,7 @@ Content-Type: application/json
 
 {
   "nome_usuario": "Teste Atualizado",
-  "email_usuario": "teste.atualizado@email.coin",
+  "email_usuario": "teste.atualizado@gmail.com",
   "senha_usuario": "novasenha",
   "telefone_usuario": "11888888888"
 }
