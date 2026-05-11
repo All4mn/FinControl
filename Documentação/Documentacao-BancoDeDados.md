@@ -17,7 +17,7 @@ O modelo foi projetado seguindo os princípios de normalização relacional, com
 
 ## 2. Diagrama Entidade-Relacionamento (DER)
 
-![DER do FinControl](./neondb_-_neondb_-_public.png)
+![DER do FinControl](./diagrama.png)
 
 > Notação utilizada: conectores do DBeaver (equivalente a Crow's Foot). O arquivo de projeto do DBeaver está disponível em `General-20260510.dbp`.
 
