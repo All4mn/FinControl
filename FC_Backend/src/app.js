@@ -34,10 +34,17 @@ app.register(contaRoutes, { prefix: "/contas" });
 app.register(transacaoRoutes, { prefix: "/transacoes" });
 app.register(logsRoutes, { prefix: "/logs" });
 
+app.get("/", async () => {
+  return { status: "online" };
+});
+
 const start = async () => {
   try {
     console.log("Conectando ao banco de dados...");
-    await app.listen({ port: process.env.PORT || 3000 });
+    await app.listen({
+      port: process.env.PORT || 3000,
+      host: "0.0.0.0",
+    });
     console.log("Servidor conectado ao banco de dados com sucesso!");
     console.log("Servidor Fastify rodando na porta:");
     // console.log(process.env.DB_CONNECTION_STRING); // <-- Adicione esta linha para verificar a string de conexão se der undefined então falta configurar a variável de ambiente
