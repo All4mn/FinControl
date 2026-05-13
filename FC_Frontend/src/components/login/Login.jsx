@@ -23,7 +23,8 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
+    console.log("Enviando dados para:", `${import.meta.env.VITE_BACKEND_RENDER_URL}/usuarios/login`)
     if (!formData.email || !formData.senha) {
       setErro("Por favor, preencha todos os campos.");
       return;
@@ -33,7 +34,8 @@ export default function Login() {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/usuarios/login",
+        // "http://localhost:3000/usuarios/login", //rodar com os servidor local
+        `${import.meta.env.VITE_BACKEND_RENDER_URL}/usuarios/login`, //rodar com o servidor render
         {
           email_usuario: formData.email,
           senha_usuario: formData.senha,

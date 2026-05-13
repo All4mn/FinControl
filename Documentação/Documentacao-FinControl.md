@@ -60,7 +60,7 @@ Na entrega parcial, o backend está completo com todas as rotas e a lógica de n
 
 A separação em **FC_Backend** e **FC_Frontend** segue as boas práticas de projetos fullstack, permitindo que as duas partes evoluam de forma independente com suas próprias dependências e configurações.
 
----
+--- (mateus: citação ao dbeaver?)
 
 ## 4. Estrutura do Projeto
 
@@ -130,7 +130,7 @@ cd FinControl
 
 No DBeaver ou outro cliente PostgreSQL:
 
-1. Crie um banco de dados (ex: `fincontrol`)
+1. Crie um banco de dados (ex: `fincontrol`) (mateus: ???)
 2. Execute `Documentação/scripts/criar_tabelas.sql`
 3. Execute `Documentação/scripts/popular_dados.sql`
 4. Anote a string de conexão no formato:
@@ -148,13 +148,13 @@ cp .env.exemplo .env
 Edite o `.env`:
 
 ```env
-DB_CONNECTION_STRING='postgresql://usuario:senha@localhost:5432/fincontrol'
-GOOGLE_CLIENT_ID='seu_client_id_do_google'
+DB_CONNECTION_STRING='postgresql://usuario:senha@localhost:5432/fincontrol' (mateus: nao seria a do banco de dados nas nuvens ja?)
+GOOGLE_CLIENT_ID='seu_client_id_do_google' (mateus: nao seria o google client id do allan? ja que ele que configurou a funcionalidade?)
 ```
 
 ```bash
-npm install
-npm run dev
+npm install 
+npm run dev 
 ```
 
 Backend disponível em `http://localhost:3000`.
@@ -163,7 +163,7 @@ Backend disponível em `http://localhost:3000`.
 
 ```bash
 cd ../FC_Frontend
-npm install
+npm install 
 npm run dev
 ```
 
