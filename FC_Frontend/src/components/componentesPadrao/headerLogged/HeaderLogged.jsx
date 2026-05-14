@@ -8,12 +8,13 @@ export default function Header({ usuario, logado = false }) {
   const [termoBusca, setTermoBusca] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
+  const id_usuario = localStorage.getItem('id_usuario');
 
   const toggleMenu = () => setMenuAberto(!menuAberto);
   const toggleBusca = () => setBuscaAberta(!buscaAberta);
 
   const handleLogout = () => {
-    localStorage.removeItem('usuario');
+    localStorage.clear('id_usuario');
     navigate('/login');
   };
 

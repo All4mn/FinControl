@@ -9,27 +9,52 @@ const API_BASE_URL =
 
 export default function Dashboard() {
   const [usuario, setUsuario] = useState(null);
+  const [idUsuario, setIdUsuario] = useState(localStorage.getItem("id_usuario"));
+  const [nomeUsuario, setNomeUsuario] = useState(localStorage.getItem("nome_usuario"));
+  const [emailUsuario, setEmailUsuario] = useState(localStorage.getItem("email_usuario"));
 
   useEffect(() => {
     // Verifica dados salvos no localStorage (compatível com login tradicional e Google)
     const usuarioData = localStorage.getItem("usuario");
-    const idUsuario = localStorage.getItem("id_usuario");
-    const nomeUsuario = localStorage.getItem("nome_usuario");
-    const emailUsuario = localStorage.getItem("email_usuario");
+    const currentIdUsuario = localStorage.getItem("id_usuario");
+    const currentNomeUsuario = localStorage.getItem("nome_usuario");
+    const currentEmailUsuario = localStorage.getItem("email_usuario");
 
     if (usuarioData) {
       // Formato antigo (login tradicional)
       const parsedData = JSON.parse(usuarioData);
       setUsuario(parsedData.dados);
-    } else if (idUsuario && nomeUsuario && emailUsuario) {
+    } else if (currentIdUsuario && currentNomeUsuario && currentEmailUsuario) {
       // Formato novo (login Google)
       setUsuario({
-        id_usuario: idUsuario,
-        nome_usuario: nomeUsuario,
-        email_usuario: emailUsuario,
+        id_usuario: currentIdUsuario,
+        nome_usuario: currentNomeUsuario,
+        email_usuario: currentEmailUsuario,
       });
     }
+
+    // Atualiza os estados individuais
+    setIdUsuario(currentIdUsuario);
+    setNomeUsuario(currentNomeUsuario);
+    setEmailUsuario(currentEmailUsuario);
   }, []);
+
+  const handleLogout = () => {
+    // Limpa localStorage
+    localStorage.removeItem("usuario");
+    localStorage.removeItem("id_usuario");
+    localStorage.removeItem("nome_usuario");
+    localStorage.removeItem("email_usuario");
+
+    // Limpa estados
+    setUsuario(null);
+    setIdUsuario(null);
+    setNomeUsuario(null);
+    setEmailUsuario(null);
+
+    // Redireciona para login
+    window.location.href = "/login";
+  };
 
   return (
     <div className={styles.dashboard}>
@@ -40,13 +65,13 @@ export default function Dashboard() {
         <div className={styles.usuarioInfo}>
           <h2>Informações do Usuário</h2>
           <p>
-            <strong>ID:</strong> {usuario.id_usuario}
+            <strong>ID:</strong> {idUsuario}
           </p>
           <p>
-            <strong>Nome:</strong> {usuario.nome_usuario}
+              <strong>Nome:</strong> {nomeUsuario}
           </p>
           <p>
-            <strong>Email:</strong> {usuario.email_usuario}
+            <strong>Email:</strong> {emailUsuario}
           </p>
         </div>
       )}
