@@ -41,7 +41,8 @@ export default function Login() {
 
       if (result.data.sucesso) {
         const { dados: usuario, cadastroIncompleto } = result.data;
-
+        
+        //mudar para cookies
         localStorage.setItem("id_usuario", usuario.id_usuario);
         localStorage.setItem("nome_usuario", usuario.nome_usuario);
         localStorage.setItem("email_usuario", usuario.email_usuario);
