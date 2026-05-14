@@ -5,7 +5,7 @@
 GET {{url}}/usuarios
 
 ### Buscar usuário por ID
-GET {{url}}/usuarios/12
+GET {{url}}/usuarios/25
 
 ###
 POST {{url}}/usuarios/login
@@ -48,12 +48,15 @@ Content-Type: application/json
   "nome_usuario": "Teste Atualizado",
   "email_usuario": "teste.atualizado@gmail.com",
   "senha_usuario": "novasenha",
-  "telefone_usuario": "11888888888"
+  "telefone_usuario": "11888888888",
+  "id_status_usuario": "1"
 }
 
 ### Deletar usuário
 DELETE {{url}}/usuarios/1
 
+###
+PATCH {{url}}/usuarios/desativar/27
 
 # ==================== CATEGORIAS ====================
 ### Buscar categorias

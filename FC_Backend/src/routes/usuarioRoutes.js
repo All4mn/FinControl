@@ -4,6 +4,7 @@ export async function usuarioRoutes(app) {
     // Como definimos o prefixo '/usuarios' no app.js, a rota '/' equivale a '/usuarios'
     app.post('/login', UsuarioController.login);
     app.get('/', UsuarioController.listar);
+    app.patch('/desativar/:id', UsuarioController.desativar);
     app.get('/:id', UsuarioController.buscarPorId);
     app.post('/', UsuarioController.criar);
     app.post('/login-google',async (req, res) => {

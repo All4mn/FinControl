@@ -155,6 +155,22 @@ const UsuarioController = {
       return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
     }
   },
+
+  async desativar(req,res){
+    console.log("Recebendo requisição para desativar usuário com ID:", req.params.id);
+    try {
+      const {id} = req.params;
+      const desativado = await UsuarioModel.desativar(id)
+      if(!desativado){
+        return res.status(404).send({sucesso: false, mensagem: "usuario nao encontrado"})
+      } 
+      res.send({sucesso: true, mensagem: "usuario desativado com sucesso"})
+    }
+      catch (err){
+        console.error("Erro ao desativar usuário:", err.message);
+        return res.status(500).send({sucesso: false, mensagem: "Erro interno" });
+      }
+  }
 };
 
 export default UsuarioController;

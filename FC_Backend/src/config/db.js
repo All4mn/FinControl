@@ -21,7 +21,10 @@ class database {
         // Para replicar: Substitua a connectionString pela sua própria string de conexão
         // do PostgreSQL (pode vir de variáveis de ambiente para segurança).
         this.pool = new Pool({
-            connectionString: process.env.DB_CONNECTION_STRING
+            connectionString: process.env.DB_CONNECTION_STRING,
+            ssl:{
+                rejectUnauthorized: false
+            }
         });
     }
 
