@@ -29,7 +29,7 @@ Na entrega parcial, o backend está completo com todas as rotas e a lógica de n
 ### Backend
 - **Node.js** — ambiente de execução JavaScript no servidor
 - **Fastify** — framework web para criação das rotas e gerenciamento das requisições HTTP
-- **PostgreSQL** — banco de dados relacional utilizado para persistência dos dados
+- **PostgreSQL** — banco de dados relacional utilizado para persistência dos dados, hospedado na plataforma Neon
 - **pg** — driver Node.js para conexão com o PostgreSQL, com gerenciamento de pool de conexões
 - **dotenv** — carregamento das variáveis de ambiente a partir do arquivo `.env`
 - **@fastify/cors** — configuração de CORS para permitir requisições do frontend
@@ -43,7 +43,8 @@ Na entrega parcial, o backend está completo com todas as rotas e a lógica de n
 - **Axios** — cliente HTTP para comunicação com o backend
 
 ### Ferramentas e Ambiente
-- **DBeaver** — cliente visual para administração do banco PostgreSQL e construção do DER
+- **DBeaver** — cliente visual para administração do banco PostgreSQL e modelagem do DER
+- **Neon** — plataforma de banco de dados PostgreSQL em nuvem, utilizada para hospedagem do banco do projeto
 - **Git + GitHub** — versionamento de código e gerenciamento do projeto via GitHub Projects
 
 ---
@@ -54,13 +55,17 @@ Na entrega parcial, o backend está completo com todas as rotas e a lógica de n
 
 **PostgreSQL** é um banco relacional robusto, com suporte completo a restrições de integridade referencial, transações e tipos de dados avançados — adequado para um sistema financeiro que depende de consistência nos dados.
 
+**Neon** foi adotado para hospedar o banco em nuvem, eliminando a necessidade de configuração de servidor local por parte dos integrantes da equipe. A plataforma oferece um tier gratuito com suporte completo ao PostgreSQL e uma connection string padrão compatível com o driver `pg`.
+
 **React + Vite** combina a componentização do React com a velocidade do Vite no desenvolvimento, especialmente no hot reload. A estrutura de componentes facilita a manutenção e a escalabilidade do frontend.
 
 **Axios** foi escolhido para as requisições HTTP por sua API simples e suporte a interceptors, o que facilita o tratamento centralizado de erros e autenticação futura via tokens.
 
+**DBeaver** foi utilizado como ferramenta de administração do banco por oferecer uma interface visual completa para criação e visualização de tabelas, execução de queries e exportação do DER — sem necessidade de acesso exclusivo via linha de comando.
+
 A separação em **FC_Backend** e **FC_Frontend** segue as boas práticas de projetos fullstack, permitindo que as duas partes evoluam de forma independente com suas próprias dependências e configurações.
 
---- (mateus: citação ao dbeaver?)
+---
 
 ## 4. Estrutura do Projeto
 
@@ -116,8 +121,8 @@ FinControl/
 ### Pré-requisitos
 
 - Node.js (v18 ou superior)
-- PostgreSQL instalado e em execução
 - Git
+- Acesso às credenciais do projeto (ver passo 3)
 
 ### 1. Clonar o repositório
 
@@ -126,17 +131,14 @@ git clone https://github.com/All4mn/FinControl.git
 cd FinControl
 ```
 
-### 2. Configurar o banco de dados
+### 2. Banco de dados
 
-No DBeaver ou outro cliente PostgreSQL:
+O banco de dados já está provisionado na plataforma **Neon** (PostgreSQL em nuvem). Não é necessário instalar o PostgreSQL localmente.
 
-1. Crie um banco de dados (ex: `fincontrol`) (mateus: ???)
-2. Execute `Documentação/scripts/criar_tabelas.sql`
-3. Execute `Documentação/scripts/popular_dados.sql`
-4. Anote a string de conexão no formato:
-   ```
-   postgresql://usuario:senha@localhost:5432/fincontrol
-   ```
+Para visualizar ou administrar o banco, conecte no DBeaver usando a connection string fornecida pelo responsável pelo projeto. Os scripts de criação e população das tabelas estão disponíveis em:
+
+- `Documentação/scripts/criar_tabelas.sql`
+- `Documentação/scripts/popular_dados.sql`
 
 ### 3. Configurar o backend
 
@@ -145,16 +147,16 @@ cd FC_Backend
 cp .env.exemplo .env
 ```
 
-Edite o `.env`:
+Edite o `.env` com as credenciais do projeto — solicite ao responsável pelo backend:
 
 ```env
-DB_CONNECTION_STRING='postgresql://usuario:senha@localhost:5432/fincontrol' (mateus: nao seria a do banco de dados nas nuvens ja?)
-GOOGLE_CLIENT_ID='seu_client_id_do_google' (mateus: nao seria o google client id do allan? ja que ele que configurou a funcionalidade?)
+DB_CONNECTION_STRING='string de conexão do Neon fornecida pelo responsável'
+GOOGLE_CLIENT_ID='client ID do projeto Google OAuth configurado para o FinControl'
 ```
 
 ```bash
-npm install 
-npm run dev 
+npm install
+npm run dev
 ```
 
 Backend disponível em `http://localhost:3000`.
@@ -163,7 +165,7 @@ Backend disponível em `http://localhost:3000`.
 
 ```bash
 cd ../FC_Frontend
-npm install 
+npm install
 npm run dev
 ```
 
