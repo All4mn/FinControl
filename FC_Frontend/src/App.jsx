@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/landingpage/LandingPage.jsx";
 import Login from "./pages/login/Login.jsx";
 import Cadastro from "./pages/cadastro/Cadastro.jsx";
+import CompletarCadastro from "./pages/completarCadastro/CompletarCadastro.jsx";
 import Dashboard from "./pages/dashboard/Dashboard.jsx";
 // import Relatorios from "./pages/relatorios/Relatorios.jsx"
 // import Arquivados from "./pages/arquivados/Arquivados.jsx"
@@ -16,6 +17,8 @@ export default function App() {
         <Route path="/login" element={<Login />} />
 
         <Route path="/cadastro" element={<Cadastro />} />
+
+        <Route path="/completar-cadastro" element={<CompletarCadastro />} />
 
         <Route path="/dashboard" element={<Dashboard />} />
 
