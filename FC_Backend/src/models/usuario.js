@@ -38,6 +38,7 @@ class UsuarioModel {
    * Busca usuário pelo ID do Google.
    */
   async findByGoogleId(googleId) {
+    console.log("Buscando usuário por Google ID:", googleId);
     const response = await database.query(
       'SELECT id_usuario, nome_usuario, email_usuario, telefone_usuario, google_id_usuario FROM usuario WHERE google_id_usuario = $1',
       [googleId]

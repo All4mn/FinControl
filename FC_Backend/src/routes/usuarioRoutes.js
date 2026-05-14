@@ -6,7 +6,10 @@ export async function usuarioRoutes(app) {
     app.get('/', UsuarioController.listar);
     app.get('/:id', UsuarioController.buscarPorId);
     app.post('/', UsuarioController.criar);
-    app.post('/login-google', UsuarioController.loginGoogle);
+    app.post('/login-google',async (req, res) => {
+        console.log("Recebendo requisição para login com Google");
+        await UsuarioController.loginGoogle(req, res);
+    });
     app.put('/:id', UsuarioController.atualizar);
     app.delete('/:id', UsuarioController.deletar);
 }
