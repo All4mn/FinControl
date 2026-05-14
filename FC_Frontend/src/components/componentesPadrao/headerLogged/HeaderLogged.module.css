@@ -1,0 +1,386 @@
+.header {
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 50%, #86efac 100%);
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(22, 163, 74, 0.3);
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: #ffffff;
+  transition: transform 0.2s ease;
+}
+
+.logo:hover {
+  transform: scale(1.02);
+}
+
+.logoIcon {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoText {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.navLink:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.navLinkAtivo {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.acoes {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.buscaContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btnIcone {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 10px;
+  padding: 0.625rem;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnIcone:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.inputBusca {
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: 10px;
+  padding: 0.625rem 1rem;
+  font-size: 0.95rem;
+  color: #1f2937;
+  width: 200px;
+  outline: none;
+  transition: width 0.3s ease;
+}
+
+.inputBusca:focus {
+  width: 280px;
+}
+
+.inputBusca::placeholder {
+  color: #9ca3af;
+}
+
+.btnCompartilhar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: 25px;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #16a34a;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btnCompartilhar:hover {
+  background: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.perfilContainer {
+  position: relative;
+}
+
+.btnPerfil {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s ease;
+}
+
+.btnPerfil:hover {
+  transform: scale(1.05);
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #16a34a;
+  border: 3px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.menuDropdown {
+  position: absolute;
+  top: calc(100% + 0.75rem);
+  right: 0;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  min-width: 240px;
+  padding: 0.5rem;
+  z-index: 200;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.menuHeader {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.menuNome {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #1f2937;
+}
+
+.menuEmail {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.menuDivisor {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 0.25rem 0;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #374151;
+  font-size: 0.95rem;
+  transition: background 0.2s ease;
+}
+
+.menuItem:hover {
+  background: #f3f4f6;
+}
+
+.menuItemSair {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border-radius: 10px;
+  border: none;
+  background: none;
+  color: #dc2626;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.menuItemSair:hover {
+  background: #fef2f2;
+}
+
+.btnMenuMobile {
+  display: none;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 10px;
+  padding: 0.625rem;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.authButtons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btnLogin {
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease;
+}
+
+.btnLogin:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.btnCadastro {
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #16a34a;
+  background: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.btnCadastro:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 1024px) {
+  .nav {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 0.5rem;
+    transform: translateY(-120%);
+    opacity: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(22, 163, 74, 0.3);
+  }
+
+  .navAberto {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .navLink {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem;
+    font-size: 1.1rem;
+  }
+
+  .btnMenuMobile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btnCompartilhar span {
+    display: none;
+  }
+
+  .btnCompartilhar {
+    padding: 0.625rem;
+    border-radius: 10px;
+  }
+
+  .inputBusca {
+    display: none;
+  }
+
+  .buscaAberta .inputBusca {
+    display: block;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    width: 280px;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 0 1rem;
+    gap: 1rem;
+  }
+
+  .logoText {
+    font-size: 1.25rem;
+  }
+
+  .acoes {
+    gap: 0.5rem;
+  }
+
+  .avatar {
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
+  }
+}

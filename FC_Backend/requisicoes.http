@@ -4,6 +4,9 @@
 ### Buscar todos os usuários
 GET {{url}}/usuarios
 
+### Buscar usuário por ID
+GET {{url}}/usuarios/12
+
 ###
 POST {{url}}/usuarios/login
 Content-Type: application/json
