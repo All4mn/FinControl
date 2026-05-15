@@ -4,10 +4,14 @@ import axios from "axios";
 import Header from "../../components/componentesPadrao/header/Header";
 import Footer from "../../components/componentesPadrao/footer/Footer";
 import styles from "./Login.module.css";
-import { GoogleLogin } from "@react-oauth/google";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 
 const API_BASE_URL =
   import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
+
+if (!import.meta.env.VITE_BACKEND_RENDER_URL) {
+  console.warn("Aviso: VITE_BACKEND_RENDER_URL não definida no .env. Usando localhost como padrão.");
+}
 
 export default function Login() {
   const navigate = useNavigate();
@@ -18,34 +22,31 @@ export default function Login() {
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState("");
-  const [googleReady, setGoogleReady] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const googleInitialized = useRef(false);
+  
+  // Debug para verificar se o ID está sendo carregado (pode remover depois)
+  useEffect(() => {
+    console.log("Google Client ID carregado:", import.meta.env.VITE_GOOGLE_CLIENT_ID ? "Sim" : "Não");
+  }, []);
 
   const handleGoogleCredentialResponse = async (response) => {
     if (!response?.credential) {
       setErro("Não foi possível obter o token do Google.");
-      setGoogleLoading(false);
       return;
     }
 
     const idToken = response.credential;
 
     try {
-      setGoogleLoading(true);
       setErro("");
 
-      const result = await axios.post(`${API_BASE_URL}/usuarios/login-google`, {
-        idToken,
-      });
+      const result = await axios.post(
+        `${API_BASE_URL}/usuarios/login-google`,
+        { idToken },
+        { withCredentials: true },
+      );
 
       if (result.data.sucesso) {
         const { dados: usuario, cadastroIncompleto } = result.data;
-        
-        //mudar para cookies
-        localStorage.setItem("id_usuario", usuario.id_usuario);
-        localStorage.setItem("nome_usuario", usuario.nome_usuario);
-        localStorage.setItem("email_usuario", usuario.email_usuario);
 
         if (cadastroIncompleto) {
           window.sessionStorage.setItem(
@@ -68,71 +69,6 @@ export default function Login() {
           "Erro ao fazer login com Google. Tente novamente.",
       );
     } finally {
-      setGoogleLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (window.google && window.google.accounts) {
-        if (googleInitialized.current || window.__fc_google_init_done__) {
-          setGoogleReady(true);
-          clearInterval(interval);
-          return;
-        }
-
-        if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
-          setErro(
-            "Variável VITE_GOOGLE_CLIENT_ID não está definida. Verifique .env",
-          );
-          clearInterval(interval);
-          return;
-        }
-
-        try {
-          window.google.accounts.id.initialize({
-            client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-            callback: handleGoogleCredentialResponse,
-            cancel_on_tap_outside: true,
-          });
-
-          googleInitialized.current = true;
-          window.__fc_google_init_done__ = true;
-          setGoogleReady(true);
-        } catch (err) {
-          console.error("Erro ao inicializar Google Identity:", err);
-          setErro("Erro ao carregar login do Google. Recarregue a página.");
-        } finally {
-          clearInterval(interval);
-        }
-      }
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleGoogleLogin = async () => {
-    setErro("");
-
-    if (!googleReady) {
-      setErro(
-        "O login do Google ainda está carregando. Aguarde e tente novamente.",
-      );
-      return;
-    }
-
-    if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
-      setErro(
-        "Variável VITE_GOOGLE_CLIENT_ID não está definida. Verifique .env",
-      );
-      return;
-    }
-
-    try {
-      window.google.accounts.id.prompt();
-    } catch (err) {
-      console.error("Erro ao iniciar login Google:", err);
-      setErro("Erro ao iniciar login do Google. Tente novamente.");
     }
   };
 
@@ -157,13 +93,16 @@ export default function Login() {
     setCarregando(true);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/usuarios/login`, {
-        email_usuario: formData.email,
-        senha_usuario: formData.senha,
-      });
+      const response = await axios.post(
+        `${API_BASE_URL}/usuarios/login`,
+        {
+          email_usuario: formData.email,
+          senha_usuario: formData.senha,
+        },
+        { withCredentials: true },
+      );
 
       console.log("Login realizado:", response.data);
-      localStorage.setItem("usuario", JSON.stringify(response.data));
       navigate("/dashboard");
     } catch (err) {
       console.log("Erro no login:", err);
@@ -316,12 +255,21 @@ export default function Login() {
             <span>ou</span>
           </div>
 
-          <GoogleLogin onSuccess={handleGoogleCredentialResponse} onError={() => setErro("Erro no login com Google. Tente novamente.")} />
+          {import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
+            <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+              <GoogleLogin 
+                onSuccess={handleGoogleCredentialResponse} 
+                onError={() => setErro("Erro no login com Google. Tente novamente.")} 
+              />
+            </GoogleOAuthProvider>
+          ) : (
+            <p className={styles.erro}>Erro de configuração: ID do Google não encontrado no .env</p>
+          )}
 
           <p className={styles.linkCadastro}>
             Não tem uma conta? <Link to="/cadastro">Cadastre-se</Link>
           </p>
-
+        </div>
 
       <button
         className={styles.btnAcessibilidade}
@@ -337,7 +285,6 @@ export default function Login() {
           <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9H15V22H13V16H11V22H9V9H3V7H21V9Z" />
         </svg>
       </button>
-    </div>
     </main>
       <Footer />
     </div>

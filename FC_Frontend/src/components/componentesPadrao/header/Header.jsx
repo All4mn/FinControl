@@ -13,7 +13,6 @@ export default function Header({ usuario, logado = false }) {
   const toggleBusca = () => setBuscaAberta(!buscaAberta);
 
   const handleLogout = () => {
-    localStorage.removeItem('usuario');
     navigate('/login');
   };
 

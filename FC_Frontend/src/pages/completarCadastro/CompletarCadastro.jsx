@@ -8,7 +8,7 @@ import styles from "./CompletarCadastro.module.css";
 const API_BASE_URL =
   import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
 
-const initialFormData = {
+const dadosFormularioInicial = {
   nome: "",
   email: "",
   telefone: "",
@@ -19,10 +19,10 @@ const initialFormData = {
 export default function CompletarCadastro() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [formData, setFormData] = useState(initialFormData);
+  const [dadosFormulario, setDadosFormulario] = useState(dadosFormularioInicial);
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
-  const [usuarioId, setUsuarioId] = useState(null);
+  const [idUsuario, setIdUsuario] = useState(null);
 
   const formatarTelefone = (valor) => {
     const numeros = String(valor).replace(/\D/g, "");
@@ -35,20 +35,20 @@ export default function CompletarCadastro() {
   };
 
   useEffect(() => {
-    const routeUsuario = location.state?.usuario;
-    const storedUsuario = window.sessionStorage.getItem(
+    const usuarioRota = location.state?.usuario;
+    const usuarioSalvo = window.sessionStorage.getItem(
       "completarCadastroUsuario",
     );
     const usuario =
-      routeUsuario || (storedUsuario ? JSON.parse(storedUsuario) : null);
+      usuarioRota || (usuarioSalvo ? JSON.parse(usuarioSalvo) : null);
 
     if (!usuario) {
       navigate("/login");
       return;
     }
 
-    setUsuarioId(usuario.id_usuario);
-    setFormData({
+    setIdUsuario(usuario.id_usuario);
+    setDadosFormulario({
       nome: usuario.nome_usuario || "",
       email: usuario.email_usuario || "",
       telefone: usuario.telefone_usuario
@@ -58,7 +58,7 @@ export default function CompletarCadastro() {
       confirmarSenha: "",
     });
 
-    if (routeUsuario) {
+    if (usuarioRota) {
       window.sessionStorage.setItem(
         "completarCadastroUsuario",
         JSON.stringify(usuario),
@@ -66,69 +66,66 @@ export default function CompletarCadastro() {
     }
   }, [location.state, navigate]);
 
-  const handleTelefoneChange = (e) => {
+  const aoAlterarTelefone = (e) => {
     const valorFormatado = formatarTelefone(e.target.value);
-    setFormData((prev) => ({ ...prev, telefone: valorFormatado }));
+    setDadosFormulario((prev) => ({ ...prev, telefone: valorFormatado }));
     setErro("");
   };
 
-  const handleChange = (e) => {
+  const aoAlterarCampo = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setDadosFormulario((prev) => ({ ...prev, [name]: value }));
     setErro("");
   };
 
   const validarFormulario = () => {
-    if (!formData.nome.trim()) {
+    if (!dadosFormulario.nome.trim()) {
       setErro("Por favor, informe seu nome completo.");
       return false;
     }
-    if (!formData.email.trim()) {
+    if (!dadosFormulario.email.trim()) {
       setErro("Por favor, informe seu email.");
       return false;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(dadosFormulario.email)) {
       setErro("Por favor, informe um email válido.");
       return false;
     }
-    if (!formData.telefone.trim()) {
+    if (!dadosFormulario.telefone.trim()) {
       setErro("Por favor, informe seu telefone.");
       return false;
     }
-    if (formData.senha.length < 6) {
+    if (dadosFormulario.senha.length < 6) {
       setErro("A senha deve ter pelo menos 6 caracteres.");
       return false;
     }
-    if (formData.senha !== formData.confirmarSenha) {
+    if (dadosFormulario.senha !== dadosFormulario.confirmarSenha) {
       setErro("As senhas não coincidem.");
       return false;
     }
     return true;
   };
 
-  const handleSubmit = async (e) => {
+  const aoEnviarFormulario = async (e) => {
     e.preventDefault();
-    if (!validarFormulario() || !usuarioId) return;
+    if (!validarFormulario() || !idUsuario) return;
 
     setCarregando(true);
     try {
-      const dados = {
-        nome_usuario: formData.nome.trim(),
-        email_usuario: formData.email.trim(),
-        telefone_usuario: formData.telefone.replace(/\D/g, ""),
-        senha_usuario: formData.senha,
+      const dadosAtualizacao = {
+        nome_usuario: dadosFormulario.nome.trim(),
+        email_usuario: dadosFormulario.email.trim(),
+        telefone_usuario: dadosFormulario.telefone.replace(/\D/g, ""),
+        senha_usuario: dadosFormulario.senha,
       };
 
       const response = await axios.put(
-        `${API_BASE_URL}/usuarios/${usuarioId}`,
-        dados,
+        `${API_BASE_URL}/usuarios/${idUsuario}`,
+        dadosAtualizacao,
+        { withCredentials: true },
       );
 
       window.sessionStorage.removeItem("completarCadastroUsuario");
-      localStorage.setItem("id_usuario", response.data.dados.id_usuario);
-      localStorage.setItem("nome_usuario", response.data.dados.nome_usuario);
-      localStorage.setItem("email_usuario", response.data.dados.email_usuario);
-
       navigate("/dashboard");
     } catch (err) {
       console.error("Erro ao completar cadastro:", err);
@@ -174,7 +171,7 @@ export default function CompletarCadastro() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className={styles.form}>
+          <form onSubmit={aoEnviarFormulario} className={styles.form}>
             <div className={styles.campo}>
               <div className={styles.inputWrapper}>
                 <svg
@@ -196,8 +193,8 @@ export default function CompletarCadastro() {
                   type="text"
                   name="nome"
                   placeholder="Nome Completo"
-                  value={formData.nome}
-                  onChange={handleChange}
+                  value={dadosFormulario.nome}
+                  onChange={aoAlterarCampo}
                   className={styles.input}
                   autoComplete="name"
                 />
@@ -225,8 +222,8 @@ export default function CompletarCadastro() {
                   type="email"
                   name="email"
                   placeholder="Email"
-                  value={formData.email}
-                  onChange={handleChange}
+                  value={dadosFormulario.email}
+                  onChange={aoAlterarCampo}
                   className={styles.input}
                   autoComplete="email"
                 />
@@ -253,8 +250,8 @@ export default function CompletarCadastro() {
                   type="tel"
                   name="telefone"
                   placeholder="Número de Telefone"
-                  value={formData.telefone}
-                  onChange={handleTelefoneChange}
+                  value={dadosFormulario.telefone}
+                  onChange={aoAlterarTelefone}
                   className={styles.input}
                   autoComplete="tel"
                 />
@@ -282,8 +279,8 @@ export default function CompletarCadastro() {
                   type="password"
                   name="senha"
                   placeholder="Senha"
-                  value={formData.senha}
-                  onChange={handleChange}
+                  value={dadosFormulario.senha}
+                  onChange={aoAlterarCampo}
                   className={styles.input}
                   autoComplete="new-password"
                 />
@@ -311,8 +308,8 @@ export default function CompletarCadastro() {
                   type="password"
                   name="confirmarSenha"
                   placeholder="Confirmar senha"
-                  value={formData.confirmarSenha}
-                  onChange={handleChange}
+                  value={dadosFormulario.confirmarSenha}
+                  onChange={aoAlterarCampo}
                   className={styles.input}
                   autoComplete="new-password"
                 />

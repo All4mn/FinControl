@@ -9,74 +9,60 @@ const API_BASE_URL =
 
 export default function Dashboard() {
   const [usuario, setUsuario] = useState(null);
-  const [idUsuario, setIdUsuario] = useState(localStorage.getItem("id_usuario"));
-  const [nomeUsuario, setNomeUsuario] = useState(localStorage.getItem("nome_usuario"));
-  const [emailUsuario, setEmailUsuario] = useState(localStorage.getItem("email_usuario"));
+  const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
-    // Verifica dados salvos no localStorage (compatível com login tradicional e Google)
-    //repassar para cookie ao inves de localstorage
-    const usuarioData = localStorage.getItem("usuario");
-    console.log(usuarioData)
-    const currentIdUsuario = localStorage.getItem("id_usuario");
-    const currentNomeUsuario = localStorage.getItem("nome_usuario");
-    const currentEmailUsuario = localStorage.getItem("email_usuario");
+    const fetchUsuario = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/usuarios/me`, {
+          withCredentials: true,
+        });
 
-    if (usuarioData) {
-      // Formato antigo (login tradicional)
-      const parsedData = JSON.parse(usuarioData);
-      setUsuario(parsedData.dados);
-    } else if (currentIdUsuario && currentNomeUsuario && currentEmailUsuario) {
-      // Formato novo (login Google)
-      setUsuario({
-        id_usuario: currentIdUsuario,
-        nome_usuario: currentNomeUsuario,
-        email_usuario: currentEmailUsuario,
-      });
-    }
+        if (response.data.sucesso) {
+          setUsuario(response.data.dados);
+        } else {
+          window.location.href = "/login";
+        }
+      } catch (err) {
+        console.error("Erro ao carregar usuário:", err);
+        window.location.href = "/login";
+      } finally {
+        setCarregando(false);
+      }
+    };
 
-    // Atualiza os estados individuais
-    setIdUsuario(currentIdUsuario);
-    setNomeUsuario(currentNomeUsuario);
-    setEmailUsuario(currentEmailUsuario);
+    fetchUsuario();
   }, []);
 
-  const handleLogout = () => {
-    // Limpa localStorage
-    localStorage.removeItem("usuario");
-    localStorage.removeItem("id_usuario");
-    localStorage.removeItem("nome_usuario");
-    localStorage.removeItem("email_usuario");
-
-    // Limpa estados
-    setUsuario(null);
-    setIdUsuario(null);
-    setNomeUsuario(null);
-    setEmailUsuario(null);
-
-    // Redireciona para login
-    window.location.href = "/login";
-  };
+  if (carregando) {
+    return (
+      <div className={styles.dashboard}>
+        <Header usuario={null} logado={true} />
+        <main className={styles.main}>
+          <p>Carregando informações do usuário...</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.dashboard}>
-      <Header />
+      <Header usuario={usuario} logado={true} />
       <h1>Dashboard</h1>
 
       {usuario && (
         <div className={styles.usuarioInfo}>
           <h2>Informações do Usuário</h2>
           <p>
-            <strong>ID:</strong> {idUsuario}
+            <strong>ID:</strong> {usuario.id_usuario}
           </p>
           <p>
-              <strong>Nome:</strong> {nomeUsuario} 
-              {/* nao está atualizando para novos dados */}
+            <strong>Nome:</strong> {usuario.nome_usuario}
           </p>
           <p>
-            <strong>Email:</strong> {emailUsuario}
+            <strong>Email:</strong> {usuario.email_usuario}
           </p>
-          {/* <button onClick={()=> console.log(usuarioData)}>usuario data</button> */}
         </div>
       )}
 
