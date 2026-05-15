@@ -73,10 +73,10 @@ class UsuarioModel {
    */
   async createWithGoogle({ google_id, nome_usuario, email_usuario, telefone_usuario = null }) {
     const response = await database.query(
-      `INSERT INTO usuario (nome_usuario, email_usuario, telefone_usuario, google_id_usuario)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO usuario (nome_usuario, email_usuario, telefone_usuario, google_id_usuario, id_status_usuario)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING id_usuario, nome_usuario, email_usuario, telefone_usuario, google_id_usuario`,
-      [nome_usuario, email_usuario, telefone_usuario, google_id]
+      [nome_usuario, email_usuario, telefone_usuario, google_id, 1]
     );
     return response.rows[0];
   }
