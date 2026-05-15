@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import styles from './HeaderLogged.module.css';
+
+const API_BASE_URL = import.meta.env.VITE_BACKEND_RENDER_URL || 'http://localhost:3000';
 
 export default function Header({ usuario, logado = false }) {
   const [menuAberto, setMenuAberto] = useState(false);
@@ -8,14 +11,22 @@ export default function Header({ usuario, logado = false }) {
   const [termoBusca, setTermoBusca] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
-  const id_usuario = localStorage.getItem('id_usuario');
 
   const toggleMenu = () => setMenuAberto(!menuAberto);
   const toggleBusca = () => setBuscaAberta(!buscaAberta);
 
-  const handleLogout = () => {
-    localStorage.clear('id_usuario');
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await axios.post(
+        `${API_BASE_URL}/usuarios/logout`,
+        {},
+        { withCredentials: true },
+      );
+    } catch (err) {
+      console.error('Erro ao sair:', err);
+    } finally {
+      navigate('/login');
+    }
   };
 
   const navLinks = [

@@ -1,7 +1,25 @@
 import { OAuth2Client } from 'google-auth-library';
+import jwt from 'jsonwebtoken';
 import UsuarioModel from '../models/usuario.js';
 
+const JWT_SECRET = process.env.JWT_SECRET || 'jwt-secret-change-me';
+const COOKIE_NAME = 'session';
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const createSessionToken = (id_usuario) =>
+  jwt.sign({ id_usuario }, JWT_SECRET, { expiresIn: '1d' });
+
+const setAuthCookie = (reply, token) => {
+  reply.setCookie(COOKIE_NAME, token, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: 60 * 60 * 24,
+  });
+};
+
+const verifySessionToken = (token) => jwt.verify(token, JWT_SECRET);
 
 const UsuarioController = {
   async listar(req, res) {
@@ -27,6 +45,10 @@ const UsuarioController = {
         return res.status(401)
           .send({ sucesso: false, mensagem: "Email ou senha incorretos" });
       }
+
+      const token = createSessionToken(usuario.id_usuario);
+      setAuthCookie(res, token);
+
       return res.status(200).send({ sucesso: true, dados: usuario });
     } catch (err) {
       console.error("Erro no login:", err.message);
@@ -113,10 +135,42 @@ const UsuarioController = {
         });
       }
 
+      const token = createSessionToken(usuario.id_usuario);
+      setAuthCookie(res, token);
+
       const cadastroIncompleto = !usuario.telefone_usuario;
       return res.status(200).send({ sucesso: true, dados: usuario, cadastroIncompleto });
     } catch (err) {
       console.error('Erro ao fazer login com Google:', err.message);
+      return res.status(500).send({ sucesso: false, mensagem: 'Erro interno' });
+    }
+  },
+
+  async me(req, res) {
+    try {
+      const token = req.cookies?.[COOKIE_NAME];
+      if (!token) {
+        return res.status(401).send({ sucesso: false, mensagem: 'Não autenticado' });
+      }
+
+      const payload = verifySessionToken(token);
+      const usuario = await UsuarioModel.findById(payload.id_usuario);
+      if (!usuario) {
+        return res.status(404).send({ sucesso: false, mensagem: 'Usuário não encontrado' });
+      }
+
+      return res.status(200).send({ sucesso: true, dados: usuario });
+    } catch (err) {
+      console.error('Erro ao buscar usuário autenticado:', err.message);
+      return res.status(401).send({ sucesso: false, mensagem: 'Sessão inválida' });
+    }
+  },
+
+  async logout(req, res) {
+    try {
+      return res.clearCookie(COOKIE_NAME, { path: '/' }).status(200).send({ sucesso: true, mensagem: 'Logout realizado' });
+    } catch (err) {
+      console.error('Erro ao fazer logout:', err.message);
       return res.status(500).send({ sucesso: false, mensagem: 'Erro interno' });
     }
   },
