@@ -34,8 +34,8 @@ POST {{url}}/usuarios
 Content-Type: application/json
 
 {
-  "nome_usuario": "Teste User",
-  "email_usuario": "teste@gmail.com",
+  "nome_usuario": "Insert pelo backend",
+  "email_usuario": "insert@gmail.com",
   "senha_usuario": "123456",
   "telefone_usuario": "11000000000"
 }

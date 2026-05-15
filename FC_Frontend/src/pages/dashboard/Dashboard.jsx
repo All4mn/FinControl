@@ -15,7 +15,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     // Verifica dados salvos no localStorage (compatível com login tradicional e Google)
+    //repassar para cookie ao inves de localstorage
     const usuarioData = localStorage.getItem("usuario");
+    console.log(usuarioData)
     const currentIdUsuario = localStorage.getItem("id_usuario");
     const currentNomeUsuario = localStorage.getItem("nome_usuario");
     const currentEmailUsuario = localStorage.getItem("email_usuario");
@@ -68,11 +70,13 @@ export default function Dashboard() {
             <strong>ID:</strong> {idUsuario}
           </p>
           <p>
-              <strong>Nome:</strong> {nomeUsuario}
+              <strong>Nome:</strong> {nomeUsuario} 
+              {/* nao está atualizando para novos dados */}
           </p>
           <p>
             <strong>Email:</strong> {emailUsuario}
           </p>
+          {/* <button onClick={()=> console.log(usuarioData)}>usuario data</button> */}
         </div>
       )}
 

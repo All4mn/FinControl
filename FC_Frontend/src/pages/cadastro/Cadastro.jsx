@@ -94,12 +94,12 @@ export default function Cadastro() {
         telefone_usuario: formData.telefone.replace(/\D/g, ""),
       };
       console.log("Enviando dados para o backend:", dados);
-      // const response = await axios.post(`${API_BASE_URL}/usuarios`, dados); //forma mais apropriada de enviar dados para o backend
-      const response = await axios({
-        method: "post",
-        url: `${API_BASE_URL}/usuarios`,
-        data: dados,
-      });
+      const response = await axios.post(`${API_BASE_URL}/usuarios`, dados); //forma mais apropriada de enviar dados para o backend
+      // const response = await axios({
+      //   method: "post",
+      //   url: `${API_BASE_URL}/usuarios`,
+      //   data: dados,
+      // });
       console.log("Cadastro realizado:", response.data);
       alert("Cadastro realizado com sucesso! Faça login para continuar.");
       navigate("/login");
@@ -114,6 +114,7 @@ export default function Cadastro() {
       setCarregando(false);
     }
   };
+
 
   return (
     <div className={styles.page}>
