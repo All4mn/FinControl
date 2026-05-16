@@ -49,23 +49,15 @@ export default function Dashboard() {
   return (
     <div className={styles.dashboard}>
       <Header usuario={usuario} logado={true} />
-      <h1>Dashboard</h1>
+      <main className={styles.main}>
+        <h1>Dashboard</h1>
 
-      {usuario && (
-        <div className={styles.usuarioInfo}>
-          <h2>Informações do Usuário</h2>
-          <p>
-            <strong>ID:</strong> {usuario.id_usuario}
-          </p>
-          <p>
-            <strong>Nome:</strong> {usuario.nome_usuario}
-          </p>
-          <p>
-            <strong>Email:</strong> {usuario.email_usuario}
-          </p>
-        </div>
-      )}
-
+        {usuario && (
+          <div className={styles.usuarioInfo}>
+            <h2>Olá, {usuario.nome_usuario}</h2>
+          </div>
+        )}
+      </main>
       <Footer />
     </div>
   );

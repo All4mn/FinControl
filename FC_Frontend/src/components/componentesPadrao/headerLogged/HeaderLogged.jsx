@@ -6,14 +6,17 @@ import styles from './HeaderLogged.module.css';
 const API_BASE_URL = import.meta.env.VITE_BACKEND_RENDER_URL || 'http://localhost:3000';
 
 export default function Header({ usuario, logado = false }) {
-  const [menuAberto, setMenuAberto] = useState(false);
   const [buscaAberta, setBuscaAberta] = useState(false);
   const [termoBusca, setTermoBusca] = useState('');
+  const [menuAberto, setMenuAberto] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
-  const toggleMenu = () => setMenuAberto(!menuAberto);
+  const userName = usuario?.nome_usuario || usuario?.nome || 'Usuário';
+  const userEmail = usuario?.email_usuario || usuario?.email || '';
+
   const toggleBusca = () => setBuscaAberta(!buscaAberta);
+  const toggleMenu = () => setMenuAberto(!menuAberto);
 
   const handleLogout = async () => {
     try {
@@ -88,13 +91,12 @@ export default function Header({ usuario, logado = false }) {
 
         {logado && (
           <>
-            <nav className={`${styles.nav} ${menuAberto ? styles.navAberto : ''}`}>
+            <nav className={styles.nav}>
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   to={link.href}
                   className={`${styles.navLink} ${location.pathname === link.href ? styles.navLinkAtivo : ''}`}
-                  onClick={() => setMenuAberto(false)}
                 >
                   {renderIcon(link.icon)}
                   <span>{link.label}</span>
@@ -136,16 +138,16 @@ export default function Header({ usuario, logado = false }) {
               </Link>
 
               <div className={styles.perfilContainer}>
-                <button className={styles.btnPerfil} onClick={toggleMenu}>
+                <button className={styles.btnPerfil} onClick={toggleMenu} title="Abrir menu">
                   <div className={styles.avatar}>
-                    {usuario?.nome ? usuario.nome.charAt(0).toUpperCase() : 'U'}
+                    {userName.charAt(0).toUpperCase()}
                   </div>
                 </button>
                 {menuAberto && (
                   <div className={styles.menuDropdown}>
                     <div className={styles.menuHeader}>
-                      <span className={styles.menuNome}>{usuario?.nome || 'Usuário'}</span>
-                      <span className={styles.menuEmail}>{usuario?.email || ''}</span>
+                      <span className={styles.menuNome}>{userName}</span>
+                      <span className={styles.menuEmail}>{userEmail}</span>
                     </div>
                     <div className={styles.menuDivisor} />
                     <Link to="/perfil" className={styles.menuItem} onClick={() => setMenuAberto(false)}>
@@ -176,22 +178,6 @@ export default function Header({ usuario, logado = false }) {
               </div>
             </div>
 
-            <button className={styles.btnMenuMobile} onClick={toggleMenu} aria-label="Menu">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                {menuAberto ? (
-                  <>
-                    <path d="M18 6 6 18" />
-                    <path d="m6 6 12 12" />
-                  </>
-                ) : (
-                  <>
-                    <line x1="4" x2="20" y1="12" y2="12" />
-                    <line x1="4" x2="20" y1="6" y2="6" />
-                    <line x1="4" x2="20" y1="18" y2="18" />
-                  </>
-                )}
-              </svg>
-            </button>
           </>
         )}
 

@@ -3,13 +3,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styles from './Header.module.css';
 
 export default function Header({ usuario, logado = false }) {
-  const [menuAberto, setMenuAberto] = useState(false);
   const [buscaAberta, setBuscaAberta] = useState(false);
   const [termoBusca, setTermoBusca] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
 
-  const toggleMenu = () => setMenuAberto(!menuAberto);
+  const userName = usuario?.nome_usuario || usuario?.nome || 'Usuário';
+  const userEmail = usuario?.email_usuario || usuario?.email || '';
+
   const toggleBusca = () => setBuscaAberta(!buscaAberta);
 
   const handleLogout = () => {
@@ -125,14 +126,14 @@ export default function Header({ usuario, logado = false }) {
               <div className={styles.perfilContainer}>
                 <button className={styles.btnPerfil} onClick={toggleMenu}>
                   <div className={styles.avatar}>
-                    {usuario?.nome ? usuario.nome.charAt(0).toUpperCase() : 'U'}
+                    {userName.charAt(0).toUpperCase()}
                   </div>
                 </button>
                 {menuAberto && (
                   <div className={styles.menuDropdown}>
                     <div className={styles.menuHeader}>
-                      <span className={styles.menuNome}>{usuario?.nome || 'Usuário'}</span>
-                      <span className={styles.menuEmail}>{usuario?.email || ''}</span>
+                      <span className={styles.menuNome}>{userName}</span>
+                      <span className={styles.menuEmail}>{userEmail}</span>
                     </div>
                     <div className={styles.menuDivisor} />
                     <Link to="/perfil" className={styles.menuItem} onClick={() => setMenuAberto(false)}>
