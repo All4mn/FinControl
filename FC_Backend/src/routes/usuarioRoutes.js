@@ -5,6 +5,7 @@ export async function usuarioRoutes(app) {
     app.post('/login', UsuarioController.login);
     app.post('/logout', UsuarioController.logout);
     app.get('/me', UsuarioController.me);
+    app.get('/verificar-email', UsuarioController.verificarEmail);
     app.get('/', UsuarioController.listar);
     app.patch('/desativar/:id', UsuarioController.desativar);
     app.get('/:id', UsuarioController.buscarPorId);
@@ -13,6 +14,8 @@ export async function usuarioRoutes(app) {
         console.log("Recebendo requisição para login com Google");
         await UsuarioController.loginGoogle(req, res);
     });
+    app.put('/atualizar', UsuarioController.atualizarPerfil);
+    app.delete('/deletar-conta', UsuarioController.deletarConta);
     app.put('/:id', UsuarioController.atualizar);
     app.delete('/:id', UsuarioController.deletar);
 }

@@ -224,6 +224,85 @@ const UsuarioController = {
         console.error("Erro ao desativar usuário:", err.message);
         return res.status(500).send({sucesso: false, mensagem: "Erro interno" });
       }
+  },
+
+  async verificarEmail(req, res) {
+    try {
+      const { email } = req.query;
+      if (!email) {
+        return res.status(400).send({ sucesso: false, mensagem: "Email é obrigatório" });
+      }
+
+      const usuarioExistente = await UsuarioModel.buscarPorEmail(email);
+      return res.status(200).send({ sucesso: true, existe: !!usuarioExistente });
+    } catch (err) {
+      console.error("Erro ao verificar email:", err.message);
+      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
+    }
+  },
+
+  async atualizarPerfil(req, res) {
+    try {
+      const token = req.cookies?.[COOKIE_NAME];
+      if (!token) {
+        return res.status(401).send({ sucesso: false, mensagem: 'Não autenticado' });
+      }
+
+      const payload = verifySessionToken(token);
+      const { nome_usuario, email_usuario, senha } = req.body;
+
+      // Buscar usuário atual
+      const usuarioAtual = await UsuarioModel.findById(payload.id_usuario);
+      if (!usuarioAtual) {
+        return res.status(404).send({ sucesso: false, mensagem: 'Usuário não encontrado' });
+      }
+
+      // Verificar se o novo email já existe (se foi alterado)
+      if (email_usuario && email_usuario !== usuarioAtual.email_usuario) {
+        const emailExistente = await UsuarioModel.buscarPorEmail(email_usuario);
+        if (emailExistente) {
+          return res.status(400).send({ sucesso: false, mensagem: "Email já está em uso" });
+        }
+      }
+
+      // Preparar dados para atualização
+      const dadosAtualizados = {
+        nome_usuario: nome_usuario || usuarioAtual.nome_usuario,
+        email_usuario: email_usuario || usuarioAtual.email_usuario,
+        senha_usuario: senha || usuarioAtual.senha_usuario,
+        telefone_usuario: usuarioAtual.telefone_usuario,
+      };
+
+      const usuarioAtualizado = await UsuarioModel.update(payload.id_usuario, dadosAtualizados);
+      return res.status(200).send({ sucesso: true, dados: usuarioAtualizado });
+    } catch (err) {
+      console.error("Erro ao atualizar perfil:", err.message);
+      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
+    }
+  },
+
+  async deletarConta(req, res) {
+    try {
+      const token = req.cookies?.[COOKIE_NAME];
+      if (!token) {
+        return res.status(401).send({ sucesso: false, mensagem: 'Não autenticado' });
+      }
+
+      const payload = verifySessionToken(token);
+      const deletado = await UsuarioModel.delete(payload.id_usuario);
+      
+      if (!deletado) {
+        return res.status(404).send({ sucesso: false, mensagem: 'Usuário não encontrado' });
+      }
+
+      // Limpar cookie de sessão
+      res.clearCookie(COOKIE_NAME, { path: '/' });
+      
+      return res.status(200).send({ sucesso: true, mensagem: 'Conta deletada com sucesso' });
+    } catch (err) {
+      console.error('Erro ao deletar conta:', err.message);
+      return res.status(500).send({ sucesso: false, mensagem: 'Erro interno' });
+    }
   }
 };
 
