@@ -12,8 +12,8 @@ POST {{url}}/usuarios/login
 Content-Type: application/json
 
 {
-  "email_usuario": "gokugames@gmail.com",
-  "senha_usuario": "kamehameha"
+  "email_usuario": "carlos@email.com",
+  "senha_usuario": "carlos123"
 }
 
 ###

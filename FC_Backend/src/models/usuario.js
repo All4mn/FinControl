@@ -12,24 +12,24 @@ class UsuarioModel {
   async findAll() {
     const response = await database.query(
       // 'SELECT id_usuario, nome_usuario, email_usuario, telefone_usuario, google_id_usuario FROM usuario ORDER BY id_usuario DESC'
-      'SELECT * FROM usuario ORDER BY id_usuario DESC'
+      "SELECT * FROM usuario ORDER BY id_usuario DESC",
     );
     return response.rows;
   }
-   async findByLogin({ email_usuario, senha_usuario }) {
+  async findByLogin({ email_usuario, senha_usuario }) {
     const response = await database.query(
-      'SELECT id_usuario, nome_usuario, email_usuario, telefone_usuario FROM usuario WHERE email_usuario = $1 AND senha_usuario = $2',
-      [email_usuario, senha_usuario]
-    )
+      "SELECT id_usuario, nome_usuario, email_usuario, telefone_usuario FROM usuario WHERE email_usuario = $1 AND senha_usuario = $2 AND id_status_usuario = 1",
+      [email_usuario, senha_usuario],
+    );
     return response.rows[0] || null;
-   }
+  }
   /**
    * Busca usuário por ID.
    */
   async findById(id) {
     const response = await database.query(
-      'SELECT * FROM usuario WHERE id_usuario = $1',
-      [id]
+      "SELECT * FROM usuario WHERE id_usuario = $1",
+      [id],
     );
     return response.rows[0] || null;
   }
@@ -40,8 +40,8 @@ class UsuarioModel {
   async findByGoogleId(googleId) {
     console.log("Buscando usuário por Google ID:", googleId);
     const response = await database.query(
-      'SELECT id_usuario, nome_usuario, email_usuario, telefone_usuario, google_id_usuario FROM usuario WHERE google_id_usuario = $1',
-      [googleId]
+      "SELECT id_usuario, nome_usuario, email_usuario, telefone_usuario, google_id_usuario FROM usuario WHERE google_id_usuario = $1",
+      [googleId],
     );
     return response.rows[0] || null;
   }
@@ -49,8 +49,17 @@ class UsuarioModel {
   /**
    * Cria um novo usuário.
    */
-  async create({ nome_usuario, email_usuario, senha_usuario, telefone_usuario }) {
-    console.log("Criando usuário:", { nome_usuario, email_usuario, telefone_usuario });
+  async create({
+    nome_usuario,
+    email_usuario,
+    senha_usuario,
+    telefone_usuario,
+  }) {
+    console.log("Criando usuário:", {
+      nome_usuario,
+      email_usuario,
+      telefone_usuario,
+    });
     const response = await database.query(
       `INSERT INTO usuario (nome_usuario, email_usuario, senha_usuario, telefone_usuario, id_status_usuario)
        VALUES ($1, $2, $3, $4 , 1)
@@ -71,12 +80,17 @@ class UsuarioModel {
   /**
    * Cria um novo usuário com dados do Google.
    */
-  async createWithGoogle({ google_id, nome_usuario, email_usuario, telefone_usuario = null }) {
+  async createWithGoogle({
+    google_id,
+    nome_usuario,
+    email_usuario,
+    telefone_usuario = null,
+  }) {
     const response = await database.query(
       `INSERT INTO usuario (nome_usuario, email_usuario, telefone_usuario, google_id_usuario, id_status_usuario)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING id_usuario, nome_usuario, email_usuario, telefone_usuario, google_id_usuario`,
-      [nome_usuario, email_usuario, telefone_usuario, google_id, 1]
+      [nome_usuario, email_usuario, telefone_usuario, google_id, 1],
     );
     return response.rows[0];
   }
@@ -108,18 +122,18 @@ class UsuarioModel {
     );
     return response.rowCount > 0;
   }
-  
+
   /**
    * Ativa ou desativa um usuário.
-  */
- async desativar(id) {
-   console.log('req no model usuario desativar', id)
-   const response = await database.query(
-     "UPDATE usuario SET id_status_usuario = 2 WHERE id_usuario = $1",
-     [id],
+   */
+  async desativar(id) {
+    console.log("req no model usuario desativar", id);
+    const response = await database.query(
+      "UPDATE usuario SET id_status_usuario = 2 WHERE id_usuario = $1",
+      [id],
     );
-      return response.rowCount > 0;
-    }
+    return response.rowCount > 0;
+  }
 }
 
 export default new UsuarioModel();

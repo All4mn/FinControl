@@ -25,7 +25,7 @@ app.register(cookie, {
 
 app.register(cors, {
   origin: process.env.FRONTEND_URL || "http://localhost:5173",
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 });
