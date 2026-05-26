@@ -1,6 +1,5 @@
 import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
 import UsuarioModel from '../models/usuario.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'jwt-secret-change-me';
@@ -39,29 +38,21 @@ const UsuarioController = {
       if (!email_usuario || !senha_usuario) {
         return res
           .status(400)
-          .send({ sucesso: false, mensagem: 'Email e senha são obrigatórios' });
+          .send({ sucesso: false, mensagem: "Email e senha são obrigatórios" });
       }
-
-      const usuario = await UsuarioModel.buscarPorEmail(email_usuario);
-      if (!usuario || !usuario.senha_usuario) {
-        return res.status(401).send({ sucesso: false, mensagem: 'Email ou senha incorretos' });
-      }
-
-      const senhaValida = await bcrypt.compare(senha_usuario, usuario.senha_usuario);
-      if (!senhaValida) {
-        return res.status(401).send({ sucesso: false, mensagem: 'Email ou senha incorretos' });
+      const usuario = await UsuarioModel.findByLogin({ email_usuario, senha_usuario });
+      if (!usuario) {
+        return res.status(401)
+          .send({ sucesso: false, mensagem: "Email ou senha incorretos" });
       }
 
       const token = createSessionToken(usuario.id_usuario);
       setAuthCookie(res, token);
 
-      // Remover campo de senha antes de enviar ao cliente
-      const { senha_usuario: _, ...usuarioSemSenha } = usuario;
-
-      return res.status(200).send({ sucesso: true, dados: usuarioSemSenha });
+      return res.status(200).send({ sucesso: true, dados: usuario });
     } catch (err) {
-      console.error('Erro no login:', err.message);
-      return res.status(500).send({ sucesso: false, mensagem: 'Erro interno' });
+      console.error("Erro no login:", err.message);
+      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
     }
   },
 
@@ -95,32 +86,23 @@ const UsuarioController = {
           .status(400)
           .send({
             sucesso: false,
-            mensagem: 'Todos os campos são obrigatórios',
+            mensagem: "Todos os campos são obrigatórios",
           });
       }
 
-      const emailExistente = await UsuarioModel.buscarPorEmail(dados.email_usuario);
+      const emailExistente = await UsuarioModel.buscarPorEmail(
+        dados.email_usuario,
+      );
       if (emailExistente) {
         return res
           .status(400)
-          .send({ sucesso: false, mensagem: 'Email já cadastrado' });
+          .send({ sucesso: false, mensagem: "Email já cadastrado" });
       }
-
-      // Hashear a senha antes de salvar
-      const salt = await bcrypt.genSalt(10);
-      const senhaHash = await bcrypt.hash(dados.senha_usuario, salt);
-
-      const novoUsuario = await UsuarioModel.create({
-        nome_usuario: dados.nome_usuario,
-        email_usuario: dados.email_usuario,
-        senha_usuario: senhaHash,
-        telefone_usuario: dados.telefone_usuario,
-      });
-
+      const novoUsuario = await UsuarioModel.create(dados);
       return res.status(201).send({ sucesso: true, dados: novoUsuario });
     } catch (err) {
-      console.error('Erro ao criar usuário:', err.message);
-      return res.status(500).send({ sucesso: false, mensagem: 'Erro interno' });
+      console.error("Erro ao criar usuário:", err.message);
+      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
     }
   },
 
@@ -197,23 +179,16 @@ const UsuarioController = {
     try {
       const { id } = req.params;
       const dados = req.body;
-
-      // Se for fornecida nova senha, hashear antes de salvar
-      if (dados.senha_usuario) {
-        const salt = await bcrypt.genSalt(10);
-        dados.senha_usuario = await bcrypt.hash(dados.senha_usuario, salt);
-      }
-
       const usuario = await UsuarioModel.update(id, dados);
       if (!usuario) {
         return res
           .status(404)
-          .send({ sucesso: false, mensagem: 'Usuário não encontrado' });
+          .send({ sucesso: false, mensagem: "Usuário não encontrado" });
       }
       return res.status(200).send({ sucesso: true, dados: usuario });
     } catch (err) {
-      console.error('Erro ao atualizar usuário:', err.message);
-      return res.status(500).send({ sucesso: false, mensagem: 'Erro interno' });
+      console.error("Erro ao atualizar usuário:", err.message);
+      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
     }
   },
 
@@ -294,15 +269,15 @@ const UsuarioController = {
       const dadosAtualizados = {
         nome_usuario: nome_usuario || usuarioAtual.nome_usuario,
         email_usuario: email_usuario || usuarioAtual.email_usuario,
-        senha_usuario: senha ? await bcrypt.hash(senha, await bcrypt.genSalt(10)) : usuarioAtual.senha_usuario,
+        senha_usuario: senha || usuarioAtual.senha_usuario,
         telefone_usuario: usuarioAtual.telefone_usuario,
       };
 
       const usuarioAtualizado = await UsuarioModel.update(payload.id_usuario, dadosAtualizados);
       return res.status(200).send({ sucesso: true, dados: usuarioAtualizado });
     } catch (err) {
-      console.error('Erro ao atualizar perfil:', err.message);
-      return res.status(500).send({ sucesso: false, mensagem: 'Erro interno' });
+      console.error("Erro ao atualizar perfil:", err.message);
+      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
     }
   },
 
