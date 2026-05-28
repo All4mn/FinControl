@@ -95,14 +95,14 @@ export class UsuarioController {
    * 3. Gera um token JWT
    * 4. Armazena o token em um cookie httpOnly seguro
    * 5. Retorna os dados do usuário autenticado
-   * 
+   *
    * Segurança do Cookie:
    * - Armazenado no lado do servidor para autenticação futura
    * - Protegido contra XSS (httpOnly)
    * - Protegido contra CSRF (sameSite: lax)
    * - Apenas HTTPS em produção (secure)
    * - Expira em 24 horas
-   * 
+   *
    * @param {Object} req - Requisição HTTP com body { email_usuario, senha_usuario }
    * @param {Object} res - Resposta HTTP com cookie definido
    * @returns {Object} { sucesso: boolean, dados: usuario ou mensagem de erro }
@@ -110,14 +110,14 @@ export class UsuarioController {
   async login(req, res) {
     try {
       const { email_usuario, senha_usuario } = req.body;
-      
+
       // Valida campos obrigatórios
       if (!email_usuario || !senha_usuario) {
         return res
           .status(400)
           .send({ sucesso: false, mensagem: "Email e senha são obrigatórios" });
       }
-      
+
       // Busca usuário com credenciais correspondentes
       const usuario = await this.service.findByLogin({
         email_usuario,
@@ -194,7 +194,7 @@ export class UsuarioController {
           .status(400)
           .send({ sucesso: false, mensagem: "Email já cadastrado" });
       }
-      
+
       const novoUsuario = await this.service.create(dados);
       return res.status(201).send({ sucesso: true, dados: novoUsuario });
     } catch (err) {
@@ -212,13 +212,13 @@ export class UsuarioController {
    * 4. Gera um token JWT
    * 5. Armazena o token em um cookie httpOnly seguro
    * 6. Retorna flag indicando se cadastro está incompleto
-   * 
+   *
    * Fluxo de Cookies:
    * - idToken do Google é validado contra a audiência configurada
    * - Um novo JWT é gerado e armazenado em cookie seguro
    * - O cookie permite autenticação em requisições subsequentes
    * - Se telefone não existe, flag 'cadastroIncompleto' avisa ao frontend
-   * 
+   *
    * @param {Object} req - Requisição com { idToken } no body
    * @param {Object} res - Resposta HTTP com cookie de sessão definido
    * @returns {Object} { sucesso, dados: usuario, cadastroIncompleto }
@@ -282,13 +282,13 @@ export class UsuarioController {
    * 3. Extrai o id_usuario do payload do token
    * 4. Busca os dados completos do usuário no banco
    * 5. Retorna dados do usuário autenticado
-   * 
+   *
    * Fluxo de Cookies:
    * - Cookie é lido automaticamente pelo Fastify em req.cookies
    * - Token é verificado contra a chave secreta JWT_SECRET
    * - Se token expirado ou inválido, erro 401 é retornado
    * - Seguro contra manipulação de token (HMAC verificado)
-   * 
+   *
    * @param {Object} req - Requisição com cookie de sessão
    * @param {Object} res - Resposta HTTP
    * @returns {Object} { sucesso, dados: usuario ou mensagem de erro }
@@ -302,12 +302,12 @@ export class UsuarioController {
         return res
 
           .status(401)
-          .send({ sucesso: false, mensagem: "Não autenticado" });
+          .send({ sucesso: false, mensagem: "Não autenticadooooooooo" });
       }
 
       // Verifica e decodifica o token JWT do cookie
       const payload = verifySessionToken(token);
-      
+
       // Busca dados completos do usuário usando ID extraído do token
       const usuario = await this.service.findById(payload.id_usuario);
       if (!usuario) {
@@ -321,7 +321,7 @@ export class UsuarioController {
       console.error("Erro ao buscar usuário autenticado:", err.message);
       return res
         .status(401)
-        .send({ sucesso: false, mensagem: "Sessão inválida" });
+        .send({ sucesso: false, mensagem: "Sessão inválidaaaaaaaaaaaaaaaaa" });
     }
   }
 
@@ -331,13 +331,13 @@ export class UsuarioController {
    * 1. Remove o cookie de sessão do cliente via clearCookie
    * 2. Define o caminho do cookie como "/" (mesma configuração da criação)
    * 3. Retorna sucesso ao cliente
-   * 
+   *
    * Fluxo de Cookies:
    * - clearCookie envia um Set-Cookie com MaxAge=0
    * - Isso invalida o cookie no navegador do cliente
    * - O token JWT não pode mais ser usado para autenticação
    * - Requisições subsequentes não terão cookie válido
-   * 
+   *
    * @param {Object} req - Requisição HTTP
    * @param {Object} res - Resposta HTTP com cookie removido
    * @returns {Object} { sucesso: true, mensagem: "Logout realizado" }
@@ -458,13 +458,13 @@ export class UsuarioController {
    * 4. Se email foi alterado, verifica duplicação
    * 5. Atualiza os dados no banco preservando outros campos
    * 6. Retorna dados atualizados
-   * 
+   *
    * Fluxo de Cookies:
    * - Cookie é usado para identificar o usuário autenticado
    * - Apenas o próprio usuário pode atualizar seu perfil
    * - Token continua válido após atualização
    * - Próximas requisições usam o mesmo cookie/token
-   * 
+   *
    * @param {Object} req - Requisição com cookie e body { nome_usuario, email_usuario, senha }
    * @param {Object} res - Resposta HTTP
    * @returns {Object} { sucesso, dados: usuarioAtualizado ou mensagem de erro }
@@ -529,14 +529,14 @@ export class UsuarioController {
    * 4. Deleta o usuário do banco de dados
    * 5. Remove o cookie de sessão do cliente
    * 6. Retorna mensagem de sucesso
-   * 
+   *
    * Fluxo de Cookies:
    * - Cookie é usado para identificar o usuário autenticado
    * - Após deletar conta, o cookie é removido (clearCookie)
    * - Cliente recebe Set-Cookie com MaxAge=0 para invalidar cookie
    * - Requisições subsequentes não terão autenticação
    * - Garante logout automático após exclusão
-   * 
+   *
    * @param {Object} req - Requisição com cookie de sessão
    * @param {Object} res - Resposta HTTP com cookie removido
    * @returns {Object} { sucesso: true, mensagem: "Conta deletada com sucesso" }
@@ -553,7 +553,7 @@ export class UsuarioController {
 
       // Verifica e decodifica o token JWT
       const payload = verifySessionToken(token);
-      
+
       // Deleta a conta do usuário
       const deletado = await this.service.delete(payload.id_usuario);
 
