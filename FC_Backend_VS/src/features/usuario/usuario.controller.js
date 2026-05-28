@@ -131,9 +131,10 @@ export class UsuarioController {
 
       // Gera token JWT e o armazena em um cookie seguro
       const token = createSessionToken(usuario.id_usuario);
+      console.log(token)
       setAuthCookie(res, token);
 
-      return res.status(200).send({ sucesso: true, dados: usuario });
+      return res.status(200).send({ sucesso: true, dados: usuario, token: token });
     } catch (err) {
       console.error("Erro no login:", err.message);
       return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
@@ -296,8 +297,10 @@ export class UsuarioController {
     try {
       // Tenta recuperar o cookie de sessão
       const token = req.cookies?.[COOKIE_NAME];
+      console.log(token)
       if (!token) {
         return res
+
           .status(401)
           .send({ sucesso: false, mensagem: "Não autenticado" });
       }

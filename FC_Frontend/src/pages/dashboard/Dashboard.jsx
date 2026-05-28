@@ -14,6 +14,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchUsuario = async () => {
       try {
+        console.log(API_BASE_URL)
         const response = await axios.get(`${API_BASE_URL}/usuarios/me`, {
           withCredentials: true,
         });
@@ -21,11 +22,11 @@ export default function Dashboard() {
         if (response.data.sucesso) {
           setUsuario(response.data.dados);
         } else {
-          window.location.href = "/login";
+          // window.location.href = "/login";
         }
       } catch (err) {
         console.error("Erro ao carregar usuário:", err);
-        window.location.href = "/login";
+        // window.location.href = "/login";
       } finally {
         setCarregando(false);
       }

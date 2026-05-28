@@ -269,6 +269,11 @@ export default function Login() {
           <p className={styles.linkCadastro}>
             Não tem uma conta? <Link to="/cadastro">Cadastre-se</Link>
           </p>
+          {/* <button onClick={async()=>{
+            const response = await axios.get(`${API_BASE_URL}/usuarios`) 
+            console.log(response.data)
+          }}>aaaaaaaaaaaa</button> 
+          botao pra ver se ele pega as coisas pelo render*/}
         </div>
 
       <button
