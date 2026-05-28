@@ -26,10 +26,11 @@ const createSessionToken = (id_usuario) =>
  * @param {string} token - Token JWT a ser armazenado no cookie
  */
 const setAuthCookie = (reply, token) => {
+  const isProduction = process.env.NODE_ENV === "production";
   reply.setCookie(COOKIE_NAME, token, {
     httpOnly: true, // Inacessível via JavaScript
-    sameSite: "lax", // Proteção CSRF
-    secure: process.env.NODE_ENV === "production", // HTTPS apenas em produção
+    secure: isProduction ? true : false,
+    sameSite: isProduction ? "none" : "lax", // HTTPS apenas em produção
     path: "/", // Disponível em toda a aplicação
     maxAge: 60 * 60 * 24, // 24 horas em segundos
   });
@@ -131,10 +132,12 @@ export class UsuarioController {
 
       // Gera token JWT e o armazena em um cookie seguro
       const token = createSessionToken(usuario.id_usuario);
-      console.log(token)
+      console.log(token);
       setAuthCookie(res, token);
 
-      return res.status(200).send({ sucesso: true, dados: usuario, token: token });
+      return res
+        .status(200)
+        .send({ sucesso: true, dados: usuario, token: token });
     } catch (err) {
       console.error("Erro no login:", err.message);
       return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
@@ -297,12 +300,12 @@ export class UsuarioController {
     try {
       // Tenta recuperar o cookie de sessão
       const token = req.cookies?.[COOKIE_NAME];
-      console.log(token)
+      console.log(token);
       if (!token) {
         return res
 
           .status(401)
-          .send({ sucesso: false, mensagem: "Não autenticadooooooooo" });
+          .send({ sucesso: false, mensagem: "Não autenticado" });
       }
 
       // Verifica e decodifica o token JWT do cookie
@@ -321,7 +324,7 @@ export class UsuarioController {
       console.error("Erro ao buscar usuário autenticado:", err.message);
       return res
         .status(401)
-        .send({ sucesso: false, mensagem: "Sessão inválidaaaaaaaaaaaaaaaaa" });
+        .send({ sucesso: false, mensagem: "Sessão inválida" });
     }
   }
 
