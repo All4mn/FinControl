@@ -1,21 +1,21 @@
 // =============================================================================
-// models/usuario.js
-// Queries SQL para a tabela de usuario
+// models/repositories/usuario.repository.js
+// Acesso ao banco de dados para a tabela de usuario
 // =============================================================================
 
-import database from "../config/db.js";
+import database from "../../config/db.js";
 
-class UsuarioModel {
+export class UsuarioRepository {
   /**
-   * Busca todos os usuários (sem a senha, por segurança).
+   * Busca todos os usuários.
    */
   async findAll() {
     const response = await database.query(
-      // 'SELECT id_usuario, nome_usuario, email_usuario, telefone_usuario, google_id_usuario FROM usuario ORDER BY id_usuario DESC'
       "SELECT * FROM usuario ORDER BY id_usuario DESC",
     );
     return response.rows;
   }
+
   async findByLogin({ email_usuario, senha_usuario }) {
     const response = await database.query(
       "SELECT id_usuario, nome_usuario, email_usuario, telefone_usuario FROM usuario WHERE email_usuario = $1 AND senha_usuario = $2 AND id_status_usuario = 1",
@@ -23,6 +23,7 @@ class UsuarioModel {
     );
     return response.rows[0] || null;
   }
+
   /**
    * Busca usuário por ID.
    */
@@ -49,12 +50,7 @@ class UsuarioModel {
   /**
    * Cria um novo usuário.
    */
-  async create({
-    nome_usuario,
-    email_usuario,
-    senha_usuario,
-    telefone_usuario,
-  }) {
+  async create({ nome_usuario, email_usuario, senha_usuario, telefone_usuario }) {
     console.log("Criando usuário:", {
       nome_usuario,
       email_usuario,
@@ -135,5 +131,3 @@ class UsuarioModel {
     return response.rowCount > 0;
   }
 }
-
-export default new UsuarioModel();

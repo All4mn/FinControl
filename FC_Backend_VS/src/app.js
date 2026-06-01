@@ -8,16 +8,35 @@ import cookie from "@fastify/cookie";
 import dotenv from "dotenv";
 
 // Importando as rotas do Fastify
-import { usuarioRoutes } from "./routes/usuarioRoutes.js";
-import { categoriaRoutes } from "./routes/categoriaRoutes.js";
-import { metodoRoutes } from "./routes/metodoRoutes.js";
-import { contaRoutes } from "./routes/contaRoutes.js";
-import { transacaoRoutes } from "./routes/transacaoRoutes.js";
-import { logsRoutes } from "./routes/logsRoutes.js";
+import { usuarioRoutes } from "./features/usuario/usuarioRoutes.js";
+import { categoriaRoutes } from "./features/categoria/categoriaRoutes.js";
+import { metodoRoutes } from "./features/metodo/metodoRoutes.js";
+import { contaRoutes } from "./features/conta/contaRoutes.js";
+import { transacaoRoutes } from "./features/transacao/transacaoRoutes.js";
+import { logsRoutes } from "./features/logs/logsRoutes.js";
+import { AppError } from "./Errors/AppError.js";
 
 dotenv.config();
 
 const app = fastify({ logger: true });
+
+// Tratamento de erros global
+app.setErrorHandler((error, request, reply) => {
+  // Verifica se o erro foi intencional (Regra de Negócio / Validação)
+  if (error instanceof AppError) {
+    return reply.status(error.statusCode).send({
+      status: "error",
+      message: error.message,
+    });
+  }
+  // Se o erro NÃO for um AppError, é um erro inesperado
+  // (ex: banco de dados caiu, digitação errada no código).
+  console.error("🔥 ERRO INTERNO:", error);
+  return reply.status(500).send({
+    status: "error",
+    message: "Internal Server Error",
+  });
+});
 
 app.register(cookie, {
   secret: process.env.COOKIE_SECRET || "cookie-secret-change-me",
@@ -51,7 +70,9 @@ const start = async () => {
       host: "0.0.0.0",
     });
     console.log("Servidor conectado ao banco de dados com sucesso!");
-    console.log("Servidor Fastify rodando na porta:");
+    console.log(
+      `Servidor Fastify rodando na porta: ${process.env.PORT || 3000}`,
+    );
     // console.log(process.env.DB_CONNECTION_STRING); // <-- Adicione esta linha para verificar a string de conexão se der undefined então falta configurar a variável de ambiente
   } catch (err) {
     app.log.error(err);

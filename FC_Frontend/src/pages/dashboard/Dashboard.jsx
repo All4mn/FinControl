@@ -14,6 +14,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchUsuario = async () => {
       try {
+        console.log(API_BASE_URL);
         const response = await axios.get(`${API_BASE_URL}/usuarios/me`, {
           withCredentials: true,
         });

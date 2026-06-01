@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import styles from './PerfilModal.module.css';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import styles from "./PerfilModal.module.css";
 
-const API_BASE_URL = import.meta.env.VITE_BACKEND_RENDER_URL || 'http://localhost:3000';
+const API_BASE_URL =
+  import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
 
 export default function PerfilModal({ usuario, isOpen, onClose }) {
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [modoEdicao, setModoEdicao] = useState(false);
-  const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
   const [emailExistente, setEmailExistente] = useState(false);
   const [verificandoEmail, setVerificandoEmail] = useState(false);
   const [carregando, setCarregando] = useState(false);
@@ -17,9 +18,9 @@ export default function PerfilModal({ usuario, isOpen, onClose }) {
   // Inicializar valores quando o modal abre
   useEffect(() => {
     if (isOpen && usuario) {
-      setNome(usuario?.nome_usuario || usuario?.nome || '');
-      setEmail(usuario?.email_usuario || usuario?.email || '');
-      setSenha('');
+      setNome(usuario?.nome_usuario || usuario?.nome || "");
+      setEmail(usuario?.email_usuario || usuario?.email || "");
+      setSenha("");
       setModoEdicao(false);
       setEmailExistente(false);
     }
@@ -27,7 +28,10 @@ export default function PerfilModal({ usuario, isOpen, onClose }) {
 
   // Verificar se o email já existe
   const verificarEmail = async (novoEmail) => {
-    if (!novoEmail || novoEmail === (usuario?.email_usuario || usuario?.email)) {
+    if (
+      !novoEmail ||
+      novoEmail === (usuario?.email_usuario || usuario?.email)
+    ) {
       setEmailExistente(false);
       return;
     }
@@ -39,12 +43,12 @@ export default function PerfilModal({ usuario, isOpen, onClose }) {
         {
           params: { email: novoEmail },
           withCredentials: true,
-        }
+        },
       );
 
       setEmailExistente(response.data.existe);
     } catch (err) {
-      console.error('Erro ao verificar email:', err);
+      console.error("Erro ao verificar email:", err);
       setEmailExistente(false);
     } finally {
       setVerificandoEmail(false);
@@ -62,7 +66,7 @@ export default function PerfilModal({ usuario, isOpen, onClose }) {
 
   const handleSalvar = async () => {
     if (emailExistente) {
-      alert('Este email já está em uso!');
+      alert("Este email já está em uso!");
       return;
     }
 
@@ -80,18 +84,18 @@ export default function PerfilModal({ usuario, isOpen, onClose }) {
       const response = await axios.put(
         `${API_BASE_URL}/usuarios/atualizar`,
         dados,
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (response.data.sucesso) {
-        alert('Perfil atualizado com sucesso!');
+        alert("Perfil atualizado com sucesso!");
         setModoEdicao(false);
         onClose();
         window.location.reload();
       }
     } catch (err) {
-      console.error('Erro ao atualizar perfil:', err);
-      alert('Erro ao atualizar perfil. Tente novamente.');
+      console.error("Erro ao atualizar perfil:", err);
+      alert("Erro ao atualizar perfil. Tente novamente.");
     } finally {
       setCarregando(false);
     }
@@ -99,26 +103,26 @@ export default function PerfilModal({ usuario, isOpen, onClose }) {
 
   const handleDeletarConta = async () => {
     const confirmacao = window.confirm(
-      'Tem certeza que deseja deletar sua conta? Esta ação é irreversível e todos os seus dados serão perdidos.'
+      "Tem certeza que deseja deletar sua conta? Esta ação é irreversível e todos os seus dados serão perdidos.",
     );
 
     if (!confirmacao) return;
 
     setCarregando(true);
     try {
-      const response = await axios.delete(
-        `${API_BASE_URL}/usuarios/deletar-conta`,
-        { withCredentials: true }
+      const response = await axios.patch(
+        `${API_BASE_URL}/usuarios/desativar/${usuario.id_usuario}`,
+        { withCredentials: true },
       );
 
       if (response.data.sucesso) {
-        alert('Conta deletada com sucesso!');
+        alert("Conta deletada com sucesso!");
         onClose();
-        window.location.href = '/login';
+        window.location.href = "/login";
       }
     } catch (err) {
-      console.error('Erro ao deletar conta:', err);
-      alert('Erro ao deletar conta. Tente novamente.');
+      console.error("Erro ao deletar conta:", err);
+      alert("Erro ao deletar conta. Tente novamente.");
     } finally {
       setCarregando(false);
     }
@@ -155,9 +159,7 @@ export default function PerfilModal({ usuario, isOpen, onClose }) {
 
         <div className={styles.modalBody}>
           <div className={styles.avatarContainer}>
-            <div className={styles.avatar}>
-              {nome.charAt(0).toUpperCase()}
-            </div>
+            <div className={styles.avatar}>{nome.charAt(0).toUpperCase()}</div>
           </div>
 
           <div className={styles.campoGrupo}>
@@ -176,7 +178,7 @@ export default function PerfilModal({ usuario, isOpen, onClose }) {
             <div className={styles.emailContainer}>
               <input
                 type="email"
-                className={`${styles.input} ${emailExistente ? styles.inputErro : ''}`}
+                className={`${styles.input} ${emailExistente ? styles.inputErro : ""}`}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 readOnly={!modoEdicao}
@@ -194,18 +196,20 @@ export default function PerfilModal({ usuario, isOpen, onClose }) {
             <label className={styles.label}>Senha</label>
             <div className={styles.senhaContainer}>
               <input
-                type={mostrarSenha ? 'text' : 'password'}
+                type={mostrarSenha ? "text" : "password"}
                 className={styles.input}
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
                 readOnly={!modoEdicao}
-                placeholder={!modoEdicao ? '••••••••' : 'Digite uma nova senha (opcional)'}
+                placeholder={
+                  !modoEdicao ? "••••••••" : "Digite uma nova senha (opcional)"
+                }
               />
               {modoEdicao && (
                 <button
                   className={styles.btnMostrarSenha}
                   onClick={() => setMostrarSenha(!mostrarSenha)}
-                  title={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+                  title={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
                 >
                   {mostrarSenha ? (
                     <svg
@@ -250,7 +254,10 @@ export default function PerfilModal({ usuario, isOpen, onClose }) {
               <button className={styles.btnCancelar} onClick={onClose}>
                 Fechar
               </button>
-              <button className={styles.btnEditar} onClick={() => setModoEdicao(true)}>
+              <button
+                className={styles.btnEditar}
+                onClick={() => setModoEdicao(true)}
+              >
                 Editar Perfil
               </button>
             </>
@@ -267,7 +274,7 @@ export default function PerfilModal({ usuario, isOpen, onClose }) {
                 onClick={handleSalvar}
                 disabled={emailExistente || carregando}
               >
-                {carregando ? 'Salvando...' : 'Salvar'}
+                {carregando ? "Salvando..." : "Salvar"}
               </button>
             </>
           )}
@@ -281,7 +288,7 @@ export default function PerfilModal({ usuario, isOpen, onClose }) {
             onClick={handleDeletarConta}
             disabled={carregando}
           >
-            {carregando ? 'Deletando...' : 'Deletar Conta'}
+            {carregando ? "Deletando..." : "Deletar Conta"}
           </button>
         </div>
       </div>
