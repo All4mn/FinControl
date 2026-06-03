@@ -25,7 +25,7 @@ export class LogsRepository {
     (l.posterior->>'id_conta')::INT          AS id_conta,
     (l.posterior->>'id_carteira')::INT       AS id_carteira,
     (l.posterior->>'id_categoria')::INT      AS id_categoria,
-    (l.posterior->>'valor')::NUMERIC         AS valor,
+    (l.posterior->>'valor')::FLOAT           AS valor,
     l.posterior->>'descricao'                AS descricao,
     (l.posterior->>'quitado')::BOOLEAN       AS quitado,
     (l.posterior->>'arquivado')::BOOLEAN     AS arquivado,
@@ -33,7 +33,7 @@ export class LogsRepository {
     (l.posterior->>'data')::TIMESTAMPTZ      AS data_transacao,
 
     -- Desempacota anterior (NULL em INSERTs, preenchido em UPDATEs)
-    (l.anterior->>'valor')::NUMERIC          AS valor_antes,
+    (l.anterior->>'valor')::FLOAT          AS valor_antes,
     l.anterior->>'descricao'                 AS descricao_antes,
     (l.anterior->>'arquivado')::BOOLEAN      AS arquivado_antes,
     (l.anterior->>'entrada')::BOOLEAN        AS entrada_antes,

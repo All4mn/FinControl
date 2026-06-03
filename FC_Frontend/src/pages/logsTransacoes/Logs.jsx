@@ -6,6 +6,7 @@ import styles from "./Logs.module.css";
 import TableLog from "../../components/componentesPadrao/tableLog/TableLog.jsx";
 import { useEffect } from "react";
 
+
 const API_BASE_URL =
   // import.meta.env.VITE_BACKEND_RENDER_URL ||
    "http://localhost:3000";
@@ -42,12 +43,13 @@ const Logs = () => {
           <h1>Logs</h1>
         </div>
         <section>
+
           <TableLog 
           logs={log}
           />
         </section>
 
-        <button onClick={()=>console.log(log.dados)}>visualizar log</button>
+        <button onClick={()=>console.log(log)}>visualizar log</button>
       </div>
       <footer className={styles.footer}>
         <Footer />

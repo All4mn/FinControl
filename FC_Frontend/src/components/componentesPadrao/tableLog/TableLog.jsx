@@ -1,77 +1,149 @@
-import React from 'react'
-import styles from './TableLog.module.css'
-import dayjs from 'dayjs'
-const TableLog = (logs) => {
+import React, { useState, useMemo } from "react";
+import styles from "./TableLog.module.css";
+import dayjs from "dayjs";
+
+const formatData = (val) =>
+  val ? dayjs(val).format("DD/MM/YYYY HH:mm") : null;
+
+const NA = <span className={styles.tdNa}>—</span>;
+
+const BadgeOp = ({ op }) => {
+  const cls =
+    op === "INSERT"
+      ? styles.badgeInsert
+      : styles.badgeUpdate
+  return <span className={cls}>{op}</span>;
+};
+
+const BadgeBool = ({ val }) =>
+  val == null ? (
+    NA
+  ) : (
+    <span className={val ? styles.badgeSim : styles.badgeNao}>
+      {val ? "Sim" : "Não"}
+    </span>
+  );
+
+const TdAntes = ({ children }) =>
+  children == null ? (
+    <td className={`${styles.tdAntes} ${styles.tdNa}`}>—</td>
+  ) : (
+    <td className={styles.tdAntes}>{children}</td>
+  );
+
+const ThSort = ({ campo, atual, direcao, onClick, children }) => {
+  const cls =
+    atual === campo
+      ? direcao === "asc"
+        ? styles.thAsc
+        : styles.thDesc
+      : styles.thSortable;
+  return (
+    <th className={cls} onClick={() => onClick(campo)}>
+      {children}
+    </th>
+  );
+};
+
+const TableLog = ({ logs }) => {
+  const [filtroOp, setFiltroOp] = useState("TODOS");
+  const [sortCampo, setSortCampo] = useState("id_log");
+  const [sortDir, setSortDir] = useState("desc");
+
+  const handleSort = (campo) => {
+    if (sortCampo === campo) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortCampo(campo);
+      setSortDir("asc");
+    }
+  };
+
+  const dadosFiltrados = useMemo(() => {
+    let lista = filtroOp === "TODOS" ? logs : logs.filter((l) => l.operacao === filtroOp);
+    lista = [...lista].sort((a, b) => {
+      let va = a[sortCampo] ?? "";
+      let vb = b[sortCampo] ?? "";
+      if (typeof va === "string") va = va.toLowerCase();
+      if (typeof vb === "string") vb = vb.toLowerCase();
+      if (va < vb) return sortDir === "asc" ? -1 : 1;
+      if (va > vb) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+    return lista;
+  }, [logs, filtroOp, sortCampo, sortDir]);
+
+  if (!logs || logs.length === 0) {
+    return (
+      <div className={styles.container}>
+        <p className={styles.vazio}>Nenhum log encontrado.</p>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
-        <div className={styles.table_container}>
-
-        {/* {logs.logs.map((log) => (
-            <>
-            <ul className={styles.tabela}>
-            
-            <li key={log.id_log} className={styles.linha}>
-                <p>ID: {log.id_log}</p>
-                <p>Operação: {log.operacao}</p>
-                <p>Conta: {log.nome_conta}</p>
-                <p>Carteira: {log.nome_carteira}</p>
-                <p>Categoria: {log.nome_categoria}</p>
-            </li>
-            </ul>
-            </>
-        ))} */}
-
+      <div className={styles.table_container}>
+      <div className={styles.toolbar}>
+        <label>
+          Operação
+          <select value={filtroOp} onChange={(e) => setFiltroOp(e.target.value)}>
+            <option value="TODOS">Todos</option>
+            <option value="INSERT">INSERT</option>
+            <option value="UPDATE">UPDATE</option>
+          </select>
+        </label>
+        <span className={styles.contador}>
+          {dadosFiltrados.length} de {logs.length} registros
+        </span>
+      </div>
         <table className={styles.tabela}>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Operação</th>
-                    <th>Conta</th>
-                    <th>Carteira</th>
-                    <th>Categoria</th>
-                    <th>Descrição</th>
-                    <th>Descrição Antes</th>
-                    <th>Valor</th>
-                    <th>Valor Antes</th>
-                    <th>Entrada</th>
-                    <th>Entrada Antes</th>
-                    <th>Arquivado</th>
-                    <th>Arquivado Antes</th>
-                    <th>Quitado</th>
-                    <th>Data Transação</th>
-                    <th>Data Antes</th>
-                    <th>Data Log</th>
-
-                </tr>
-            </thead>
-            <tbody>
-                {logs.logs.map((log) => (
-                    <tr key={log.id_log} className={styles.linha}>
-                        <td>{log.id_log}</td>
-                        <td>{log.operacao}</td>
-                        <td>{log.nome_conta}</td>
-                        <td>{log.nome_carteira}</td>
-                        <td>{log.nome_categoria}</td>
-                        <td>{log.descricao}</td>
-                        <td>{log.descricao_antes || 'N/A'}</td>
-                        <td>{log.valor}</td>
-                        <td>{log.valor_antes !== null ? log.valor_antes : 'N/A'}</td>
-                        <td>{log.entrada ? 'Sim' : 'Não'}</td>
-                        <td>{log.entrada_antes !== null ? (log.entrada_antes ? 'Sim' : 'Não') : 'N/A'}</td>
-                        <td>{log.arquivado ? 'Sim' : 'Não'}</td>
-                        <td>{log.arquivado_antes !== null ? (log.arquivado_antes ? 'Sim' : 'Não') : 'N/A'}</td>
-                        <td>{log.quitado ? 'Sim' : 'Não'}</td>
-                        <td>{log.data_transacao ? dayjs(log.data_transacao).format('DD/MM/YYYY HH:mm:ss') : 'N/A'}</td>
-                        <td>{log.data_antes ? dayjs(log.data_antes).format('DD/MM/YYYY HH:mm:ss') : 'N/A'}</td>
-                        <td>{log.data_log ? dayjs(log.data_log).format('DD/MM/YYYY HH:mm:ss') : 'N/A'}</td>
-
-                    </tr>
-                ))}
-            </tbody>
+          <thead>
+            <tr>
+              <ThSort campo="id_log" atual={sortCampo} direcao={sortDir} onClick={handleSort}>ID</ThSort>
+              <ThSort campo="operacao" atual={sortCampo} direcao={sortDir} onClick={handleSort}>Operação</ThSort>
+              <ThSort campo="nome_conta" atual={sortCampo} direcao={sortDir} onClick={handleSort}>Conta</ThSort>
+              <ThSort campo="nome_carteira" atual={sortCampo} direcao={sortDir} onClick={handleSort}>Carteira</ThSort>
+              <ThSort campo="nome_categoria" atual={sortCampo} direcao={sortDir} onClick={handleSort}>Categoria</ThSort>
+              <ThSort campo="descricao" atual={sortCampo} direcao={sortDir} onClick={handleSort}>Descrição</ThSort>
+              <th>Descrição antes</th>
+              <ThSort campo="valor" atual={sortCampo} direcao={sortDir} onClick={handleSort}>Valor</ThSort>
+              <th>Valor antes</th>
+              <th>Entrada</th>
+              <th>Entrada antes</th>
+              <th>Arquivado</th>
+              <th>Arquivado antes</th>
+              <th>Quitado</th>
+              <ThSort campo="data_transacao" atual={sortCampo} direcao={sortDir} onClick={handleSort}>Data transação</ThSort>
+              <ThSort campo="data_log" atual={sortCampo} direcao={sortDir} onClick={handleSort}>Data log</ThSort>
+            </tr>
+          </thead>
+          <tbody>
+            {dadosFiltrados.map((log) => (
+              <tr key={log.id_log}>
+                <td>{log.id_log}</td>
+                <td><BadgeOp op={log.operacao} /></td>
+                <td>{log.nome_conta ?? NA}</td>
+                <td>{log.nome_carteira ?? NA}</td>
+                <td>{log.nome_categoria ?? NA}</td>
+                <td>{log.descricao}</td>
+                <TdAntes>{log.descricao_antes ?? null}</TdAntes>
+                <td>R$ {Number(log.valor).toFixed(2)}</td>
+                <TdAntes>{log.valor_antes != null ? `R$ ${Number(log.valor_antes).toFixed(2)}` : null}</TdAntes>
+                <td><BadgeBool val={log.entrada} /></td>
+                <TdAntes><BadgeBool val={log.entrada_antes} /></TdAntes>
+                <td><BadgeBool val={log.arquivado} /></td>
+                <TdAntes><BadgeBool val={log.arquivado_antes} /></TdAntes>
+                <td><BadgeBool val={log.quitado} /></td>
+                <td>{formatData(log.data_transacao) ?? NA}</td>
+                <td>{formatData(log.data_log) ?? NA}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
-        </div>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default TableLog
+export default TableLog;
