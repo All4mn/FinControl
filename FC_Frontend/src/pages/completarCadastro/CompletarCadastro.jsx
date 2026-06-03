@@ -1,129 +1,17 @@
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 import Header from "../../components/componentesPadrao/header/Header";
 import Footer from "../../components/componentesPadrao/footer/Footer";
 import styles from "./CompletarCadastro.module.css";
-
-const API_BASE_URL =
-  import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
-
-const dadosFormularioInicial = {
-  nome: "",
-  email: "",
-  telefone: "",
-};
+import { useCompletarCadastro } from "./useCompletarCadastro";
 
 export default function CompletarCadastro() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [dadosFormulario, setDadosFormulario] = useState(dadosFormularioInicial);
-  const [erro, setErro] = useState("");
-  const [carregando, setCarregando] = useState(false);
-  const [idUsuario, setIdUsuario] = useState(null);
-
-  const formatarTelefone = (valor) => {
-    const numeros = String(valor).replace(/\D/g, "");
-    if (numeros.length <= 11) {
-      return numeros
-        .replace(/^(\d{2})/, "($1) ")
-        .replace(/(\d{5})(\d)/, "$1-$2");
-    }
-    return valor;
-  };
-
-  useEffect(() => {
-    const usuarioRota = location.state?.usuario;
-    const usuarioSalvo = window.sessionStorage.getItem(
-      "completarCadastroUsuario",
-    );
-    const usuario =
-      usuarioRota || (usuarioSalvo ? JSON.parse(usuarioSalvo) : null);
-
-    if (!usuario) {
-      navigate("/login");
-      return;
-    }
-
-    setIdUsuario(usuario.id_usuario);
-    setDadosFormulario({
-      nome: usuario.nome_usuario || "",
-      email: usuario.email_usuario || "",
-      telefone: usuario.telefone_usuario
-        ? formatarTelefone(usuario.telefone_usuario)
-        : "",
-    });
-
-    if (usuarioRota) {
-      window.sessionStorage.setItem(
-        "completarCadastroUsuario",
-        JSON.stringify(usuario),
-      );
-    }
-  }, [location.state, navigate]);
-
-  const aoAlterarTelefone = (e) => {
-    const valorFormatado = formatarTelefone(e.target.value);
-    setDadosFormulario((prev) => ({ ...prev, telefone: valorFormatado }));
-    setErro("");
-  };
-
-  const aoAlterarCampo = (e) => {
-    const { name, value } = e.target;
-    setDadosFormulario((prev) => ({ ...prev, [name]: value }));
-    setErro("");
-  };
-
-  const validarFormulario = () => {
-    if (!dadosFormulario.nome.trim()) {
-      setErro("Por favor, informe seu nome completo.");
-      return false;
-    }
-    if (!dadosFormulario.email.trim()) {
-      setErro("Por favor, informe seu email.");
-      return false;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(dadosFormulario.email)) {
-      setErro("Por favor, informe um email válido.");
-      return false;
-    }
-    if (!dadosFormulario.telefone.trim()) {
-      setErro("Por favor, informe seu telefone.");
-      return false;
-    }
-    return true;
-  };
-
-  const aoEnviarFormulario = async (e) => {
-    e.preventDefault();
-    if (!validarFormulario() || !idUsuario) return;
-
-    setCarregando(true);
-    try {
-      const dadosAtualizacao = {
-        nome_usuario: dadosFormulario.nome.trim(),
-        email_usuario: dadosFormulario.email.trim(),
-        telefone_usuario: dadosFormulario.telefone.replace(/\D/g, ""),
-      };
-
-      const response = await axios.put(
-        `${API_BASE_URL}/usuarios/${idUsuario}`,
-        dadosAtualizacao,
-        { withCredentials: true },
-      );
-
-      window.sessionStorage.removeItem("completarCadastroUsuario");
-      navigate("/dashboard");
-    } catch (err) {
-      console.error("Erro ao completar cadastro:", err);
-      setErro(
-        err.response?.data?.mensagem ||
-          "Erro ao completar cadastro. Tente novamente.",
-      );
-    } finally {
-      setCarregando(false);
-    }
-  };
+  const {
+    formData,
+    erro,
+    carregando,
+    handleChange,
+    handleTelefoneChange,
+    handleSubmit,
+  } = useCompletarCadastro();
 
   return (
     <div className={styles.page}>
@@ -158,7 +46,7 @@ export default function CompletarCadastro() {
             </div>
           )}
 
-          <form onSubmit={aoEnviarFormulario} className={styles.form}>
+          <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.campo}>
               <div className={styles.inputWrapper}>
                 <svg
@@ -180,8 +68,8 @@ export default function CompletarCadastro() {
                   type="text"
                   name="nome"
                   placeholder="Nome Completo"
-                  value={dadosFormulario.nome}
-                  onChange={aoAlterarCampo}
+                  value={formData.nome}
+                  onChange={handleChange}
                   className={styles.input}
                   autoComplete="name"
                 />
@@ -209,8 +97,8 @@ export default function CompletarCadastro() {
                   type="email"
                   name="email"
                   placeholder="Email"
-                  value={dadosFormulario.email}
-                  onChange={aoAlterarCampo}
+                  value={formData.email}
+                  onChange={handleChange}
                   className={styles.input}
                   autoComplete="email"
                 />
@@ -237,8 +125,8 @@ export default function CompletarCadastro() {
                   type="tel"
                   name="telefone"
                   placeholder="Número de Telefone"
-                  value={dadosFormulario.telefone}
-                  onChange={aoAlterarTelefone}
+                  value={formData.telefone}
+                  onChange={handleTelefoneChange}
                   className={styles.input}
                   autoComplete="tel"
                 />
