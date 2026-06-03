@@ -136,3 +136,8 @@ Content-Type: application/json
 {
   "telefone_usuario": "11999999999"
 }
+
+###
+GET {{url}}/logs
+###
+GET {{url}}/logs/filter
