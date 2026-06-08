@@ -1,116 +1,24 @@
-import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { Link } from "react-router-dom";
 import Header from "../../components/componentesPadrao/header/Header";
 import Footer from "../../components/componentesPadrao/footer/Footer";
 import styles from "./Login.module.css";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-
-const API_BASE_URL =
-  import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
-
-if (!import.meta.env.VITE_BACKEND_RENDER_URL) {
-  console.warn("Aviso: VITE_BACKEND_RENDER_URL não definida no .env. Usando localhost como padrão.");
-}
+import { useLogin } from "./useLogin";
 
 export default function Login() {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: "",
-    senha: "",
-  });
-  const [mostrarSenha, setMostrarSenha] = useState(false);
-  const [carregando, setCarregando] = useState(false);
-  const [erro, setErro] = useState("");
-  
-  // Debug para verificar se o ID está sendo carregado (pode remover depois)
-  useEffect(() => {
-    console.log("Google Client ID carregado:", import.meta.env.VITE_GOOGLE_CLIENT_ID ? "Sim" : "Não");
-  }, []);
+  const {
+    formData,
+    mostrarSenha,
+    carregando,
+    erro,
+    setErro,
+    handleChange,
+    handleSubmit,
+    toggleMostrarSenha,
+    handleGoogleCredentialResponse,
+  } = useLogin();
 
-  const handleGoogleCredentialResponse = async (response) => {
-    if (!response?.credential) {
-      setErro("Não foi possível obter o token do Google.");
-      return;
-    }
-
-    const idToken = response.credential;
-
-    try {
-      setErro("");
-
-      const result = await axios.post(
-        `${API_BASE_URL}/usuarios/login-google`,
-        { idToken },
-        { withCredentials: true },
-      );
-
-      if (result.data.sucesso) {
-        const { dados: usuario, cadastroIncompleto } = result.data;
-
-        if (cadastroIncompleto) {
-          window.sessionStorage.setItem(
-            "completarCadastroUsuario",
-            JSON.stringify(usuario),
-          );
-          navigate("/completar-cadastro", {
-            state: { usuario, fromGoogle: true },
-          });
-        } else {
-          navigate("/dashboard");
-        }
-      } else {
-        setErro(result.data.mensagem || "Erro no login com Google.");
-      }
-    } catch (err) {
-      console.error("Erro no login com Google:", err);
-      setErro(
-        err.response?.data?.mensagem ||
-          "Erro ao fazer login com Google. Tente novamente.",
-      );
-    } finally {
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setErro("");
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    console.log(
-      "Enviando dados para:",
-      `${import.meta.env.VITE_BACKEND_RENDER_URL}/usuarios/login`,
-    );
-    if (!formData.email || !formData.senha) {
-      setErro("Por favor, preencha todos os campos.");
-      return;
-    }
-
-    setCarregando(true);
-
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/usuarios/login`,
-        {
-          email_usuario: formData.email,
-          senha_usuario: formData.senha,
-        },
-        { withCredentials: true },
-      );
-
-      console.log("Login realizado:", response.data);
-      navigate("/dashboard");
-    } catch (err) {
-      console.log("Erro no login:", err);
-      setErro("Email ou senha incorretos. Tente novamente.");
-    } finally {
-      setCarregando(false);
-    }
-  };
+  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   return (
     <div className={styles.page}>
@@ -199,7 +107,7 @@ export default function Login() {
                 />
                 <button
                   type="button"
-                  onClick={() => setMostrarSenha(!mostrarSenha)}
+                  onClick={toggleMostrarSenha}
                   className={styles.btnMostrarSenha}
                   aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
                 >
@@ -255,8 +163,8 @@ export default function Login() {
             <span>ou</span>
           </div>
 
-          {import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
-            <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+          {GOOGLE_CLIENT_ID ? (
+            <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
               <GoogleLogin 
                 onSuccess={handleGoogleCredentialResponse} 
                 onError={() => setErro("Erro no login com Google. Tente novamente.")} 
@@ -269,11 +177,6 @@ export default function Login() {
           <p className={styles.linkCadastro}>
             Não tem uma conta? <Link to="/cadastro">Cadastre-se</Link>
           </p>
-          {/* <button onClick={async()=>{
-            const response = await axios.get(`${API_BASE_URL}/usuarios`) 
-            console.log(response.data)
-          }}>aaaaaaaaaaaa</button> 
-          botao pra ver se ele pega as coisas pelo render*/}
         </div>
 
       <button

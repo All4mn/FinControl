@@ -1,120 +1,22 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { Link } from "react-router-dom";
 import Header from "../../components/componentesPadrao/header/Header";
 import Footer from "../../components/componentesPadrao/footer/Footer";
 import styles from "./Cadastro.module.css";
-
-const API_BASE_URL =
-  import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
+import { useCadastro } from "./useCadastro";
 
 export default function Cadastro() {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    nome: "",
-    email: "",
-    telefone: "",
-    senha: "",
-    confirmarSenha: "",
-  });
-  const [mostrarSenha, setMostrarSenha] = useState(false);
-  const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
-  const [carregando, setCarregando] = useState(false);
-  const [erro, setErro] = useState("");
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setErro("");
-  };
-
-  const formatarTelefone = (valor) => {
-    const numeros = valor.replace(/\D/g, "");
-    if (numeros.length <= 11) {
-      return numeros
-        .replace(/^(\d{2})/, "($1) ")
-        .replace(/(\d{5})(\d)/, "$1-$2");
-    }
-    return valor.slice(0, 15);
-  };
-
-  const handleTelefoneChange = (e) => {
-    const valorFormatado = formatarTelefone(e.target.value);
-    setFormData((prev) => ({ ...prev, telefone: valorFormatado }));
-    setErro("");
-  };
-
-  const validarFormulario = () => {
-    if (!formData.nome.trim()) {
-      setErro("Por favor, informe seu nome completo.");
-      return false;
-    }
-    if (!formData.email.trim()) {
-      setErro("Por favor, informe seu email.");
-      return false;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      setErro("Por favor, informe um email válido.");
-      return false;
-    }
-    if (!formData.telefone.trim()) {
-      setErro("Por favor, informe seu telefone.");
-      return false;
-    }
-    if (formData.senha.length < 6) {
-      setErro("A senha deve ter pelo menos 6 caracteres.");
-      return false;
-    }
-    if (formData.senha !== formData.confirmarSenha) {
-      setErro("As senhas não coincidem.");
-      return false;
-    }
-    return true;
-  };
-
-  const handleSubmit = async (e) => {
-    console.log(
-      formData.nome,
-      formData.email,
-      formData.telefone,
-      formData.senha,
-      API_BASE_URL
-    );
-    e.preventDefault();
-
-    if (!validarFormulario()) return;
-
-    setCarregando(true);
-
-    try {
-      const dados = {
-        nome_usuario: formData.nome,
-        email_usuario: formData.email,
-        senha_usuario: formData.senha,
-        telefone_usuario: formData.telefone.replace(/\D/g, ""),
-      };
-      console.log("Enviando dados para o backend:", dados);
-      const response = await axios.post(`${API_BASE_URL}/usuarios`, dados); //forma mais apropriada de enviar dados para o backend
-      // const response = await axios({
-      //   method: "post",
-      //   url: `${API_BASE_URL}/usuarios`,
-      //   data: dados,
-      // });
-      console.log("Cadastro realizado:", response.data);
-      alert("Cadastro realizado com sucesso! Faça login para continuar.");
-      navigate("/login");
-    } catch (err) {
-      console.log("Erro no cadastro:", err);
-      if (err.response?.status === 409) {
-        setErro("Este email já está cadastrado.");
-      } else {
-        setErro("Erro ao realizar cadastro. Tente novamente.");
-      }
-    } finally {
-      setCarregando(false);
-    }
-  };
-
+  const {
+    formData,
+    mostrarSenha,
+    mostrarConfirmarSenha,
+    carregando,
+    erro,
+    handleChange,
+    handleTelefoneChange,
+    handleSubmit,
+    toggleMostrarSenha,
+    toggleMostrarConfirmarSenha,
+  } = useCadastro();
 
   return (
     <div className={styles.page}>
@@ -260,7 +162,7 @@ export default function Cadastro() {
                 />
                 <button
                   type="button"
-                  onClick={() => setMostrarSenha(!mostrarSenha)}
+                  onClick={toggleMostrarSenha}
                   className={styles.btnMostrarSenha}
                   aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
                 >
@@ -327,9 +229,7 @@ export default function Cadastro() {
                 />
                 <button
                   type="button"
-                  onClick={() =>
-                    setMostrarConfirmarSenha(!mostrarConfirmarSenha)
-                  }
+                  onClick={toggleMostrarConfirmarSenha}
                   className={styles.btnMostrarSenha}
                   aria-label={
                     mostrarConfirmarSenha ? "Ocultar senha" : "Mostrar senha"
