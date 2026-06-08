@@ -11,4 +11,8 @@ export class LogsService {
   async findAll() {
     return await this.repository.findAll();
   }
+
+  async findFiltered() {
+    return await this.repository.findFiltered();
+  }
 }

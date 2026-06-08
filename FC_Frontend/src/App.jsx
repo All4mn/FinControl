@@ -4,6 +4,7 @@ import Login from "./pages/login/Login.jsx";
 import Cadastro from "./pages/cadastro/Cadastro.jsx";
 import CompletarCadastro from "./pages/completarCadastro/CompletarCadastro.jsx";
 import Dashboard from "./pages/dashboard/Dashboard.jsx";
+import Logs from "./pages/logsTransacoes/Logs.jsx";
 // import Relatorios from "./pages/relatorios/Relatorios.jsx"
 // import Arquivados from "./pages/arquivados/Arquivados.jsx"
 // import NovaConta from "./pages/novaConta/NovaConta.jsx"
@@ -21,6 +22,8 @@ export default function App() {
         <Route path="/completar-cadastro" element={<CompletarCadastro />} />
 
         <Route path="/dashboard" element={<Dashboard />} />
+        
+        <Route path="/dashboard/logs" element={<Logs />} />
 
         {/* <Route path="/dashboard/relatorios" element={<Relatorios />} /> */}
 
