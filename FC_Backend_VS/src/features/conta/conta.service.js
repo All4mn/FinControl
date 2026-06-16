@@ -2,6 +2,8 @@
 // models/services/conta.service.js
 // Lógica de negócios para conta
 // =============================================================================
+import { NotFound } from "./conta.error.js";
+
 
 export class ContaService {
   constructor(repository) {
@@ -39,5 +41,26 @@ export class ContaService {
   async delete(id) {
     if (!id) throw new Error("ID é obrigatório");
     return await this.repository.delete(id);
+  }
+
+  async search(id){
+    if(!id || isNaN(id)){  
+      console.log('malha fina');
+          
+      throw new NotFound('Id não especificado')
+    }
+    const user = await this.repository.findUserById(id)
+    if(!user || user.length == 0){
+      throw new NotFound('Usuario não encontrado')
+    }
+    const response = await this.repository.search(id)
+    if(!response || response.length == 0){
+      console.log('tetstt');
+      
+      return {
+        "data":"Usuário sem Conta"
+      }
+    }
+    return response
   }
 }

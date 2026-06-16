@@ -7,6 +7,9 @@ const contaService = new ContaService(contaRepository);
 const contaController = new ContaController(contaService);
 
 export async function contaRoutes(app) {
+  app.get('/search/:id', async (req,res)=>{
+  return contaController.search(req,res)
+  })
   app.get("/", contaController.listar);
   app.get("/:id", contaController.buscarPorId);
   app.post("/", contaController.criar);

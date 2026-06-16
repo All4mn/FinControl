@@ -49,4 +49,19 @@ export class ContaRepository {
     );
     return response.rowCount > 0;
   }
+
+  async search(id){
+    const response = await database.query(`
+      select c.id_conta, c.id_usuario, c.id_moeda, c.nome_conta, c.saldo_conta, u.nome_usuario  as nome_user from conta c inner join  usuario u on c.id_usuario = u.id_usuario  where c.id_usuario = $1
+      `,[id])
+      // console.log(response)
+      return response.rows
+  }
+
+  async findUserById(id){
+    const response = await database.query(`
+      SELECT * FROM usuario WHERE id_usuario = $1
+      `,[id])
+      return response.rows[0] || null
+  }
 }
