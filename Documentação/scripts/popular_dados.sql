@@ -22,6 +22,15 @@ INSERT INTO metodo (nome_metodo) VALUES
 INSERT INTO moeda (nome_moeda) VALUES
 ('Real Brasileiro');
 
+-- Status de Usuário
+INSERT INTO status_usuario (nome_status) VALUES
+('Ativo'),
+('Inativo'),
+('Pendente'),
+('Banido'),
+('Suspenso'),
+('Excluído');
+
 -- Observação:
 -- Não inserimos usuários com senha neste script porque a senha deve ser hasheada
 -- Antes de inserir um usuário com senha diretamente no banco, gere o hash usando bcrypt e coloque aqui.
