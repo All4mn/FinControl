@@ -8,10 +8,7 @@ const formatData = (val) =>
 const NA = <span className={styles.tdNa}>—</span>;
 
 const BadgeOp = ({ op }) => {
-  const cls =
-    op === "INSERT"
-      ? styles.badgeInsert
-      : styles.badgeUpdate
+  const cls = op === "INSERT" ? styles.badgeInsert : styles.badgeUpdate;
   return <span className={cls}>{op}</span>;
 };
 
@@ -49,6 +46,7 @@ const TableLog = ({ logs }) => {
   const [filtroOp, setFiltroOp] = useState("TODOS");
   const [sortCampo, setSortCampo] = useState("id_log");
   const [sortDir, setSortDir] = useState("desc");
+  const [filtroIdTransacao, setFiltroIdTransacao] = useState("");
 
   const handleSort = (campo) => {
     if (sortCampo === campo) {
@@ -60,7 +58,13 @@ const TableLog = ({ logs }) => {
   };
 
   const dadosFiltrados = useMemo(() => {
-    let lista = filtroOp === "TODOS" ? logs : logs.filter((l) => l.operacao === filtroOp);
+    let lista =
+      filtroOp === "TODOS" ? logs : logs.filter((l) => l.operacao === filtroOp);
+    if (filtroIdTransacao.trim() !== "") {
+      lista = lista.filter((l) =>
+        String(l.id_transacao ?? "").includes(filtroIdTransacao.trim()),
+      );
+    }
     lista = [...lista].sort((a, b) => {
       let va = a[sortCampo] ?? "";
       let vb = b[sortCampo] ?? "";
@@ -71,7 +75,7 @@ const TableLog = ({ logs }) => {
       return 0;
     });
     return lista;
-  }, [logs, filtroOp, sortCampo, sortDir]);
+  }, [logs, filtroOp, sortCampo, sortDir, filtroIdTransacao]);
 
   if (!logs || logs.length === 0) {
     return (
@@ -84,57 +88,158 @@ const TableLog = ({ logs }) => {
   return (
     <div className={styles.container}>
       <div className={styles.table_container}>
-      <div className={styles.toolbar}>
-        <label>
-          Operação
-          <select value={filtroOp} onChange={(e) => setFiltroOp(e.target.value)}>
-            <option value="TODOS">Todos</option>
-            <option value="INSERT">INSERT</option>
-            <option value="UPDATE">UPDATE</option>
-          </select>
-        </label>
-        <span className={styles.contador}>
-          {dadosFiltrados.length} de {logs.length} registros
-        </span>
-      </div>
+        <div className={styles.toolbar}>
+          <label>
+            Id Transação
+            <input
+            className={styles.id_transacao_label}
+              type="text"
+              placeholder="Buscar por ID..."
+              value={filtroIdTransacao}
+              onChange={(e) => setFiltroIdTransacao(e.target.value)}
+            />
+          </label>
+          <label>
+            Operação
+            <select
+              value={filtroOp}
+              onChange={(e) => setFiltroOp(e.target.value)}
+            >
+              <option value="TODOS">Todos</option>
+              <option value="INSERT">INSERT</option>
+              <option value="UPDATE">UPDATE</option>
+            </select>
+          </label>
+          <span className={styles.contador}>
+            {dadosFiltrados.length} de {logs.length} registros
+          </span>
+        </div>
         <table className={styles.tabela}>
           <thead>
             <tr>
-              <ThSort campo="id_log" atual={sortCampo} direcao={sortDir} onClick={handleSort}>ID</ThSort>
-              <ThSort campo="operacao" atual={sortCampo} direcao={sortDir} onClick={handleSort}>Operação</ThSort>
-              <ThSort campo="nome_conta" atual={sortCampo} direcao={sortDir} onClick={handleSort}>Conta</ThSort>
-              <ThSort campo="nome_carteira" atual={sortCampo} direcao={sortDir} onClick={handleSort}>Carteira</ThSort>
-              <ThSort campo="nome_categoria" atual={sortCampo} direcao={sortDir} onClick={handleSort}>Categoria</ThSort>
-              <ThSort campo="descricao" atual={sortCampo} direcao={sortDir} onClick={handleSort}>Descrição</ThSort>
+              <ThSort
+                campo="id_log"
+                atual={sortCampo}
+                direcao={sortDir}
+                onClick={handleSort}
+              >
+                ID
+              </ThSort>
+              <ThSort
+                campo="id_transacao"
+                atual={sortCampo}
+                direcao={sortDir}
+                onClick={handleSort}
+              >
+                Id transação
+              </ThSort>
+              <ThSort
+                campo="operacao"
+                atual={sortCampo}
+                direcao={sortDir}
+                onClick={handleSort}
+              >
+                Operação
+              </ThSort>
+              <ThSort
+                campo="nome_conta"
+                atual={sortCampo}
+                direcao={sortDir}
+                onClick={handleSort}
+              >
+                Conta
+              </ThSort>
+              <ThSort
+                campo="nome_carteira"
+                atual={sortCampo}
+                direcao={sortDir}
+                onClick={handleSort}
+              >
+                Carteira
+              </ThSort>
+              <ThSort
+                campo="nome_categoria"
+                atual={sortCampo}
+                direcao={sortDir}
+                onClick={handleSort}
+              >
+                Categoria
+              </ThSort>
+              <ThSort
+                campo="descricao"
+                atual={sortCampo}
+                direcao={sortDir}
+                onClick={handleSort}
+              >
+                Descrição
+              </ThSort>
               <th>Descrição antes</th>
-              <ThSort campo="valor" atual={sortCampo} direcao={sortDir} onClick={handleSort}>Valor</ThSort>
+              <ThSort
+                campo="valor"
+                atual={sortCampo}
+                direcao={sortDir}
+                onClick={handleSort}
+              >
+                Valor
+              </ThSort>
               <th>Valor antes</th>
               <th>Entrada</th>
               <th>Entrada antes</th>
               <th>Arquivado</th>
               <th>Arquivado antes</th>
               <th>Quitado</th>
-              <ThSort campo="data_transacao" atual={sortCampo} direcao={sortDir} onClick={handleSort}>Data transação</ThSort>
-              <ThSort campo="data_log" atual={sortCampo} direcao={sortDir} onClick={handleSort}>Data log</ThSort>
+              <ThSort
+                campo="data_transacao"
+                atual={sortCampo}
+                direcao={sortDir}
+                onClick={handleSort}
+              >
+                Data transação
+              </ThSort>
+              <ThSort
+                campo="data_log"
+                atual={sortCampo}
+                direcao={sortDir}
+                onClick={handleSort}
+              >
+                Data log
+              </ThSort>
             </tr>
           </thead>
           <tbody>
             {dadosFiltrados.map((log) => (
               <tr key={log.id_log}>
                 <td>{log.id_log}</td>
-                <td><BadgeOp op={log.operacao} /></td>
+                <td>{log.id_transacao}</td>
+                <td>
+                  <BadgeOp op={log.operacao} />
+                </td>
                 <td>{log.nome_conta ?? NA}</td>
                 <td>{log.nome_carteira ?? NA}</td>
                 <td>{log.nome_categoria ?? NA}</td>
                 <td>{log.descricao}</td>
                 <TdAntes>{log.descricao_antes ?? null}</TdAntes>
                 <td>R$ {Number(log.valor).toFixed(2)}</td>
-                <TdAntes>{log.valor_antes != null ? `R$ ${Number(log.valor_antes).toFixed(2)}` : null}</TdAntes>
-                <td><BadgeBool val={log.entrada} /></td>
-                <TdAntes><BadgeBool val={log.entrada_antes} /></TdAntes>
-                <td><BadgeBool val={log.arquivado} /></td>
-                <TdAntes><BadgeBool val={log.arquivado_antes} /></TdAntes>
-                <td><BadgeBool val={log.quitado} /></td>
+                <TdAntes>
+                  {log.valor_antes != null
+                    ? `R$ ${Number(log.valor_antes).toFixed(2)}`
+                    : null}
+                </TdAntes>
+                <td>
+                  <BadgeBool val={log.entrada} />
+                </td>
+                <TdAntes>
+                  <BadgeBool val={log.entrada_antes} />
+                </TdAntes>
+                <td>
+                  <BadgeBool val={log.arquivado} />
+                </td>
+                <TdAntes>
+                  <BadgeBool val={log.arquivado_antes} />
+                </TdAntes>
+                <td>
+                  <BadgeBool val={log.quitado} />
+                </td>
                 <td>{formatData(log.data_transacao) ?? NA}</td>
                 <td>{formatData(log.data_log) ?? NA}</td>
               </tr>

@@ -31,7 +31,8 @@ export class LogsRepository {
     (l.posterior->>'arquivado')::BOOLEAN     AS arquivado,
     (l.posterior->>'entrada')::BOOLEAN       AS entrada,
     (l.posterior->>'data')::TIMESTAMPTZ      AS data_transacao,
-
+    (l.posterior->>'id_transacao')::INT       AS id_transacao,
+    
     -- Desempacota anterior (NULL em INSERTs, preenchido em UPDATEs)
     (l.anterior->>'valor')::FLOAT          AS valor_antes,
     l.anterior->>'descricao'                 AS descricao_antes,
@@ -47,6 +48,7 @@ SELECT
   d.id_log,
   d.operacao,
   d.data_log,
+  d.id_transacao,
   
   
   -- Vínculos

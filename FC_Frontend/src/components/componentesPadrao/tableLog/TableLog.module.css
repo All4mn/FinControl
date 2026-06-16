@@ -89,6 +89,10 @@ background-color: #5daa74;
   font-size: 11px;
 }
 
+.id_transacao_label{
+  outline: none;
+}
+
 .thAsc::after {
   content: " ↑";
   opacity: 1;
