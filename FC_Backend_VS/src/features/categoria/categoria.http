@@ -1,0 +1,15 @@
+@url = http://localhost:3000
+
+# ==================== CATEGORIAS ====================
+
+
+### Buscar categorias
+GET {{url}}/categorias
+
+### Criar categoria
+POST {{url}}/categorias
+Content-Type: application/json
+
+{
+  "nome_categoria": "Alimentação"
+}

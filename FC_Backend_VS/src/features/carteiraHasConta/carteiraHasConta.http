@@ -1,0 +1,15 @@
+@url = http://localhost:3000
+
+# ==================== CARTEIRAS E CONTAS ====================
+
+### Buscar carteiras e contas
+GET {{url}}/carteiraHasConta
+### Criar carteiraHasConta
+POST {{url}}/carteiraHasConta
+Content-Type: application/json  
+
+{
+  "id_carteira": 1,
+  "id_conta": 1
+}
+

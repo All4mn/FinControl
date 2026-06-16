@@ -1,0 +1,18 @@
+@url = http://localhost:3000
+
+# ==================== CONTAS ====================
+
+### Buscar contas
+GET {{url}}/contas
+
+### Criar conta
+POST {{url}}/contas
+Content-Type: application/json
+
+{
+  "id_usuario": 1,
+  "id_moeda": 1, 
+  "nome_conta": "Conta Corrente Nubank",
+  "saldo_conta": 1500.50
+}
+
