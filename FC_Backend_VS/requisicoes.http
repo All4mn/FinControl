@@ -53,7 +53,7 @@ Content-Type: application/json
 }
 
 ### Deletar usuário
-DELETE {{url}}/usuarios/1
+DELETE {{url}}/usuarios/4
 
 ###
 PATCH {{url}}/usuarios/desativar/27
@@ -98,6 +98,9 @@ Content-Type: application/json
   "nome_conta": "Conta Corrente Nubank",
   "saldo_conta": 1500.50
 }
+
+###
+GET {{url}}/contas/search/2
 
 
 # ==================== TRANSAÇÕES ====================
