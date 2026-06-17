@@ -91,6 +91,9 @@ background-color: #5daa74;
 
 .id_transacao_label{
   outline: none;
+  border-radius: 5px;
+  border: none;
+  padding: 4px;
 }
 
 .thAsc::after {

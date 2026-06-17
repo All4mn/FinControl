@@ -90,7 +90,7 @@ const TableLog = ({ logs }) => {
       <div className={styles.table_container}>
         <div className={styles.toolbar}>
           <label>
-            Id Transação
+            Pesquisar por Id transação
             <input
             className={styles.id_transacao_label}
               type="text"
