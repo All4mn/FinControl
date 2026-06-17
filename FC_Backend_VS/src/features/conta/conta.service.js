@@ -69,9 +69,12 @@ export class ContaService {
     // Se o usuário não possui nenhuma conta, retorna mensagem amigável
     // Caso contrário, retorna o array com todos os dados das contas
     if(!response || response.length == 0){
-      return {
-        "data":"Usuário sem Conta"
-      }
+      // return {
+        
+      //   "data":"Usuário sem Conta",
+      //   "verify":false
+      // }
+      return false
     }
     return response
   }

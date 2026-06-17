@@ -58,9 +58,10 @@ export class ContaRepository {
     // Seleciona dados da conta + nome do usuário
     // Filtra apenas as contas do usuário especificado
     const response = await database.query(`
-      SELECT c.id_conta, c.id_usuario, c.id_moeda, c.nome_conta, c.saldo_conta, u.nome_usuario AS nome_user 
+      SELECT c.id_conta, c.id_usuario, c.id_moeda, c.nome_conta, c.saldo_conta, u.nome_usuario AS nome_user, m.nome_moeda AS moeda
       FROM conta c 
       INNER JOIN usuario u ON c.id_usuario = u.id_usuario 
+      INNER JOIN moeda m ON c.id_moeda = m.id_moeda
       WHERE c.id_usuario = $1
       `,[id])
       
