@@ -69,4 +69,11 @@ export class ContaController {
       return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
     }
   }
+
+  async search(req,res){
+    const { id } = req.params
+    console.log(id)
+    const response = await this.service.search(id)
+    return res.status(200).send({ sucesso: true, dados: response })
+  }
 }

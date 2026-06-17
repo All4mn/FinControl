@@ -9,6 +9,7 @@ import StatusUsuario from "./pages/statusUsuario/StatusUsuario.jsx";
 // import Relatorios from "./pages/relatorios/Relatorios.jsx"
 // import Arquivados from "./pages/arquivados/Arquivados.jsx"
 // import NovaConta from "./pages/novaConta/NovaConta.jsx"
+import Conta from "./pages/conta/Conta.jsx";
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="/dashboard/logs" element={<Logs />} />
 
         <Route path="/dashboard/status-usuario" element={<StatusUsuario />} />
+        <Route path="/dashboard/conta" element={<Conta />} />
 
         {/* <Route path="/dashboard/relatorios" element={<Relatorios />} /> */}
 
