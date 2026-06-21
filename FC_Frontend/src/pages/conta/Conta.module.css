@@ -4,5 +4,21 @@
 }
 
 .conta_window{
-    height: 100vh;
+    height: 86vh;
+    transition: 0.5s;
+}
+
+.conta_window_creating{
+  display: flex;
+  flex-direction: column;
+    transition: 0.5s;
+    height: 86vh;
+    background-color: rgb(187, 187, 187);
+}
+
+.popup_container{
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
