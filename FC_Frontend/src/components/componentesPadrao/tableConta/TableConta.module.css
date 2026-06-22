@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ── Card wrapper ── */
+.card {
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 14px;
+  border-left: 4px solid #22c55e;
+  padding: 1rem 1.25rem;
+  font-family: 'Inter', sans-serif;
+  transition: opacity 0.2s, border-left-color 0.2s;
+  box-sizing: border-box;
+}
+
+/* Conta inativa (apagada visualmente) */
+.card_inativa {
+  border-left-color: #cbd5e1;
+  opacity: 0.6;
+}
+
+/* ── Linha do topo: nome + ícones ── */
+.card_header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.nome_conta {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+  transition: text-decoration 0.15s, color 0.15s;
+}
+
+.nome_conta_inativa {
+  text-decoration: line-through;
+  color: #94a3b8;
+}
+
+/* input de edição no lugar do nome */
+.input_nome {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  border: none;
+  border-bottom: 2px solid #22c55e;
+  background: transparent;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+  padding: 0 0 2px;
+  width: 60%;
+}
+
+/* ── Grupo de ícones ── */
+.acoes {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn_icone {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s;
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+.btn_icone:hover {
+  background-color: #f1f5f9;
+  color: #111827;
+}
+
+.btn_apagar:hover {
+  color: #ef4444;
+  background-color: #fee2e2;
+}
+
+.btn_reativar:hover {
+  color: #16a34a;
+  background-color: #dcfce7;
+}
+
+.btn_editar_ativo {
+  color: #16a34a;
+  background-color: #dcfce7;
+}
+
+/* ── Linha inferior: moeda · saldo ── */
+.card_body {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.moeda {
+  font-size: 0.8rem;
+  color: #16a34a;
+  font-weight: 600;
+  background-color: #dcfce7;
+  padding: 2px 8px;
+  border-radius: 999px;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.moeda_inativa {
+  color: #94a3b8;
+  background-color: #f1f5f9;
+}
+
+.separador {
+  font-size: 0.75rem;
+  color: #cbd5e1;
+}
+
+.saldo {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #374151;
+  transition: text-decoration 0.15s, color 0.15s;
+}
+
+.saldo_inativa {
+  text-decoration: line-through;
+  color: #94a3b8;
+}
+
+/* ── Estado vazio ── */
+.vazio {
+  text-align: center;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  padding: 2rem 0;
+}
+
+.vazio span {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
