@@ -15,6 +15,7 @@ import { contaRoutes } from "./features/conta/contaRoutes.js";
 import { transacaoRoutes } from "./features/transacao/transacaoRoutes.js";
 import { statusUsuarioRoutes } from "./features/status_usuario/statusUsuarioRoutes.js";
 import { logsRoutes } from "./features/logs/logsRoutes.js";
+import { moedaRoutes } from "./features/moeda/moedaRoutes.js"; // <-- Import adicionado
 import { AppError } from "./Errors/AppError.js";
 
 dotenv.config();
@@ -59,6 +60,7 @@ app.register(contaRoutes, { prefix: "/contas" });
 app.register(transacaoRoutes, { prefix: "/transacoes" });
 app.register(logsRoutes, { prefix: "/logs" });
 app.register(statusUsuarioRoutes, { prefix: "/status-usuario" });
+app.register(moedaRoutes, { prefix: "/moedas" }); // <-- Rota registrada aqui
 
 app.get("/", async () => {
   return { status: "online" };
