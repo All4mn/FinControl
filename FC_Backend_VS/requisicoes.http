@@ -100,7 +100,20 @@ Content-Type: application/json
 }
 
 ###
-GET {{url}}/contas/search/2
+PUT {{url}}/contas/8
+Content-Type: application/json
+
+{
+  "nome_conta":"mudado no backend"
+}
+
+###
+GET {{url}}/contas/search/61
+
+###
+PUT {{url}}/contas/arquivar/8
+###
+PUT {{url}}/contas/desarquivar/8
 
 
 # ==================== TRANSAÇÕES ====================

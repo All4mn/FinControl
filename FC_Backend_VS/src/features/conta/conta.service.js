@@ -28,19 +28,23 @@ export class ContaService {
     return await this.repository.create({ id_usuario, id_moeda, nome_conta, saldo_conta });
   }
 
-  async update(id, { id_usuario, id_moeda, nome_conta, saldo_conta }) {
+  async update(id, nome_conta) {
     if (!id) throw new Error("ID é obrigatório");
-    if (!id_usuario) throw new Error("ID do usuário é obrigatório");
     if (!nome_conta || nome_conta.trim() === "") {
       throw new Error("Nome da conta é obrigatório");
     }
 
-    return await this.repository.update(id, { id_usuario, id_moeda, nome_conta, saldo_conta });
+    return await this.repository.update(id, nome_conta);
   }
 
-  async delete(id) {
+  async arquivar(id) {
     if (!id) throw new Error("ID é obrigatório");
-    return await this.repository.delete(id);
+    return await this.repository.arquivar(id);
+  }
+
+  async desarquivar(id){
+    if(!id) throw new Error("Id é obrigatório")
+      return await this.repository.desarquivar(id)
   }
 
   // Busca todas as contas de um usuário específico

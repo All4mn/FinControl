@@ -84,9 +84,56 @@ const Conta = () => {
       console.error(error.mensage);
     } finally {
       fetchConta(usuario.id_usuario);
-      setCriando(false)
+      setCriando(false);
     }
   };
+
+  const archiveConta = async (id) => {
+    try {
+      console.log(id);
+      const response = await axios.put(`http://localhost:3000/contas/arquivar/${id}`)
+      if(!response){
+        throw new Error('erro ao arquivar a conta')
+      }
+    } catch (error) {
+        console.log(error.mensage)
+    }finally{
+      fetchConta(usuario.id_usuario)
+    }
+  };
+
+  const desarchiveConta = async (id) => {
+    try {
+      console.log(id);
+      const response = await axios.put(`http://localhost:3000/contas/desarquivar/${id}`)
+      if(!response){
+        throw new Error('erro ao arquivar a conta')
+      }
+    } catch (error) {
+        console.log(error.mensage)
+    }finally{
+      fetchConta(usuario.id_usuario)
+    }
+  }
+
+  const updateConta = async (nome, id) => {
+    try {
+      const dados = {
+        "nome_conta":nome
+      }
+      console.log(nome, id);
+      const response = await axios.put(`http://localhost:3000/contas/${id}`,dados)
+      if(!response){
+        throw new Error("Nao deu pra atualizar")
+      }
+      console.log(response)
+    } catch (error) {
+      console.log(error.mensage);
+      
+    } finally{
+      fetchConta(usuario.id_usuario)
+    }
+  }
 
   if (carregando) {
     return (
@@ -105,7 +152,12 @@ const Conta = () => {
 
       <main className={styles.main}>
         <div className={styles.lista_contas}>
-          <TableConta conta={conta} />
+          <TableConta 
+            conta={conta}
+            archiveConta={archiveConta}
+            desarchiveConta={desarchiveConta}
+            updateConta={updateConta}
+          />
         </div>
 
         <button className={styles.btn_criar} onClick={() => setCriando(true)}>
