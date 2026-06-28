@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { validarCarteira } from "./CarteiraSchema";
 
 const API_BASE_URL =
   import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
@@ -11,7 +12,7 @@ const initialForm = {
 export const useCarteira = () => {
   const [usuario, setUsuario] = useState(null);
   const [carregando, setCarregando] = useState(true);
-  const [cartas, setCartas] = useState([]);
+  const [carteiras, setCarteiras] = useState([]);
   const [formData, setFormData] = useState(initialForm);
   const [editId, setEditId] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -54,7 +55,7 @@ export const useCarteira = () => {
           withCredentials: true,
         },
       );
-      setCartas(response.data.dados || []);
+      setCarteiras(response.data.dados || []);
       setError("");
     } catch (err) {
       setError(err.response?.data?.mensagem || "Erro ao carregar carteiras.");
@@ -77,8 +78,9 @@ export const useCarteira = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.nome_carteira.trim()) {
-      setError("O nome da carteira é obrigatório.");
+    const validationError = validarCarteira(formData);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -87,13 +89,13 @@ export const useCarteira = () => {
       if (editId) {
         await axios.put(
           `${API_BASE_URL}/carteiras/${editId}`,
-          { ...formData, id_usuario: usuario.id_usuario },
+          { ...formData },
           { withCredentials: true },
         );
       } else {
         await axios.post(
           `${API_BASE_URL}/carteiras`,
-          { ...formData, id_usuario: usuario.id_usuario },
+          { ...formData },
           { withCredentials: true },
         );
       }
@@ -130,7 +132,7 @@ export const useCarteira = () => {
   return {
     usuario,
     carregando,
-    cartas,
+    carteiras,
     formData,
     editId,
     loading,

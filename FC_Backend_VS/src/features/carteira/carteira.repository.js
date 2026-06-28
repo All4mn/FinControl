@@ -1,11 +1,8 @@
 import database from "../../config/db.js";
 
 export class CarteiraRepository {
-  async findAll() {
-    const response = await database.query(
-      "SELECT * FROM carteira ORDER BY id_carteira DESC",
-    );
-    return response.rows;
+  async findAll(id_usuario) {
+    return await this.findByUsuario(id_usuario);
   }
 
   async findById(id) {
@@ -26,13 +23,13 @@ export class CarteiraRepository {
     return response.rows[0];
   }
 
-  async update(id, { id_usuario, nome_carteira }) {
+  async update(id, { nome_carteira }) {
     const response = await database.query(
       `UPDATE carteira
-       SET id_usuario = $1, nome_carteira = $2
-       WHERE id_carteira = $3
+       SET nome_carteira = $1
+       WHERE id_carteira = $2
        RETURNING *`,
-      [id_usuario, nome_carteira, id],
+      [nome_carteira, id],
     );
     return response.rows[0] || null;
   }

@@ -13,7 +13,7 @@ export default function Carteira() {
     error,
     formData,
     editId,
-    cartas,
+    carteiras,
     loading,
     handleChange,
     handleSubmit,
@@ -25,7 +25,7 @@ export default function Carteira() {
   if (carregando) {
     return (
       <div className={styles.page}>
-        <Header usuario={null} logado={true} />
+        <Header usuario={{ nome_usuario: "Carregando..." }} logado={true} />
         <main className={styles.main}>
           <p>Carregando suas carteiras...</p>
         </main>
@@ -61,7 +61,7 @@ export default function Carteira() {
           />
 
           <TableCarteira
-            carteiras={cartas}
+            carteiras={carteiras}
             loading={loading}
             onEdit={handleEdit}
             onDelete={handleDelete}

@@ -7,7 +7,6 @@ const TableCarteira = ({ carteiras, loading, onEdit, onDelete }) => {
       <table className={styles.table}>
         <thead>
           <tr>
-            <th>ID</th>
             <th>Nome</th>
             <th>Ações</th>
           </tr>
@@ -15,7 +14,6 @@ const TableCarteira = ({ carteiras, loading, onEdit, onDelete }) => {
         <tbody>
           {carteiras.map((carteira) => (
             <tr key={carteira.id_carteira}>
-              <td>{carteira.id_carteira}</td>
               <td>{carteira.nome_carteira}</td>
               <td>
                 <button

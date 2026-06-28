@@ -41,14 +41,18 @@ A implementação no backend segue o padrão de camadas do projeto: controller �
 
 As rotas da funcionalidade carteira estão definidas em `src/features/carteira/carteiraRoutes.js`.
 
+Todos os endpoints de carteira exigem autenticação via cookie de sessão. O servidor valida o token do usuário antes de consultar ou alterar qualquer carteira.
+
 Endpoints implementados:
 
-- `GET /carteiras` — lista todas as carteiras (uso geral de consulta)
-- `GET /carteiras/usuario/:id_usuario` — lista apenas as carteiras de um usuário específico
-- `GET /carteiras/:id` — busca carteira por ID
-- `POST /carteiras` — cria uma nova carteira
-- `PUT /carteiras/:id` — atualiza uma carteira existente
-- `DELETE /carteiras/:id` — exclui uma carteira
+- `GET /carteiras` — lista apenas as carteiras do usuário autenticado
+- `GET /carteiras/usuario/:id_usuario` — lista apenas as carteiras do usuário informado; o backend valida que o ID informado pertence ao usuário logado
+- `GET /carteiras/:id` — busca carteira por ID, somente se pertencer ao usuário autenticado
+- `POST /carteiras` — cria uma nova carteira para o usuário autenticado
+- `PUT /carteiras/:id` — atualiza o nome da carteira, somente se pertencer ao usuário autenticado
+- `DELETE /carteiras/:id` — exclui a carteira, somente se pertencer ao usuário autenticado
+
+> Observação: não há caso de uso legítimo para um endpoint público que retorne carteiras de outros usuários. Todas as rotas de carteira são protegidas e validadas por propriedade do recurso.
 
 ### 4.2 Controller
 
