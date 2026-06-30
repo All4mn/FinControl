@@ -16,3 +16,6 @@ Content-Type: application/json
   "saldo_conta": 1500.50
 }
 
+###
+GET {{url}}/contas/search/61
+

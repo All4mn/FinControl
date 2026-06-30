@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./FormularioConta.module.css";
 
-const FormularioConta = ({ postConta, setContaInfos, contaInfos, onFechar }) => {
+const FormularioConta = ({ postConta, setContaInfos, contaInfos, onFechar, moeda }) => {
   return (
     <div className={styles.card}>
 
@@ -37,15 +37,18 @@ const FormularioConta = ({ postConta, setContaInfos, contaInfos, onFechar }) => 
         />
 
         <div className={styles.row}>
+          
           <select
             className={`${styles.input} ${styles.select}`}
             value={contaInfos.id_moeda}
             onChange={(e) => setContaInfos({ ...contaInfos, id_moeda: Number(e.target.value) })}
             required
           >
-            <option value="">Moeda</option>
-            <option value="1">Real</option>
-            <option value="2">Dólar</option>
+            <option value="">Selecione uma moeda</option>
+                       {moeda && 
+            moeda.map((moeda)=>(
+            <option key={moeda.id_moeda} value={moeda.id_moeda} >{moeda.nome_moeda}</option>
+           ))}
           </select>
 
           <input
