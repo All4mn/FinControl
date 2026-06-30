@@ -31,23 +31,38 @@ export class ContaRepository {
     return response.rows[0];
   }
 
-  async update(id, { id_usuario, id_moeda, nome_conta, saldo_conta }) {
+  async update(id, nome_conta) {
     const response = await database.query(
       `UPDATE conta 
-       SET id_usuario = $1, id_moeda = $2, nome_conta = $3, saldo_conta = $4
-       WHERE id_conta = $5
+       SET nome_conta = $1
+       WHERE id_conta = $2
        RETURNING *`,
-      [id_usuario, id_moeda, nome_conta, saldo_conta, id],
+      [nome_conta, id],
     );
     return response.rows[0] || null;
   }
 
-  async delete(id) {
+  async arquivar(id) {
     const response = await database.query(
-      "DELETE FROM conta WHERE id_conta = $1",
+      `UPDATE conta
+      SET ativo = FALSE
+      WHERE id_conta = $1
+      RETURNING *`,
       [id],
     );
     return response.rowCount > 0;
+  }
+
+  async desarquivar(id){
+    const response = await database.query(
+      `
+      UPDATE conta
+      SET ativo = TRUE
+      WHERE id_conta = $1
+      RETURNING *
+      `,[id]
+    )
+    return response.rows
   }
 
   // Busca todas as contas associadas a um usuário específico
@@ -58,7 +73,7 @@ export class ContaRepository {
     // Seleciona dados da conta + nome do usuário
     // Filtra apenas as contas do usuário especificado
     const response = await database.query(`
-      SELECT c.id_conta, c.id_usuario, c.id_moeda, c.nome_conta, c.saldo_conta, u.nome_usuario AS nome_user, m.nome_moeda AS moeda
+      SELECT c.id_conta, c.id_usuario, c.id_moeda, c.nome_conta, c.saldo_conta, u.nome_usuario AS nome_user, m.nome_moeda AS moeda, c.ativo
       FROM conta c 
       INNER JOIN usuario u ON c.id_usuario = u.id_usuario 
       INNER JOIN moeda m ON c.id_moeda = m.id_moeda

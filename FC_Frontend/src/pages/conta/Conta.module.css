@@ -1,8 +1,80 @@
-.main {
-  flex: 1;
-  padding: 24px;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.conta_window {
+  min-height: 100vh;
+  background-color: #f0f4f0;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', sans-serif;
+  position: relative;
 }
 
-.conta_window{
-    height: 100vh;
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 1rem 3rem;
+}
+
+.lista_contas {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.btn_criar {
+  margin-top: 1.75rem;
+  padding: 0.6rem 1.75rem;
+  background-color: #ffffff;
+  border: 1.5px solid #22c55e;
+  color: #16a34a;
+  border-radius: 999px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.18s, color 0.18s;
+}
+
+.btn_criar:hover {
+  background-color: #22c55e;
+  color: #fff;
+}
+
+/* ── Overlay escuro que cobre a página inteira ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.18s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Caixa do modal centralizada ── */
+.modal {
+  width: 100%;
+  max-width: 480px;
+  margin: 1rem;
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.carregando {
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
 }
