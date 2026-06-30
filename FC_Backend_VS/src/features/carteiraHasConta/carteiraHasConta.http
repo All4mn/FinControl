@@ -3,7 +3,7 @@
 # ==================== CARTEIRAS E CONTAS ====================
 
 ### Buscar carteiras e contas
-GET {{url}}/carteiraHasConta
+GET {{url}}/carteira-has-conta
 ### Criar carteiraHasConta
 POST {{url}}/carteiraHasConta
 Content-Type: application/json  
