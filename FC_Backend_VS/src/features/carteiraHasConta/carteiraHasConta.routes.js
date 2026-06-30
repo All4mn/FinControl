@@ -1,6 +1,6 @@
-import { CarteiraHasContaController } from "./CarteiraHasConta.controller.js";
-import { CarteiraHasContaRepository } from "./CarteiraHasConta.repository.js";
-import { CarteiraHasContaService } from "./CarteiraHasConta.service.js";
+import { CarteiraHasContaController } from "./carteiraHasConta.controller.js";
+import { CarteiraHasContaRepository } from "./carteiraHasConta.repository.js";
+import { CarteiraHasContaService } from "./carteiraHasConta.service.js";
 
 const repository = new CarteiraHasContaRepository();
 const service = new CarteiraHasContaService(repository);
