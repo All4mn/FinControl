@@ -9,11 +9,12 @@ import FormularioConta from "../../components/componentesPadrao/formularioConta/
 import TableConta from "../../components/componentesPadrao/tableConta/TableConta.jsx";
 const Conta = () => {
   const API_BASE_URL =
-    "http://localhost:3000"
-    // import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
+    // "http://localhost:3000"
+    import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
   const [usuario, setUsuario] = useState(0);
   const [carregando, setCarregando] = useState(true);
   const [conta, setConta] = React.useState(null);
+  const [moeda, setMoeda] = React.useState([])
   const [criando, setCriando] = React.useState(false);
   const [contaInfos, setContaInfos] = React.useState({
     id_usuario: "",
@@ -51,6 +52,8 @@ const Conta = () => {
         setCarregando(false);
       }
     };
+
+    fetchMoeda();
     fetchUsuario();
   }, []);
 
@@ -138,6 +141,20 @@ const Conta = () => {
     }
   }
 
+  const fetchMoeda = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/moedas`)
+      if(!response){
+        throw new Error()
+      }
+      console.log(response.data.dados);
+      setMoeda(response.data.dados)
+    } catch (error) {
+      console.error(error);
+      
+    }
+  }
+
   if (carregando) {
     return (
       <div className={styles.dashboard}>
@@ -178,6 +195,7 @@ const Conta = () => {
               postConta={postConta}
               setContaInfos={setContaInfos}
               contaInfos={contaInfos}
+              moeda={moeda}
               onFechar={() => setCriando(false)}
             />
           </div>
