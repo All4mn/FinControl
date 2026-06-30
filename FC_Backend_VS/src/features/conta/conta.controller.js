@@ -8,6 +8,8 @@ export class ContaController {
     this.criar = this.criar.bind(this);
     this.atualizar = this.atualizar.bind(this);
     this.arquivar = this.arquivar.bind(this);
+    this.search = this.search.bind(this);
+    this.desarquivar = this.desarquivar.bind(this)
   }
 
   async listar(req, res) {
@@ -26,7 +28,7 @@ export class ContaController {
       if (!conta)
         return res
           .status(404)
-          .send({ sucesso: false, message: "Conta não encontrada" }); // Note: standardizing responses to use 'mensagem' or what's original. Let's keep original: 'mensagem'
+          .send({ sucesso: false, mensagem: "Conta não encontrada" }); // Note: standardizing responses to use 'mensagem' or what's original. Let's keep original: 'mensagem'
       return res.status(200).send({ sucesso: true, dados: conta });
     } catch (err) {
       return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
@@ -53,7 +55,7 @@ export class ContaController {
           .send({ sucesso: false, mensagem: "Conta não encontrada" });
       return res.status(200).send({ sucesso: true, dados: conta });
     } catch (err) {
-      return res.status(500).send({ sucesso: false, mensagem: "Erro internoxxx",stack: err.stack });
+      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
     }
   }
 
@@ -73,14 +75,13 @@ export class ContaController {
 
   async desarquivar(req,res){
     try {
-      
       const { id } = req.params
       const desarquivado = await this.service.desarquivar(id);
       if(!desarquivado)
         return res
       .status(404)
       .send({sucesso: false, mensagem:"Conta nao encontrada"})
-      return res.status(200).send({ sucesso: true, mensagem: desarquivado });
+      return res.status(200).send({ sucesso: true, mensagem: "conta desarquivada" });
     } catch (error) {
       return res.status(500).send({ sucesso: false, mensagem: error.message });
     }
@@ -90,9 +91,19 @@ export class ContaController {
   }
 
   async search(req,res){
-    const { id } = req.params
-    console.log(id)
-    const response = await this.service.search(id)
-    return res.status(200).send({ sucesso: true, dados: response })
+    try {
+      const { id } = req.params
+      console.log(id)
+      const response = await this.service.search(id)
+      console.log(response);
+      
+      if(!response){
+        throw new error
+      }
+      return res.status(200).send({ sucesso: true, dados: response })
+    } catch (error) {
+      return res.status(500).send({ sucesso: false, mensagem: error.message });
+      
+    }
   }
 }

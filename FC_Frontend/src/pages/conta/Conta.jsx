@@ -9,8 +9,8 @@ import FormularioConta from "../../components/componentesPadrao/formularioConta/
 import TableConta from "../../components/componentesPadrao/tableConta/TableConta.jsx";
 const Conta = () => {
   const API_BASE_URL =
-    // "http://localhost:3000"
-    import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
+    "http://localhost:3000"
+    // import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
   const [usuario, setUsuario] = useState(0);
   const [carregando, setCarregando] = useState(true);
   const [conta, setConta] = React.useState(null);
@@ -29,6 +29,9 @@ const Conta = () => {
         const response = await axios.get(`${API_BASE_URL}/usuarios/me`, {
           withCredentials: true,
         });
+
+        console.log(`${API_BASE_URL}/usuarios/me`);
+        
         console.log(response);
 
         if (response.data.sucesso) {
@@ -39,11 +42,11 @@ const Conta = () => {
           }));
           await fetchConta(response.data.dados.id_usuario);
         } else {
-          window.location.href = "/login";
+          // window.location.href = "/login";
         }
       } catch (err) {
         console.error("Erro ao carregar usuário:", err);
-        window.location.href = "/login";
+        // window.location.href = "/login";
       } finally {
         setCarregando(false);
       }
@@ -81,7 +84,7 @@ const Conta = () => {
 
       // const reponse = await
     } catch (error) {
-      console.error(error.mensage);
+      console.error(error.message);
     } finally {
       fetchConta(usuario.id_usuario);
       setCriando(false);
@@ -96,7 +99,7 @@ const Conta = () => {
         throw new Error('erro ao arquivar a conta')
       }
     } catch (error) {
-        console.log(error.mensage)
+        console.log(error.message)
     }finally{
       fetchConta(usuario.id_usuario)
     }
@@ -110,7 +113,7 @@ const Conta = () => {
         throw new Error('erro ao arquivar a conta')
       }
     } catch (error) {
-        console.log(error.mensage)
+        console.log(error.message)
     }finally{
       fetchConta(usuario.id_usuario)
     }
@@ -128,7 +131,7 @@ const Conta = () => {
       }
       console.log(response)
     } catch (error) {
-      console.log(error.mensage);
+      console.log(error.message);
       
     } finally{
       fetchConta(usuario.id_usuario)

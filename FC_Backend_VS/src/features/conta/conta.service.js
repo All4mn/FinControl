@@ -24,6 +24,7 @@ export class ContaService {
     if (!nome_conta || nome_conta.trim() === "") {
       throw new Error("Nome da conta é obrigatório");
     }
+    if(!id_moeda) throw new Error("Moeda nao especificada")
 
     return await this.repository.create({ id_usuario, id_moeda, nome_conta, saldo_conta });
   }
@@ -78,7 +79,7 @@ export class ContaService {
       //   "data":"Usuário sem Conta",
       //   "verify":false
       // }
-      return false
+      throw new NotFound('Usuario sem conta')
     }
     return response
   }
