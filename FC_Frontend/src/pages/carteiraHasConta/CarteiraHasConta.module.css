@@ -1,3 +1,16 @@
+/* Layout principal para manter footer no rodapé */
+.fullWindow {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Organiza o formulário e a tabela em duas colunas (se houver espaço) */
 .contentLayout {
   display: flex;
@@ -100,12 +113,48 @@
   width: 100%;
 }
 
-.debugBtn {
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+}
+
+.carteiraHasContaTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 560px;
+}
+
+.carteiraHasContaTable thead {
+  background: #f1f1f1;
+}
+
+.carteiraHasContaTable th,
+.carteiraHasContaTable td {
+  padding: 0.9rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e6e6e6;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.carteiraHasContaTable th {
+  font-weight: 700;
+  color: #4a4a4a;
+}
+
+.carteiraHasContaTable tbody tr:hover {
+  background: #fafafa;
+}
+
+.emptyRow {
+  text-align: center;
+  padding: 1.5rem 0;
+  color: #6c757d;
+}
+
+.footer {
+  margin-top: auto;
 }

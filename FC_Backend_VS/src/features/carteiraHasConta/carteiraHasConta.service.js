@@ -22,8 +22,6 @@ export class CarteiraHasContaService {
     const contaExists = await this.repository.verifyIdContaExistence(dados.id_conta);
     if (!contaExists) throw new Error("ID da conta não existe");
 
-    if (!dados.nome_carteiraHasConta) throw new Error("Nome é obrigatório");
-    
     return await this.repository.create(dados);
   }
 

@@ -34,8 +34,7 @@ export const useCarteiraHasConta = () => {
         id_conta: Number(formData.id_conta),
       };
 
-      await axios.post(`${API_BASE_URL}/carteiraHasConta`, payload, { withCredentials: true });
-      navigate("/dashboard"); // Ajuste para a rota de sucesso desejada
+      await axios.post(`${API_BASE_URL}/carteira-has-conta`, payload, { withCredentials: true });
     } catch (err) {
       setError(err.response?.data?.mensagem || "Erro ao vincular carteira e conta.");
     } finally {
