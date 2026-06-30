@@ -1,0 +1,39 @@
+@url = http://localhost:3000
+
+# ==================== TRANSAÇÕES ====================
+
+### Buscar transações
+GET {{url}}/transacoes
+
+### Criar transação
+POST {{url}}/transacoes
+Content-Type: application/json
+
+{
+  "id_conta": 1,
+  "id_categoria": 1,
+  "id_metodo": 1,
+  "id_carteira": 2,
+  "valor": 150,
+  "descricao": "Compra no mercado",
+  "quitado": false,
+  "arquivado": false,
+  "data": "2026-05-04 16:52:11.299",
+  "entrada": "true"
+}
+
+### Login Google
+POST {{url}}/usuarios/login-google
+Content-Type: application/json
+
+{
+  "idToken": "SEU_ID_TOKEN_GOOGLE_AQUI"
+}
+
+### Atualizar cadastro após login Google
+PUT {{url}}/usuarios/1
+Content-Type: application/json
+
+{
+  "telefone_usuario": "11999999999"
+}
