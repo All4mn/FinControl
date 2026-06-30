@@ -12,7 +12,9 @@ import { usuarioRoutes } from "./features/usuario/usuarioRoutes.js";
 import { categoriaRoutes } from "./features/categoria/categoriaRoutes.js";
 import { metodoRoutes } from "./features/metodo/metodoRoutes.js";
 import { contaRoutes } from "./features/conta/contaRoutes.js";
+import { carteiraRoutes } from "./features/carteira/carteiraRoutes.js";
 import { transacaoRoutes } from "./features/transacao/transacaoRoutes.js";
+import { statusUsuarioRoutes } from "./features/status_usuario/statusUsuarioRoutes.js";
 import { logsRoutes } from "./features/logs/logsRoutes.js";
 import { AppError } from "./Errors/AppError.js";
 
@@ -55,8 +57,10 @@ app.register(usuarioRoutes, { prefix: "/usuarios" });
 app.register(categoriaRoutes, { prefix: "/categorias" });
 app.register(metodoRoutes, { prefix: "/metodos" });
 app.register(contaRoutes, { prefix: "/contas" });
+app.register(carteiraRoutes, { prefix: "/carteiras" });
 app.register(transacaoRoutes, { prefix: "/transacoes" });
 app.register(logsRoutes, { prefix: "/logs" });
+app.register(statusUsuarioRoutes, { prefix: "/status-usuario" });
 
 app.get("/", async () => {
   return { status: "online" };
