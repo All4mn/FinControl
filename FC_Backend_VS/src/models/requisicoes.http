@@ -1,6 +1,6 @@
 # ==================== MOEDAS ====================
 ### Buscar moedas
-GET {{url}}/moedas
+GET http://localhost:3000/moedas
 
 ### Buscar moeda por ID
 GET {{url}}/moedas/1

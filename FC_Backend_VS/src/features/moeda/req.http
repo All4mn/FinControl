@@ -1,0 +1,6 @@
+@url = http://localhost:3000
+
+# ==================== CONTAS ====================
+
+### Buscar contas
+GET {{url}}/moedas
