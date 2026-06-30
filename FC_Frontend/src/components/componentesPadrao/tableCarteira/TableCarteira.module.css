@@ -1,0 +1,73 @@
+.tableWrapper {
+  overflow-x: auto;
+  margin-top: 1.5rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #111827;
+  background: #ffffff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.table th,
+.table td {
+  padding: 1rem 1.25rem;
+  text-align: left;
+}
+
+.table thead {
+  background: #f8fafc;
+}
+
+.table th {
+  font-size: 0.9rem;
+  color: #4b5563;
+  font-weight: 700;
+}
+
+.table td {
+  border-top: 1px solid #e5e7eb;
+  font-size: 0.95rem;
+}
+
+.table tr:hover td {
+  background: #f9fafb;
+}
+
+.btnEdit,
+.btnDelete {
+  padding: 0.55rem 0.9rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-right: 0.5rem;
+}
+
+.btnEdit {
+  background: #fbbf24;
+  color: #111827;
+}
+
+.btnEdit:hover:not(:disabled) {
+  background: #f59e0b;
+}
+
+.btnDelete {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.btnDelete:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.empty {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+}

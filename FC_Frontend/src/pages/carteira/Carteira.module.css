@@ -1,0 +1,50 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+  background-color: #f5f7fa;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+  width: 100%;
+  max-width: 980px;
+  padding: 2rem;
+}
+
+.headerCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.titulo {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: #111827;
+}
+
+.descricao {
+  color: #4b5563;
+  line-height: 1.7;
+}
+
+.erro {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
