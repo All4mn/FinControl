@@ -7,6 +7,8 @@ export default function Header({ usuario, logado = false }) {
   const [termoBusca, setTermoBusca] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
+  const [menuAberto, setMenuAberto] = useState(false);
+  const toggleMenu = () => setMenuAberto(!menuAberto);
 
   const userName = usuario?.nome_usuario || usuario?.nome || 'Usuário';
   const userEmail = usuario?.email_usuario || usuario?.email || '';

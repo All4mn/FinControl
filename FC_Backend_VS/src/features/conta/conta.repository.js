@@ -49,4 +49,35 @@ export class ContaRepository {
     );
     return response.rowCount > 0;
   }
+
+  // Busca todas as contas associadas a um usuário específico
+  // Realiza INNER JOIN entre tabelas conta e usuario
+  // Retorna: array contendo id_conta, id_usuario, id_moeda, nome_conta, saldo_conta e nome_usuario
+  async search(id){
+    // Query que faz INNER JOIN entre conta e usuario
+    // Seleciona dados da conta + nome do usuário
+    // Filtra apenas as contas do usuário especificado
+    const response = await database.query(`
+      SELECT c.id_conta, c.id_usuario, c.id_moeda, c.nome_conta, c.saldo_conta, u.nome_usuario AS nome_user, m.nome_moeda AS moeda
+      FROM conta c 
+      INNER JOIN usuario u ON c.id_usuario = u.id_usuario 
+      INNER JOIN moeda m ON c.id_moeda = m.id_moeda
+      WHERE c.id_usuario = $1
+      `,[id])
+      
+    // Retorna apenas as linhas (rows) da resposta
+    return response.rows
+  }
+
+  // Busca um usuário específico pelo ID
+  // Retorna: objeto com dados do usuário ou null se não encontrado
+  async findUserById(id){
+    // Query que busca o usuário pelo ID
+    const response = await database.query(`
+      SELECT * FROM usuario WHERE id_usuario = $1
+      `,[id])
+      
+    // Retorna o primeiro resultado (única linha) ou null se não existir
+    return response.rows[0] || null
+  }
 }

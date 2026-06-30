@@ -8,7 +8,7 @@ const logsController = new LogsController(logsService);
 
 export async function logsRoutes(app) {
   app.get("/", logsController.listar);
-  app.get('/filter', async (req,res)=>{
+  app.get('/filter', async (req,res)=>{   
   return logsController.listarFiltrado(req,res)
   })
 }

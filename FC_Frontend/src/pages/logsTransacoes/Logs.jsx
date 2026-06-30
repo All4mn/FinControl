@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios";
-import Header from "../../components/componentesPadrao/headerLogged/headerLogged.jsx";
+import Header from "../../components/componentesPadrao/headerLogged/HeaderLogged.jsx";
 import Footer from "../../components/componentesPadrao/footer/Footer.jsx";
 import styles from "./Logs.module.css";
 import TableLog from "../../components/componentesPadrao/tableLog/TableLog.jsx";
