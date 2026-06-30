@@ -21,7 +21,7 @@ export class LogsController {
       const response = await this.service.findFiltered();
       return res.status(200).send({ sucesso: true, dados: response });
     } catch (error) {
-      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
+      return res.status(500).send({ sucesso: false, mensagem: "Erro interno", stack: error.stack });
     }
   }
 }

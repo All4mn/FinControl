@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS usuario (
   senha_usuario VARCHAR(255),
   telefone_usuario VARCHAR(20),
   google_id_usuario VARCHAR(255) UNIQUE,
-  id_status_usuario INT DEFAULT 1
+  id_status_usuario INT REFERENCES status_usuario(id_status) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS categoria (
@@ -67,6 +67,11 @@ CREATE TABLE IF NOT EXISTS logs (
   anterior JSONB,
   posterior JSONB,
   data TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS status_usuario (
+  id_status SERIAL PRIMARY KEY,
+  nome_status VARCHAR(50) NOT NULL UNIQUE
 );
 
 -- Índices adicionais (opcional)
