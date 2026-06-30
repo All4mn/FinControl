@@ -1,7 +1,7 @@
 export class CategoriaController {
   constructor(service) {
     this.service = service;
-    
+
     // Vincular o context 'this' para evitar perda de contexto nas rotas
     this.listar = this.listar.bind(this);
     this.buscarPorId = this.buscarPorId.bind(this);

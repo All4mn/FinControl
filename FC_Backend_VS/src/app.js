@@ -10,6 +10,7 @@ import dotenv from "dotenv";
 // Importando as rotas do Fastify
 import { usuarioRoutes } from "./features/usuario/usuarioRoutes.js";
 import { categoriaRoutes } from "./features/categoria/categoriaRoutes.js";
+import { Icone_categoriaRoutes } from "./features/icone_categoria/icone_categoria.routes.js";
 import { metodoRoutes } from "./features/metodo/metodoRoutes.js";
 import { contaRoutes } from "./features/conta/contaRoutes.js";
 import { transacaoRoutes } from "./features/transacao/transacaoRoutes.js";
@@ -57,6 +58,7 @@ app.register(metodoRoutes, { prefix: "/metodos" });
 app.register(contaRoutes, { prefix: "/contas" });
 app.register(transacaoRoutes, { prefix: "/transacoes" });
 app.register(logsRoutes, { prefix: "/logs" });
+app.register(Icone_categoriaRoutes, { prefix: "/icone_categoria" });
 
 app.get("/", async () => {
   return { status: "online" };
