@@ -12,6 +12,7 @@ import Carteira from "./pages/carteira/Carteira.jsx";
 // import NovaConta from "./pages/novaConta/NovaConta.jsx"
 import Conta from "./pages/conta/Conta.jsx";
 import CarteiraHasConta from "./pages/carteiraHasConta/CarteiraHasConta.jsx";
+import Metodo from "./pages/metodo/Metodo.jsx";
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
           path="/dashboard/carteira-has-conta"
           element={<CarteiraHasConta />}
         />
+        <Route path="/dashboard/metodos" element={<Metodo />} />
 
         {/* <Route path="/dashboard/relatorios" element={<Relatorios />} /> */}
 
