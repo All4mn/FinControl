@@ -63,9 +63,13 @@ export const useStatusUsuario = () => {
         );
       } else {
         // Criar
+        const id_status_usuario = statusList.length + 1;
         await axios.post(
           `${API_BASE_URL}/status-usuario`,
-          { nome_status_usuario: formData.nome_status_usuario },
+          {
+            id_status_usuario,
+            nome_status_usuario: formData.nome_status_usuario,
+          },
           { withCredentials: true }
         );
       }

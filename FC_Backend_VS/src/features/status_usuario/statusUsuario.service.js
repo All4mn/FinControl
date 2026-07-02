@@ -14,11 +14,14 @@ export class StatusUsuarioService {
     return await this.model.findById(id);
   }
 
-  async create({ nome_status_usuario }) {
+  async create({ id_status_usuario, nome_status_usuario }) {
+    if (!Number.isInteger(id_status_usuario) || id_status_usuario < 1) {
+      throw new AppError("ID do status é obrigatório", 400);
+    }
     if (!nome_status_usuario || nome_status_usuario.trim() === "") {
       throw new AppError("Nome do status é obrigatório", 400);
     }
-    return await this.model.create({ nome_status_usuario });
+    return await this.model.create({ id_status_usuario, nome_status_usuario });
   }
 
   async update(id, { nome_status_usuario }) {

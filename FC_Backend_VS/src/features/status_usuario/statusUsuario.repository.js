@@ -24,10 +24,10 @@ export class StatusUsuarioRepository {
     return response.rows[0] || null;
   }
 
-  async create({ nome_status_usuario }) {
+  async create({ id_status_usuario, nome_status_usuario }) {
     const response = await database.query(
-      "INSERT INTO status_usuario (nome_status_usuario) VALUES ($1) RETURNING *",
-      [nome_status_usuario]
+      "INSERT INTO status_usuario (id_status_usuario, nome_status_usuario) VALUES ($1, $2) RETURNING *",
+      [id_status_usuario, nome_status_usuario]
     );
     return response.rows[0];
   }
