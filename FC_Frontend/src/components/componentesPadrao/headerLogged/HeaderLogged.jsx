@@ -39,7 +39,6 @@ export default function Header({ usuario, logado = false }) {
     { href: '/dashboard/relatorios', label: 'Relatórios', icon: 'chart' },
     { href: '/dashboard/arquivados', label: 'Arquivados', icon: 'archive' },
     { href: '/dashboard/conta', label: 'Nova Conta', icon: 'plus' },
-    { href: '/dashboard/carteira', label: 'Carteiras', icon: 'wallet' },
   ];
 
   const renderIcon = (icon) => {

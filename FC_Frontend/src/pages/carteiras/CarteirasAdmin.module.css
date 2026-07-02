@@ -1,0 +1,124 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f7f8fb;
+}
+
+.main {
+  flex: 1;
+  padding: 24px;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.08);
+  padding: 32px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.headerCard {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.titulo {
+  margin: 0;
+  font-size: 2rem;
+  color: #111827;
+}
+
+.descricao {
+  margin: 8px 0 0;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 16px 18px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table th {
+  background: #f3f4f6;
+  color: #374151;
+  font-weight: 700;
+}
+
+.table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.loading,
+.empty {
+  padding: 24px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.error {
+  margin-bottom: 16px;
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.btnEdit,
+.btnSave,
+.btnCancel {
+  padding: 0.55rem 0.9rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-right: 0.5rem;
+}
+
+.btnEdit {
+  background: #fbbf24;
+  color: #111827;
+}
+
+.btnEdit:hover:not(:disabled) {
+  background: #f59e0b;
+}
+
+.btnSave {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.btnSave:hover:not(:disabled) {
+  background: #059669;
+}
+
+.btnCancel {
+  background: #6b7280;
+  color: #ffffff;
+}
+
+.btnCancel:hover:not(:disabled) {
+  background: #4b5563;
+}

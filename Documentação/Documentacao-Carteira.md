@@ -8,10 +8,10 @@ Esta funcionalidade foi implementada como parte do escopo do 2º bimestre, atend
 
 ## 2. Objetivo da Carteira
 
-- Implementar o cadastro de carteiras pelo usuário.
-- Permitir exibir apenas as carteiras do usuário logado.
-- Garantir operações de leitura, atualização e exclusão de carteiras.
-- Separar claramente backend e frontend conforme arquitetura do projeto.
+- Implementar uma carteira por usuário, que sintetiza as contas associadas.
+- Exibir o saldo consolidado das contas dentro dessa carteira.
+- Garantir operações de leitura, atualização e exclusão apenas para o dono da carteira.
+- Manter separação clara entre backend e frontend conforme arquitetura do projeto.
 
 ## 3. Modelagem de Dados
 
@@ -31,7 +31,7 @@ A entidade `carteira` é uma tabela de apoio ao sistema financeiro. Ela está re
 - `carteira_has_conta.id_carteira` → `carteira.id_carteira`
 - `carteira_has_conta.id_conta` → `conta.id_conta`
 
-A carteira funciona como um agrupador lógico de contas, mas os lançamentos financeiros continuam associados à conta e à transação.
+A carteira funciona como um agrupador lógico de contas, resumindo o saldo de todas as contas vinculadas em um único valor consolidado.
 
 ## 4. Backend
 
@@ -45,10 +45,10 @@ Todos os endpoints de carteira exigem autenticação via cookie de sessão. O se
 
 Endpoints implementados:
 
-- `GET /carteiras` — lista apenas as carteiras do usuário autenticado
-- `GET /carteiras/usuario/:id_usuario` — lista apenas as carteiras do usuário informado; o backend valida que o ID informado pertence ao usuário logado
+- `GET /carteiras` — retorna a carteira do usuário autenticado com o saldo consolidado das contas
+- `GET /carteiras/usuario/:id_usuario` — retorna a carteira do usuário informado; o backend valida que o ID pertence ao usuário logado
 - `GET /carteiras/:id` — busca carteira por ID, somente se pertencer ao usuário autenticado
-- `POST /carteiras` — cria uma nova carteira para o usuário autenticado
+- `POST /carteiras` — cria a carteira do usuário autenticado, não permitindo criação de mais de uma carteira por usuário
 - `PUT /carteiras/:id` — atualiza o nome da carteira, somente se pertencer ao usuário autenticado
 - `DELETE /carteiras/:id` — exclui a carteira, somente se pertencer ao usuário autenticado
 
@@ -58,7 +58,7 @@ Endpoints implementados:
 
 O controlador `src/features/carteira/carteira.controller.js` gerencia as requisições HTTP e delega a lógica para o serviço.
 
-A nova rota `listarPorUsuario` garante que apenas carteiras pertencentes ao usuário logado sejam retornadas, usando o parâmetro `id_usuario`.
+A rota `listarPorUsuario` garante que apenas a carteira do usuário logado seja retornada. O backend valida que o `id_usuario` nos parâmetros corresponda ao usuário autenticado.
 
 ### 4.3 Serviço
 
@@ -73,10 +73,19 @@ O repository `src/features/carteira/carteira.repository.js` executa as consultas
 A query-chave implementada foi:
 
 ```sql
-SELECT * FROM carteira WHERE id_usuario = $1 ORDER BY id_carteira DESC
+SELECT c.id_carteira,
+       c.id_usuario,
+       c.nome_carteira,
+       COALESCE(SUM(ct.saldo_conta), 0)::numeric(14,2) AS saldo_total
+FROM carteira c
+LEFT JOIN carteira_has_conta ch ON ch.id_carteira = c.id_carteira
+LEFT JOIN conta ct ON ct.id_conta = ch.id_conta
+WHERE c.id_usuario = $1
+GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira
+ORDER BY c.id_carteira DESC;
 ```
 
-Isso garante que a listagem seja filtrada por usuário e entregue resultados ordenados pelo ID.
+Isso garante que a carteira seja retornada como um resumo consolidado do saldo das contas do usuário, com o campo `saldo_total` representando a soma de `saldo_conta` das contas associadas.
 
 ## 5. Frontend
 
@@ -87,18 +96,18 @@ A interface do frontend foi implementada mantendo o padrão visual e estrutural 
 A página principal está em `src/pages/carteira/Carteira.jsx` e contém:
 
 - Título e contexto de usuário
-- Formulário de criação/edição de carteira
-- Tabela de listagem das carteiras existentes
+- Formulário de criação/edição da carteira
+- Tabela de listagem da carteira do usuário
 - Mensagens de sucesso ou erro
 
 ### 5.2 Hook customizado
 
 O arquivo `src/pages/carteira/useCarteira.js` centraliza a lógica do frontend:
 
-- busca de carteiras
-- criação de nova carteira
-- atualização de carteira
-- exclusão de carteira
+- busca da carteira do usuário
+- criação da carteira (quando ainda não existir)
+- atualização do nome da carteira
+- exclusão da carteira
 
 O hook utiliza o endpoint específico do usuário:
 
@@ -106,7 +115,7 @@ O hook utiliza o endpoint específico do usuário:
 GET `${API_BASE_URL}/carteiras/usuario/${usuario.id_usuario}`
 ```
 
-Isso tornou a listagem corretamente dependente do usuário autenticado.
+O retorno inclui o campo `saldo_total`, que é a soma dos saldos das contas associadas à carteira.
 
 ### 5.3 Componentes reutilizáveis
 

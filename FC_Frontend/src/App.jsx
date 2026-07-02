@@ -7,6 +7,7 @@ import Dashboard from "./pages/dashboard/Dashboard.jsx";
 import Logs from "./pages/logsTransacoes/Logs.jsx";
 import StatusUsuario from "./pages/statusUsuario/StatusUsuario.jsx";
 import Carteira from "./pages/carteira/Carteira.jsx";
+import CarteirasAdmin from "./pages/carteiras/CarteirasAdmin.jsx";
 import CreateMoeda from "./pages/createMoeda/createMoeda.jsx";
 // import Relatorios from "./pages/relatorios/Relatorios.jsx"
 // import Arquivados from "./pages/arquivados/Arquivados.jsx"
@@ -35,6 +36,8 @@ export default function App() {
         <Route path="/dashboard/status-usuario" element={<StatusUsuario />} />
         <Route path="/dashboard/conta" element={<Conta />} />
         <Route path="/dashboard/carteira" element={<Carteira />} />
+        <Route path="/dashboard/carteiras" element={<CarteirasAdmin />} />
+        <Route path="/carteiras" element={<CarteirasAdmin />} />
         <Route
           path="/dashboard/carteira-has-conta"
           element={<CarteiraHasConta />}
