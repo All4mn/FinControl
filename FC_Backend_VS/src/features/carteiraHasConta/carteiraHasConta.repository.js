@@ -16,7 +16,7 @@ export class CarteiraHasContaRepository {
       FROM carteira_has_conta t
       INNER JOIN carteira c ON c.id_carteira = t.id_carteira
       INNER JOIN conta a ON a.id_conta = t.id_conta
-      INNER JOIN usuario u ON u.id_usuario = c.id_usuario
+      INNER JOIN usuario u ON u.id_usuario = a.id_usuario
       INNER JOIN moeda m ON m.id_moeda = a.id_moeda
       ORDER BY t.id_carteira_has_conta DESC
     `

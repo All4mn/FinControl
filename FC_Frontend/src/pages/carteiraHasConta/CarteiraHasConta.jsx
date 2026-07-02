@@ -11,14 +11,21 @@ const API_BASE_URL =
 const CarteiraHasConta = () => {
   const [carteiraHasConta, setCarteiraHasConta] = React.useState([]);
 
-  const fetchCarteiraHasConta = React.useCallback(async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/carteira-has-conta`, {
-        withCredentials: true,
-      });
+  // 1. Chamada do Custom Hook para gerenciar o formulário de cadastro
+  const { formData, loading, error, handleChange, handleSubmit } =
+    useCarteiraHasConta();
 
-      const dados = response?.data?.dados ?? [];
-      setCarteiraHasConta(dados);
+  React.useEffect(() => {
+    fetchCarteiraHasConta();
+  }, []);
+
+  // 2. Busca os dados existentes para alimentar a tabela
+  const fetchCarteiraHasConta = async () => {
+    try {
+      console.log(API_BASE_URL);
+      const response = await axios.get(`${API_BASE_URL}/carteira-has-conta`);
+      console.log(response.data.dados);
+      setCarteiraHasConta(response.data.dados);
 
       if (!response.data) {
         throw new Error("Erro ao carregar CarteiraHasConta");
@@ -26,22 +33,7 @@ const CarteiraHasConta = () => {
     } catch (error) {
       console.error("Erro ao carregar CarteiraHasConta:", error);
     }
-  }, []);
-
-  const { formData, loading, error, handleChange, handleSubmit } =
-    useCarteiraHasConta();
-
-  const handleSubmitSuccess = async (e) => {
-    const success = await handleSubmit(e);
-
-    if (success) {
-      await fetchCarteiraHasConta();
-    }
   };
-
-  React.useEffect(() => {
-    fetchCarteiraHasConta();
-  }, [fetchCarteiraHasConta]);
 
   return (
     <div className={styles.fullWindow}>
@@ -60,7 +52,7 @@ const CarteiraHasConta = () => {
 
             {error && <div className={styles.erro}>{error}</div>}
 
-            <form onSubmit={handleSubmitSuccess} className={styles.form}>
+            <form onSubmit={handleSubmit} className={styles.form}>
               <div className={styles.inputGroup}>
                 <label htmlFor="id_carteira">ID da Carteira</label>
                 <input
@@ -106,7 +98,7 @@ const CarteiraHasConta = () => {
                     <th>ID Conta</th>
                     <th>Nome Carteira</th>
                     <th>Nome Conta</th>
-                    <th>Usuário Carteira</th>
+                    <th>Usuário Conta</th>
                   </tr>
                 </thead>
                 <tbody>
