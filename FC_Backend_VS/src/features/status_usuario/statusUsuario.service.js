@@ -1,3 +1,5 @@
+import { AppError } from "../../Errors/AppError.js";
+
 export class StatusUsuarioService {
   constructor(model) {
     this.model = model;
@@ -29,6 +31,15 @@ export class StatusUsuarioService {
 
   async delete(id) {
     if (!id) throw new Error("ID é obrigatório");
+
+    const totalUsuarios = await this.model.countUsersByStatusId(id);
+    if (totalUsuarios > 0) {
+      throw new AppError(
+        `Não é possivel excluir pois ${totalUsuarios} usuário${totalUsuarios > 1 ? "s" : ""} tem esse status`,
+        400
+      );
+    }
+
     return await this.model.delete(id);
   }
 }

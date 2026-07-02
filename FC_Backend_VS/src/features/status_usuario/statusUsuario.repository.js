@@ -8,6 +8,14 @@ export class StatusUsuarioRepository {
     return response.rows;
   }
 
+  async countUsersByStatusId(id) {
+    const response = await database.query(
+      "SELECT COUNT(*)::int AS total FROM usuario WHERE id_status_usuario = $1",
+      [id]
+    );
+    return response.rows[0]?.total ?? 0;
+  }
+
   async findById(id) {
     const response = await database.query(
       "SELECT * FROM status_usuario WHERE id_status_usuario = $1",
