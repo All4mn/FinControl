@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import axios from "axios";
 import { validarCreateMoeda } from "./CreateMoedaSchema";
@@ -8,27 +9,24 @@ export const useCreateMoeda = () => {
   const [formData, setFormData] = useState({
     nome_moeda: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setError("");
+    setErro("");
     setSucesso("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validação vinda do Schema
     const errorMsg = validarCreateMoeda(formData);
-    if (errorMsg) return setError(errorMsg);
+    if (errorMsg) return setErro(errorMsg);
 
-    setLoading(true);
-    setError("");
-    setSucesso("");
+    setCarregando(true);
 
     try {
       const payload = {
@@ -36,16 +34,20 @@ export const useCreateMoeda = () => {
       };
 
       await axios.post(`${API_BASE_URL}/moedas`, payload, { withCredentials: true });
-
-      // Permanece na mesma página: limpa o formulário e exibe feedback de sucesso
       setFormData({ nome_moeda: "" });
       setSucesso("Moeda criada com sucesso!");
     } catch (err) {
-      setError(err.response?.data?.mensagem || "Erro ao criar moeda.");
+      console.error("Erro ao criar moeda:", err);
+
+      if (err.response?.status === 409) {
+        setErro("Já existe uma moeda com esse nome.");
+      } else {
+        setErro(err.response?.data?.mensagem || "Erro ao criar moeda.");
+      }
     } finally {
-      setLoading(false);
+      setCarregando(false);
     }
   };
 
-  return { formData, loading, error, sucesso, handleChange, handleSubmit };
+  return { formData, carregando, erro, sucesso, handleChange, handleSubmit };
 };
