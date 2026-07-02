@@ -61,7 +61,8 @@ const Conta = () => {
     try {
       // const response = await axios.get(`${API_BASE_URL}/contas/search/${usuario.id_usuario}`)
       const response = await axios.get(
-        `http://localhost:3000/contas/search/${idUsuario}`,
+        `${API_BASE_URL}/contas/search/${idUsuario}`,
+        { withCredentials: true },
       );
       if (!response) {
         throw new Error("falha em buscar conta");
@@ -79,7 +80,11 @@ const Conta = () => {
     console.log(contaInfos);
     try {
       console.log(contaInfos);
-      const response = await axios.post(`${API_BASE_URL}/contas`, contaInfos);
+      const response = await axios.post(
+        `${API_BASE_URL}/contas`,
+        contaInfos,
+        { withCredentials: true },
+      );
       console.log(response);
       if (!response) {
         throw new Error("erro ao enviar dados");
@@ -97,7 +102,11 @@ const Conta = () => {
   const archiveConta = async (id) => {
     try {
       console.log(id);
-      const response = await axios.put(`http://localhost:3000/contas/arquivar/${id}`)
+      const response = await axios.put(
+        `${API_BASE_URL}/contas/arquivar/${id}`,
+        null,
+        { withCredentials: true },
+      );
       if(!response){
         throw new Error('erro ao arquivar a conta')
       }
@@ -111,9 +120,13 @@ const Conta = () => {
   const desarchiveConta = async (id) => {
     try {
       console.log(id);
-      const response = await axios.put(`http://localhost:3000/contas/desarquivar/${id}`)
+      const response = await axios.put(
+        `${API_BASE_URL}/contas/desarquivar/${id}`,
+        null,
+        { withCredentials: true },
+      );
       if(!response){
-        throw new Error('erro ao arquivar a conta')
+        throw new Error('erro ao desarquivar a conta')
       }
     } catch (error) {
         console.log(error.message)
@@ -128,7 +141,11 @@ const Conta = () => {
         "nome_conta":nome
       }
       console.log(nome, id);
-      const response = await axios.put(`http://localhost:3000/contas/${id}`,dados)
+      const response = await axios.put(
+        `${API_BASE_URL}/contas/${id}`,
+        dados,
+        { withCredentials: true },
+      );
       if(!response){
         throw new Error("Nao deu pra atualizar")
       }

@@ -3,9 +3,12 @@
 // Lógica de negócios para usuario
 // =============================================================================
 
+import { CarteiraRepository } from "../carteira/carteira.repository.js";
+
 export class UsuarioService {
   constructor(repository) {
     this.repository = repository;
+    this.carteiraRepository = new CarteiraRepository();
   }
 
   async findAll() {
@@ -44,12 +47,19 @@ export class UsuarioService {
       throw new Error("Senha é obrigatória");
     }
 
-    return await this.repository.create({
+    const novoUsuario = await this.repository.create({
       nome_usuario,
       email_usuario,
       senha_usuario,
       telefone_usuario,
     });
+
+    await this.carteiraRepository.create({
+      id_usuario: novoUsuario.id_usuario,
+      nome_carteira: "Carteira do usuário",
+    });
+
+    return novoUsuario;
   }
 
   async buscarPorEmail(email) {
@@ -73,12 +83,19 @@ export class UsuarioService {
       throw new Error("E-mail é obrigatório");
     }
 
-    return await this.repository.createWithGoogle({
+    const novoUsuario = await this.repository.createWithGoogle({
       google_id,
       nome_usuario,
       email_usuario,
       telefone_usuario,
     });
+
+    await this.carteiraRepository.create({
+      id_usuario: novoUsuario.id_usuario,
+      nome_carteira: "Carteira do usuário",
+    });
+
+    return novoUsuario;
   }
 
   async update(

@@ -14,8 +14,18 @@ export async function carteiraRoutes(app) {
     { preHandler: [requireAuth] },
     carteiraController.listarPorUsuario,
   );
+  app.get(
+    "/all",
+    { preHandler: [requireAuth] },
+    carteiraController.listarTodas,
+  );
   app.get("/:id", { preHandler: [requireAuth] }, carteiraController.buscarPorId);
-  app.post("/", { preHandler: [requireAuth] }, carteiraController.criar);
+  app.put(
+    "/admin/:id",
+    { preHandler: [requireAuth] },
+    carteiraController.atualizarAdmin,
+  );
+  // A criação e exclusão de carteira não são permitidas manualmente.
+  // A carteira é criada automaticamente ao registrar o usuário.
   app.put("/:id", { preHandler: [requireAuth] }, carteiraController.atualizar);
-  app.delete("/:id", { preHandler: [requireAuth] }, carteiraController.deletar);
 }
