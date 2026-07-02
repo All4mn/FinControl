@@ -1,7 +1,7 @@
 export class CategoriaController {
   constructor(service) {
     this.service = service;
-    
+
     // Vincular o context 'this' para evitar perda de contexto nas rotas
     this.listar = this.listar.bind(this);
     this.buscarPorId = this.buscarPorId.bind(this);
@@ -15,7 +15,10 @@ export class CategoriaController {
       const categorias = await this.service.findAll();
       return res.status(200).send({ sucesso: true, dados: categorias });
     } catch (err) {
-      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
+      console.log("Erro ao listar categorias:", err);
+      return res
+        .status(500)
+        .send({ sucesso: false, mensagem: "Erro interno", stack: err.stack });
     }
   }
 

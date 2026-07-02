@@ -1,0 +1,242 @@
+.container {
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  padding-left: 4px;
+}
+
+.selectButton {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 18px;
+  color: #757575;
+  background-color: #ffffff;
+  border: 1.5px solid #7cdc83;
+  border-radius: 20px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.activeButton {
+  box-shadow: 0 0 0 1px #7cdc83;
+}
+
+.dropdownList {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  margin: 4px 0 0 0;
+  padding: 12px 0;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  list-style: none;
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.dropdownItem:hover {
+  background-color: #f5f5f5;
+}
+
+.selectedItem {
+  background-color: #7cdc83 !important;
+}
+
+.selectedItem .itemLabel,
+.selectedItem .icon {
+  color: #000000;
+}
+
+.selectedItem .removeButton,
+.selectedItem .editButton {
+  color: #000000;
+}
+
+.icon {
+  font-size: 20px;
+  width: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 12px;
+  color: #333333;
+}
+
+.itemLabel {
+  font-size: 18px;
+  font-weight: 400;
+  color: #000000;
+  flex: 1;
+}
+
+.removeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #999999;
+  transition: all 0.15s ease;
+  opacity: 0.4;
+}
+
+.dropdownItem:hover .removeButton {
+  opacity: 1;
+}
+
+.removeButton:hover {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+.divider {
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 8px 16px;
+}
+
+.addItem {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.addItem:hover {
+  background-color: #f0fdf4;
+}
+
+.erroItem {
+  padding: 6px 20px;
+  font-size: 13px;
+  color: #ef4444;
+}
+
+.addInputItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+}
+
+.addInput {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 12px;
+  outline: none;
+  font-family: inherit;
+}
+
+.addInput:focus {
+  border-color: #22c55e;
+}
+
+.confirmButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background-color: #22c55e;
+  color: #ffffff;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.confirmButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.confirmButton:hover:not(:disabled) {
+  background-color: #16a34a;
+}
+
+.editInput {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 16px;
+  border: 1.5px solid #22c55e;
+  border-radius: 10px;
+  outline: none;
+  font-family: inherit;
+  margin-right: 8px;
+}
+
+.editButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #999999;
+  transition: all 0.15s ease;
+  opacity: 0.4;
+}
+
+.dropdownItem:hover .editButton {
+  opacity: 1;
+}
+
+.editButton:hover {
+  background-color: #dbeafe;
+  color: #3b82f6;
+}
+
+.editButton:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.editButtonActive {
+  opacity: 1;
+  background-color: #22c55e;
+  color: #ffffff;
+}
+
+.editButtonActive:hover {
+  background-color: #16a34a;
+  color: #ffffff;
+}

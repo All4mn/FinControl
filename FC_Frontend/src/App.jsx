@@ -5,6 +5,7 @@ import Cadastro from "./pages/cadastro/Cadastro.jsx";
 import CompletarCadastro from "./pages/completarCadastro/CompletarCadastro.jsx";
 import Dashboard from "./pages/dashboard/Dashboard.jsx";
 import Logs from "./pages/logsTransacoes/Logs.jsx";
+import CategoriaPage from "./pages/categoria/CategoriaPage.jsx";
 import StatusUsuario from "./pages/statusUsuario/StatusUsuario.jsx";
 import Carteira from "./pages/carteira/Carteira.jsx";
 import CarteirasAdmin from "./pages/carteiras/CarteirasAdmin.jsx";
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="/create-moeda" element={<CreateMoeda />} />
 
         <Route path="/dashboard/status-usuario" element={<StatusUsuario />} />
+          
         <Route path="/dashboard/conta" element={<Conta />} />
         <Route path="/dashboard/carteira" element={<Carteira />} />
         <Route path="/dashboard/carteiras" element={<CarteirasAdmin />} />
