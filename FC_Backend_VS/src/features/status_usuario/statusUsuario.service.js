@@ -14,19 +14,19 @@ export class StatusUsuarioService {
     return await this.model.findById(id);
   }
 
-  async create({ nome_status }) {
-    if (!nome_status || nome_status.trim() === "") {
+  async create({ nome_status_usuario }) {
+    if (!nome_status_usuario || nome_status_usuario.trim() === "") {
       throw new Error("Nome do status é obrigatório");
     }
-    return await this.model.create({ nome_status });
+    return await this.model.create({ nome_status_usuario });
   }
 
-  async update(id, { nome_status }) {
+  async update(id, { nome_status_usuario }) {
     if (!id) throw new Error("ID é obrigatório");
-    if (!nome_status || nome_status.trim() === "") {
+    if (!nome_status_usuario || nome_status_usuario.trim() === "") {
       throw new Error("Nome do status é obrigatório");
     }
-    return await this.model.update(id, { nome_status });
+    return await this.model.update(id, { nome_status_usuario });
   }
 
   async delete(id) {
