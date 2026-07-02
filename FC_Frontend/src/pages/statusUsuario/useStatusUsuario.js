@@ -6,7 +6,7 @@ const API_BASE_URL = import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhos
 
 export const useStatusUsuario = () => {
   const [statusList, setStatusList] = useState([]);
-  const [formData, setFormData] = useState({ nome_status: "" });
+  const [formData, setFormData] = useState({ nome_status_usuario: "" });
   const [editId, setEditId] = useState(null); // null = criação, número = edição
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -38,7 +38,7 @@ export const useStatusUsuario = () => {
   };
 
   const resetForm = () => {
-    setFormData({ nome_status: "" });
+    setFormData({ nome_status_usuario: "" });
     setEditId(null);
   };
 
@@ -58,14 +58,18 @@ export const useStatusUsuario = () => {
         // Atualizar
         await axios.put(
           `${API_BASE_URL}/status-usuario/${editId}`,
-          { nome_status: formData.nome_status },
+          { nome_status_usuario: formData.nome_status_usuario },
           { withCredentials: true }
         );
       } else {
         // Criar
+        const id_status_usuario = statusList.length + 1;
         await axios.post(
           `${API_BASE_URL}/status-usuario`,
-          { nome_status: formData.nome_status },
+          {
+            id_status_usuario,
+            nome_status_usuario: formData.nome_status_usuario,
+          },
           { withCredentials: true }
         );
       }
@@ -95,8 +99,8 @@ export const useStatusUsuario = () => {
 
   // Carrega um status para edição
   const handleEdit = (status) => {
-    setFormData({ nome_status: status.nome_status });
-    setEditId(status.id_status);
+    setFormData({ nome_status_usuario: status.nome_status_usuario });
+    setEditId(status.id_status_usuario);
   };
 
   return {
