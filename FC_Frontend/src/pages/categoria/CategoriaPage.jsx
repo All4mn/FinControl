@@ -1,7 +1,7 @@
 import Header from "../../components/componentesPadrao/headerLogged/HeaderLogged.jsx";
 import Footer from "../../components/componentesPadrao/footer/Footer.jsx";
 import Categoria from "../../components/categoria/Categoria.jsx";
-import Categoria_adm from "../../components/categoria/Categoria_adm.jsx";
+import Categoria_adm from "../../components/categoria_adm/Categoria_adm.jsx";
 import styles from "./CategoriaPage.module.css";
 
 export default function CategoriaPage() {

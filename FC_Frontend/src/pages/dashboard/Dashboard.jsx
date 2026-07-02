@@ -3,11 +3,8 @@ import { useState, useEffect } from "react";
 import Header from "../../components/componentesPadrao/headerLogged/HeaderLogged.jsx";
 import Footer from "../../components/componentesPadrao/footer/Footer.jsx";
 import styles from "./Dashboard.module.css";
-import Categoria from "../../components/categoria/Categoria.jsx";
-import Categoria_adm from "../../components/categoria/Categoria_adm.jsx";
 
 export default function Dashboard() {
-  
   const API_BASE_URL =
     import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
   const [usuario, setUsuario] = useState(null);
@@ -57,8 +54,6 @@ export default function Dashboard() {
         {usuario && (
           <div className={styles.usuarioInfo}>
             <h2>Olá, {usuario.nome_usuario}</h2>
-            <Categoria />
-            <Categoria_adm />
           </div>
         )}
       </main>
