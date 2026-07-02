@@ -1,0 +1,60 @@
+# ==================== USUÁRIOS ====================
+
+@url = http://localhost:3000
+
+### Buscar todos os usuários
+GET {{url}}/usuarios
+
+### Buscar usuário por ID
+GET {{url}}/usuarios/25
+
+###
+POST {{url}}/usuarios/login
+Content-Type: application/json
+
+{
+  "email_usuario": "carlos@email.com",
+  "senha_usuario": "carlos123"
+}
+
+###
+POST {{url}}/usuarios/login
+Content-Type: application/json
+
+{
+  "email_usuario": "gokugames@gmail.com",
+  "senha_usuario": "kamehameha-ERRADO"
+}
+
+### Buscar usuário por ID
+GET {{url}}/usuarios/6
+
+
+### Criar usuário
+POST {{url}}/usuarios
+Content-Type: application/json
+
+{
+  "nome_usuario": "Insert pelo backend",
+  "email_usuario": "insert@gmail.com",
+  "senha_usuario": "123456",
+  "telefone_usuario": "11000000000"
+}
+
+### Atualizar usuário
+PUT {{url}}/usuarios/6
+Content-Type: application/json
+
+{
+  "nome_usuario": "Teste Atualizado",
+  "email_usuario": "teste.atualizado@gmail.com",
+  "senha_usuario": "novasenha",
+  "telefone_usuario": "11888888888",
+  "id_status_usuario": "1"
+}
+
+### Deletar usuário
+DELETE {{url}}/usuarios/1
+
+###
+PATCH {{url}}/usuarios/desativar/27

@@ -1,0 +1,26 @@
+# ==================== MOEDAS ====================
+### Buscar moedas
+GET http://localhost:3000/moedas
+
+### Buscar moeda por ID
+GET {{url}}/moedas/1
+
+### Criar moeda
+POST {{url}}/moedas
+Content-Type: application/json
+
+{
+  "nome_moeda": "kuanzas"
+}
+
+### Atualizar moeda
+PUT {{url}}/moedas/4
+Content-Type: application/json
+
+{
+  "nome_moeda": "kuanzass"
+}
+
+### Deletar moeda
+DELETE {{url}}/moedas/4
+

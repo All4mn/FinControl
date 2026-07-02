@@ -31,6 +31,70 @@ body {
   padding: 24px;
 }
 
+.topSection {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.introCard {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+  width: 100%;
+}
+
+.introCard h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #111827;
+}
+
+.introCard p {
+  margin-top: 12px;
+  color: #6b7280;
+  line-height: 1.7;
+}
+
+.carteiraCard {
+  background: linear-gradient(135deg, #10b981 0%, #22c55e 100%);
+  border-radius: 24px;
+  padding: 28px;
+  color: #ffffff;
+  max-width: 560px;
+  box-shadow: 0 24px 48px rgba(16, 185, 129, 0.18);
+}
+
+.carteiraCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.carteiraTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.carteiraCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.carteiraLabel {
+  margin: 0;
+  opacity: 0.9;
+}
+
+.carteiraSaldo {
+  margin: 0;
+  font-size: 2.75rem;
+  font-weight: 800;
+}
+
 .usuarioInfo {
   background: #fff;
   border-radius: 16px;

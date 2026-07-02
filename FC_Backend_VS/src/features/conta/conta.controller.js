@@ -7,12 +7,14 @@ export class ContaController {
     this.buscarPorId = this.buscarPorId.bind(this);
     this.criar = this.criar.bind(this);
     this.atualizar = this.atualizar.bind(this);
-    this.deletar = this.deletar.bind(this);
+    this.arquivar = this.arquivar.bind(this);
+    this.search = this.search.bind(this);
+    this.desarquivar = this.desarquivar.bind(this)
   }
 
   async listar(req, res) {
     try {
-      const contas = await this.service.findAll();
+      const contas = await this.service.findAll(req.usuario.id_usuario);
       return res.status(200).send({ sucesso: true, dados: contas });
     } catch (err) {
       return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
@@ -22,11 +24,11 @@ export class ContaController {
   async buscarPorId(req, res) {
     try {
       const { id } = req.params;
-      const conta = await this.service.findById(id);
+      const conta = await this.service.findById(id, req.usuario.id_usuario);
       if (!conta)
         return res
           .status(404)
-          .send({ sucesso: false, message: "Conta não encontrada" }); // Note: standardizing responses to use 'mensagem' or what's original. Let's keep original: 'mensagem'
+          .send({ sucesso: false, mensagem: "Conta não encontrada" });
       return res.status(200).send({ sucesso: true, dados: conta });
     } catch (err) {
       return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
@@ -35,7 +37,12 @@ export class ContaController {
 
   async criar(req, res) {
     try {
-      const novaConta = await this.service.create(req.body);
+      const novaConta = await this.service.create({
+        id_usuario: req.usuario.id_usuario,
+        id_moeda: req.body.id_moeda,
+        nome_conta: req.body.nome_conta,
+        saldo_conta: req.body.saldo_conta,
+      });
       return res.status(201).send({ sucesso: true, dados: novaConta });
     } catch (err) {
       return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
@@ -45,7 +52,8 @@ export class ContaController {
   async atualizar(req, res) {
     try {
       const { id } = req.params;
-      const conta = await this.service.update(id, req.body);
+      const { nome_conta } = req.body;
+      const conta = await this.service.update(id, nome_conta, req.usuario.id_usuario);
       if (!conta)
         return res
           .status(404)
@@ -56,24 +64,47 @@ export class ContaController {
     }
   }
 
-  async deletar(req, res) {
+  async arquivar(req, res) {
     try {
       const { id } = req.params;
-      const deletado = await this.service.delete(id);
-      if (!deletado)
+      const arquivado = await this.service.arquivar(id, req.usuario.id_usuario);
+      if (!arquivado)
         return res
           .status(404)
           .send({ sucesso: false, mensagem: "Conta não encontrada" });
-      return res.status(200).send({ sucesso: true, mensagem: "Conta removida" });
+      return res.status(200).send({ sucesso: true, mensagem: "Conta arquivada" });
     } catch (err) {
       return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
     }
   }
 
+  async desarquivar(req,res){
+    try {
+      const { id } = req.params;
+      const desarquivado = await this.service.desarquivar(id, req.usuario.id_usuario);
+      if(!desarquivado)
+        return res
+      .status(404)
+      .send({sucesso: false, mensagem:"Conta nao encontrada"});
+      return res.status(200).send({ sucesso: true, mensagem: "conta desarquivada" });
+    } catch (error) {
+      return res.status(500).send({ sucesso: false, mensagem: error.message });
+    }
+   
+
+    
+  }
+
   async search(req,res){
-    const { id } = req.params
-    console.log(id)
-    const response = await this.service.search(id)
-    return res.status(200).send({ sucesso: true, dados: response })
+    try {
+      const { id } = req.params
+      if (Number(id) !== req.usuario.id_usuario) {
+        return res.status(403).send({ sucesso: false, mensagem: "Acesso negado" });
+      }
+      const response = await this.service.search(id)
+      return res.status(200).send({ sucesso: true, dados: response })
+    } catch (error) {
+      return res.status(500).send({ sucesso: false, mensagem: error.message });
+    }
   }
 }

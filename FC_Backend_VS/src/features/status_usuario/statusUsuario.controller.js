@@ -1,3 +1,5 @@
+import { AppError } from "../../Errors/AppError.js";
+
 export class StatusUsuarioController {
   constructor(service) {
     this.service = service;
@@ -14,6 +16,12 @@ export class StatusUsuarioController {
       const dados = await this.service.findAll();
       return res.status(200).send({ sucesso: true, dados });
     } catch (err) {
+      if (err instanceof AppError) {
+        return res.status(err.statusCode).send({
+          sucesso: false,
+          mensagem: err.message,
+        });
+      }
       return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
     }
   }
@@ -26,6 +34,12 @@ export class StatusUsuarioController {
         return res.status(404).send({ sucesso: false, mensagem: "Status não encontrado" });
       return res.status(200).send({ sucesso: true, dados: dado });
     } catch (err) {
+      if (err instanceof AppError) {
+        return res.status(err.statusCode).send({
+          sucesso: false,
+          mensagem: err.message,
+        });
+      }
       return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
     }
   }
@@ -35,6 +49,12 @@ export class StatusUsuarioController {
       const novo = await this.service.create(req.body);
       return res.status(201).send({ sucesso: true, dados: novo });
     } catch (err) {
+      if (err instanceof AppError) {
+        return res.status(err.statusCode).send({
+          sucesso: false,
+          mensagem: err.message,
+        });
+      }
       return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
     }
   }
@@ -47,6 +67,12 @@ export class StatusUsuarioController {
         return res.status(404).send({ sucesso: false, mensagem: "Status não encontrado" });
       return res.status(200).send({ sucesso: true, dados: atualizado });
     } catch (err) {
+      if (err instanceof AppError) {
+        return res.status(err.statusCode).send({
+          sucesso: false,
+          mensagem: err.message,
+        });
+      }
       return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
     }
   }
@@ -59,6 +85,12 @@ export class StatusUsuarioController {
         return res.status(404).send({ sucesso: false, mensagem: "Status não encontrado" });
       return res.status(200).send({ sucesso: true, mensagem: "Status removido" });
     } catch (err) {
+      if (err instanceof AppError) {
+        return res.status(err.statusCode).send({
+          sucesso: false,
+          mensagem: err.message,
+        });
+      }
       return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
     }
   }

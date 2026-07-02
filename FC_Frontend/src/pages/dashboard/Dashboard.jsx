@@ -9,6 +9,14 @@ export default function Dashboard() {
     import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
   const [usuario, setUsuario] = useState(null);
   const [carregando, setCarregando] = useState(true);
+  const [carteira, setCarteira] = useState(null);
+  const [carteiraLoading, setCarteiraLoading] = useState(false);
+
+  const formatCurrency = (value) =>
+    new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(Number(value) || 0);
 
   useEffect(() => {
     const fetchUsuario = async () => {
@@ -34,6 +42,27 @@ export default function Dashboard() {
     fetchUsuario();
   }, []);
 
+  useEffect(() => {
+    const fetchCarteira = async () => {
+      if (!usuario) return;
+      setCarteiraLoading(true);
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/carteiras/usuario/${usuario.id_usuario}`,
+          { withCredentials: true },
+        );
+        setCarteira(response.data.dados);
+      } catch (err) {
+        console.error("Erro ao carregar carteira:", err);
+        setCarteira(null);
+      } finally {
+        setCarteiraLoading(false);
+      }
+    };
+
+    fetchCarteira();
+  }, [usuario]);
+
   if (carregando) {
     return (
       <div className={styles.dashboard}>
@@ -50,10 +79,30 @@ export default function Dashboard() {
     <div className={styles.dashboard}>
       <Header usuario={usuario} logado={true} />
       <main className={styles.main}>
-        <h1>Dashboard</h1>
+        <div className={styles.topSection}>
+          <div className={styles.introCard}>
+            <h1>Olá, {usuario?.nome_usuario}</h1>
+            <p>Veja o resumo da sua carteira e seu saldo consolidado.</p>
+          </div>
+        </div>
+
         {usuario && (
-          <div className={styles.usuarioInfo}>
-            <h2>Olá, {usuario.nome_usuario}</h2>
+          <div className={styles.carteiraCard}>
+            <div className={styles.carteiraCardHeader}>
+              <span className={styles.carteiraTitle}>
+                Carteira do {usuario.nome_usuario}
+              </span>
+            </div>
+            <div className={styles.carteiraCardBody}>
+              <p className={styles.carteiraLabel}>Saldo consolidado</p>
+              <p className={styles.carteiraSaldo}>
+                {carteiraLoading
+                  ? "Carregando..."
+                  : carteira
+                  ? formatCurrency(carteira.saldo_total)
+                  : "R$ 0,00"}
+              </p>
+            </div>
           </div>
         )}
       </main>

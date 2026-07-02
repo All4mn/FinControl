@@ -1,0 +1,16 @@
+@url = http://localhost:3000
+
+# ==================== MÉTODOS ====================
+
+
+### Buscar métodos
+GET {{url}}/metodos
+
+### Criar método
+POST {{url}}/metodos
+Content-Type: application/json
+
+{
+  "nome_metodo": "Cartão de Crédito"
+}
+

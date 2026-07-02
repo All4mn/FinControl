@@ -3,20 +3,25 @@
 // Lógica de negócios para conta
 // =============================================================================
 import { NotFound } from "./conta.error.js";
-
+import { CarteiraRepository } from "../carteira/carteira.repository.js";
+import { CarteiraHasContaRepository } from "../carteiraHasConta/carteiraHasConta.repository.js";
 
 export class ContaService {
   constructor(repository) {
     this.repository = repository;
+    this.carteiraRepository = new CarteiraRepository();
+    this.carteiraHasContaRepository = new CarteiraHasContaRepository();
   }
 
-  async findAll() {
-    return await this.repository.findAll();
+  async findAll(id_usuario) {
+    if (!id_usuario) throw new NotFound("ID do usuário é obrigatório");
+    return await this.repository.findAllByUsuario(id_usuario);
   }
 
-  async findById(id) {
+  async findById(id, id_usuario) {
     if (!id) throw new Error("ID é obrigatório");
-    return await this.repository.findById(id);
+    if (!id_usuario) throw new Error("ID do usuário é obrigatório");
+    return await this.repository.findByIdAndUsuario(id, id_usuario);
   }
 
   async create({ id_usuario, id_moeda, nome_conta, saldo_conta }) {
@@ -24,23 +29,46 @@ export class ContaService {
     if (!nome_conta || nome_conta.trim() === "") {
       throw new Error("Nome da conta é obrigatório");
     }
+    if (!id_moeda) throw new Error("Moeda não especificada");
 
-    return await this.repository.create({ id_usuario, id_moeda, nome_conta, saldo_conta });
+    const conta = await this.repository.create({ id_usuario, id_moeda, nome_conta, saldo_conta });
+
+    let carteira = await this.carteiraRepository.findByUsuario(id_usuario);
+    if (!carteira) {
+      carteira = await this.carteiraRepository.create({
+        id_usuario,
+        nome_carteira: "Carteira do usuário",
+      });
+    }
+
+    await this.carteiraHasContaRepository.create({
+      id_carteira: carteira.id_carteira,
+      id_conta: conta.id_conta,
+    });
+
+    return conta;
   }
 
-  async update(id, { id_usuario, id_moeda, nome_conta, saldo_conta }) {
+  async update(id, nome_conta, id_usuario) {
     if (!id) throw new Error("ID é obrigatório");
     if (!id_usuario) throw new Error("ID do usuário é obrigatório");
     if (!nome_conta || nome_conta.trim() === "") {
       throw new Error("Nome da conta é obrigatório");
     }
 
-    return await this.repository.update(id, { id_usuario, id_moeda, nome_conta, saldo_conta });
+    return await this.repository.updateByUsuario(id, nome_conta, id_usuario);
   }
 
-  async delete(id) {
+  async arquivar(id, id_usuario) {
     if (!id) throw new Error("ID é obrigatório");
-    return await this.repository.delete(id);
+    if (!id_usuario) throw new Error("ID do usuário é obrigatório");
+    return await this.repository.arquivar(id, id_usuario);
+  }
+
+  async desarquivar(id, id_usuario) {
+    if (!id) throw new Error("Id é obrigatório");
+    if (!id_usuario) throw new Error("ID do usuário é obrigatório");
+    return await this.repository.desarquivar(id, id_usuario);
   }
 
   // Busca todas as contas de um usuário específico
@@ -74,7 +102,7 @@ export class ContaService {
       //   "data":"Usuário sem Conta",
       //   "verify":false
       // }
-      return false
+      throw new NotFound('Usuario sem conta')
     }
     return response
   }

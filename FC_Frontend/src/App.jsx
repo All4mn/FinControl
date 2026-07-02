@@ -7,10 +7,14 @@ import Dashboard from "./pages/dashboard/Dashboard.jsx";
 import Logs from "./pages/logsTransacoes/Logs.jsx";
 import CategoriaPage from "./pages/categoria/CategoriaPage.jsx";
 import StatusUsuario from "./pages/statusUsuario/StatusUsuario.jsx";
+import Carteira from "./pages/carteira/Carteira.jsx";
+import CarteirasAdmin from "./pages/carteiras/CarteirasAdmin.jsx";
+import CreateMoeda from "./pages/createMoeda/createMoeda.jsx";
 // import Relatorios from "./pages/relatorios/Relatorios.jsx"
 // import Arquivados from "./pages/arquivados/Arquivados.jsx"
 // import NovaConta from "./pages/novaConta/NovaConta.jsx"
 import Conta from "./pages/conta/Conta.jsx";
+import CarteiraHasConta from "./pages/carteiraHasConta/CarteiraHasConta.jsx";
 
 export default function App() {
   return (
@@ -25,14 +29,21 @@ export default function App() {
         <Route path="/completar-cadastro" element={<CompletarCadastro />} />
 
         <Route path="/dashboard" element={<Dashboard />} />
-        
+
         <Route path="/dashboard/logs" element={<Logs />} />
-          
+
+        <Route path="/create-moeda" element={<CreateMoeda />} />
+
         <Route path="/dashboard/status-usuario" element={<StatusUsuario />} />
           
         <Route path="/dashboard/conta" element={<Conta />} />
-          
-        <Route path="/categoria" element={<CategoriaPage />} />
+        <Route path="/dashboard/carteira" element={<Carteira />} />
+        <Route path="/dashboard/carteiras" element={<CarteirasAdmin />} />
+        <Route path="/carteiras" element={<CarteirasAdmin />} />
+        <Route
+          path="/dashboard/carteira-has-conta"
+          element={<CarteiraHasConta />}
+        />
 
         {/* <Route path="/dashboard/relatorios" element={<Relatorios />} /> */}
 

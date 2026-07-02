@@ -72,6 +72,14 @@ export default function Header({ usuario, logado = false }) {
             <path d="M12 5v14" />
           </svg>
         );
+      case 'wallet':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 12.23V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-2.77" />
+            <path d="M21 12.23h-6a2 2 0 0 1 0-4h6" />
+            <circle cx="16" cy="10" r="1" />
+          </svg>
+        );
       default:
         return null;
     }
