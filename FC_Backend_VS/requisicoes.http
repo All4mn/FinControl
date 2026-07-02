@@ -144,3 +144,6 @@ Content-Type: application/json
 GET {{url}}/logs
 ###
 GET {{url}}/logs/filter
+
+###
+GET {{url}}/categorias

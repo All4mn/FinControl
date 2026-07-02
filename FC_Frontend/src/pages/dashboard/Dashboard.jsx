@@ -5,7 +5,6 @@ import Footer from "../../components/componentesPadrao/footer/Footer.jsx";
 import styles from "./Dashboard.module.css";
 
 export default function Dashboard() {
-  
   const API_BASE_URL =
     import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
   const [usuario, setUsuario] = useState(null);
@@ -52,7 +51,6 @@ export default function Dashboard() {
       <Header usuario={usuario} logado={true} />
       <main className={styles.main}>
         <h1>Dashboard</h1>
-
         {usuario && (
           <div className={styles.usuarioInfo}>
             <h2>Olá, {usuario.nome_usuario}</h2>
