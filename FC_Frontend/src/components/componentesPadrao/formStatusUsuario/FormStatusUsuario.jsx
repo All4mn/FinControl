@@ -14,9 +14,9 @@ const FormStatusUsuario = ({
       <div className={styles.formRow}>
         <input
           type="text"
-          name="nome_status"
+          name="nome_status_usuario"
           placeholder="Nome do status"
-          value={formData.nome_status}
+          value={formData.nome_status_usuario}
           onChange={onChange}
           className={styles.input}
           disabled={loading}

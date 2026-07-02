@@ -14,9 +14,9 @@ const TableStatusUsuario = ({ statusList, loading, onEdit, onDelete }) => {
         </thead>
         <tbody>
           {statusList.map((status) => (
-            <tr key={status.id_status}>
-              <td>{status.id_status}</td>
-              <td>{status.nome_status}</td>
+            <tr key={status.id_status_usuario}>
+              <td>{status.id_status_usuario}</td>
+              <td>{status.nome_status_usuario}</td>
               <td>
                 <button
                   onClick={() => onEdit(status)}
@@ -26,7 +26,7 @@ const TableStatusUsuario = ({ statusList, loading, onEdit, onDelete }) => {
                   Editar
                 </button>
                 <button
-                  onClick={() => onDelete(status.id_status)}
+                  onClick={() => onDelete(status.id_status_usuario)}
                   className={styles.btnDelete}
                   disabled={loading}
                 >

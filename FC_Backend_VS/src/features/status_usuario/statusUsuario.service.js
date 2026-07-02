@@ -10,27 +10,27 @@ export class StatusUsuarioService {
   }
 
   async findById(id) {
-    if (!id) throw new Error("ID é obrigatório");
+    if (!id) throw new AppError("ID é obrigatório", 400);
     return await this.model.findById(id);
   }
 
   async create({ nome_status_usuario }) {
     if (!nome_status_usuario || nome_status_usuario.trim() === "") {
-      throw new Error("Nome do status é obrigatório");
+      throw new AppError("Nome do status é obrigatório", 400);
     }
     return await this.model.create({ nome_status_usuario });
   }
 
   async update(id, { nome_status_usuario }) {
-    if (!id) throw new Error("ID é obrigatório");
+    if (!id) throw new AppError("ID é obrigatório", 400);
     if (!nome_status_usuario || nome_status_usuario.trim() === "") {
-      throw new Error("Nome do status é obrigatório");
+      throw new AppError("Nome do status é obrigatório", 400);
     }
     return await this.model.update(id, { nome_status_usuario });
   }
 
   async delete(id) {
-    if (!id) throw new Error("ID é obrigatório");
+    if (!id) throw new AppError("ID é obrigatório", 400);
 
     const totalUsuarios = await this.model.countUsersByStatusId(id);
     if (totalUsuarios > 0) {
