@@ -120,6 +120,7 @@ export class UsuarioService {
 
   async delete(id) {
     if (!id) throw new Error("ID é obrigatório");
+    await this.carteiraRepository.archiveByUsuario(id);
     return await this.repository.delete(id);
   }
 

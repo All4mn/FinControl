@@ -10,14 +10,19 @@ export class CarteiraRepository {
       `SELECT c.id_carteira,
               c.id_usuario,
               c.nome_carteira,
-              COALESCE(SUM(ct.saldo_conta), 0)::numeric(14,2) AS saldo_total
+              ct.id_moeda,
+              m.nome_moeda,
+              COALESCE(SUM(ct.saldo_conta), 0)::numeric(14,2) AS saldo_total,
+              c.ativo
        FROM carteira c
        LEFT JOIN conta ct ON ct.id_usuario = c.id_usuario
+       LEFT JOIN moeda m ON m.id_moeda = ct.id_moeda
        WHERE c.id_carteira = $1
-       GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira`,
+       GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira, ct.id_moeda, m.nome_moeda, c.ativo
+       ORDER BY m.nome_moeda`,
       [id],
     );
-    return response.rows[0] || null;
+    return response.rows;
   }
 
   async create({ id_usuario, nome_carteira }) {
@@ -54,16 +59,19 @@ export class CarteiraRepository {
       `SELECT c.id_carteira,
               c.id_usuario,
               c.nome_carteira,
-              COALESCE(SUM(ct.saldo_conta), 0)::numeric(14,2) AS saldo_total
+              ct.id_moeda,
+              m.nome_moeda,
+              COALESCE(SUM(ct.saldo_conta), 0)::numeric(14,2) AS saldo_total,
+              c.ativo
        FROM carteira c
        LEFT JOIN conta ct ON ct.id_usuario = c.id_usuario
-       WHERE c.id_usuario = $1
-       GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira
-       ORDER BY c.id_carteira DESC
-       LIMIT 1`,
+       LEFT JOIN moeda m ON m.id_moeda = ct.id_moeda
+       WHERE c.id_usuario = $1 AND c.ativo = TRUE
+       GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira, ct.id_moeda, m.nome_moeda, c.ativo
+       ORDER BY m.nome_moeda`,
       [id_usuario],
     );
-    return response.rows[0] || null;
+    return response.rows;
   }
 
   async findAllWithUsers() {
@@ -71,14 +79,27 @@ export class CarteiraRepository {
       `SELECT c.id_carteira,
               c.id_usuario,
               c.nome_carteira,
+              c.ativo,
               u.nome_usuario,
               u.email_usuario,
               COALESCE(SUM(ct.saldo_conta), 0)::numeric(14,2) AS saldo_total
        FROM carteira c
        LEFT JOIN conta ct ON ct.id_usuario = c.id_usuario
        INNER JOIN usuario u ON u.id_usuario = c.id_usuario
-       GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira, u.nome_usuario, u.email_usuario
+       GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira, c.ativo, u.nome_usuario, u.email_usuario
        ORDER BY c.id_carteira DESC`,
+    );
+    return response.rows;
+  }
+
+  async archiveByUsuario(id_usuario) {
+    const response = await database.query(
+      `UPDATE carteira
+       SET ativo = FALSE,
+           id_usuario = NULL
+       WHERE id_usuario = $1
+       RETURNING *`,
+      [id_usuario],
     );
     return response.rows;
   }

@@ -35,8 +35,9 @@ CREATE TABLE IF NOT EXISTS conta (
 
 CREATE TABLE IF NOT EXISTS carteira (
   id_carteira SERIAL PRIMARY KEY,
-  id_usuario INT REFERENCES usuario(id_usuario) ON DELETE CASCADE,
-  nome_carteira VARCHAR(100) NOT NULL
+  id_usuario INT REFERENCES usuario(id_usuario) ON DELETE SET NULL,
+  nome_carteira VARCHAR(100) NOT NULL,
+  ativo BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 CREATE TABLE IF NOT EXISTS carteira_has_conta (
