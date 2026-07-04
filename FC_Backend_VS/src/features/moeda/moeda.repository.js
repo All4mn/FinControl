@@ -29,7 +29,7 @@ export class MoedaRepository {
     return response.rows[0];
   }
 
-  async update(id, { nome_moeda }) {
+  async update(id, nome_moeda ) {
     const response = await database.query(
       `UPDATE moeda SET nome_moeda = $1 WHERE id_moeda = $2 RETURNING *`,
       [nome_moeda, id]
