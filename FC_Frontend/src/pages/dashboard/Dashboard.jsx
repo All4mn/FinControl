@@ -106,11 +106,14 @@ export default function Dashboard() {
               {carteiraLoading ? (
                 <p className={styles.carteiraSaldo}>Carregando...</p>
               ) : carteira && carteira.saldos?.length ? (
-                carteira.saldos.map((saldo) => (
-                  <p className={styles.carteiraSaldo} key={`${saldo.id_moeda}-${saldo.nome_moeda}`}>
-                    {saldo.nome_moeda || "Sem moeda"}: {formatCurrency(saldo.saldo_total, getCurrencyCode(saldo.nome_moeda))}
-                  </p>
-                ))
+                <div className={styles.carteiraSaldos}>
+                  {carteira.saldos.map((saldo) => (
+                    <div className={styles.carteiraSaldoItem} key={`${saldo.id_moeda}-${saldo.nome_moeda}`}>
+                      <span className={styles.carteiraSaldoName}>{saldo.nome_moeda || "Sem moeda"}</span>
+                      <span className={styles.carteiraSaldoValue}>{formatCurrency(saldo.saldo_total, getCurrencyCode(saldo.nome_moeda))}</span>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <p className={styles.carteiraSaldo}>R$ 0,00</p>
               )}

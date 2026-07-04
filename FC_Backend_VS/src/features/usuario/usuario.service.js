@@ -4,11 +4,13 @@
 // =============================================================================
 
 import { CarteiraRepository } from "../carteira/carteira.repository.js";
+import { ContaRepository } from "../conta/conta.repository.js";
 
 export class UsuarioService {
   constructor(repository) {
     this.repository = repository;
     this.carteiraRepository = new CarteiraRepository();
+    this.contaRepository = new ContaRepository();
   }
 
   async findAll() {
@@ -120,12 +122,15 @@ export class UsuarioService {
 
   async delete(id) {
     if (!id) throw new Error("ID é obrigatório");
+    await this.contaRepository.archiveByUsuario(id);
     await this.carteiraRepository.archiveByUsuario(id);
     return await this.repository.delete(id);
   }
 
   async desativar(id) {
     if (!id) throw new Error("ID é obrigatório");
+    await this.contaRepository.archiveByUsuario(id);
+    await this.carteiraRepository.archiveByUsuario(id);
     return await this.repository.desativar(id);
   }
 }
