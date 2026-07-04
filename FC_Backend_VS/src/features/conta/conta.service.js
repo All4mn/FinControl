@@ -2,7 +2,7 @@
 // models/services/conta.service.js
 // Lógica de negócios para conta
 // =============================================================================
-import { NotFound } from "./conta.error.js";
+import { NotFound, RequiredFieldError } from "./conta.error.js";
 import { CarteiraRepository } from "../carteira/carteira.repository.js";
 import { CarteiraHasContaRepository } from "../carteiraHasConta/carteiraHasConta.repository.js";
 
@@ -22,13 +22,18 @@ export class ContaService {
   }
 
   async findById(id) {
-    if (!id) throw new Error("ID é obrigatório");
-    return await this.repository.findById(id);
+    if (!id) throw new RequiredFieldError("ID é obrigatório");
+    const response = await this.repository.findById(id);
+    if (!response) throw new NotFound("Conta não encontrada");
+    return response;
   }
 
   async create({ id_usuario, id_moeda, nome_conta, saldo_conta }) {
     if (!nome_conta || nome_conta.trim() === "") {
-      throw new Error("Nome da conta é obrigatório");
+      throw new RequiredFieldError("Nome da conta é obrigatório");
+    }
+    if(!id_usuario || !id_moeda || saldo_conta === undefined) {
+      throw new RequiredFieldError("Todos os campos são obrigatórios: id_usuario, id_moeda, nome_conta, saldo_conta");
     }
     const conta = await this.repository.create({ id_usuario, id_moeda, nome_conta, saldo_conta });
     let carteira = await this.carteiraRepository.findByUsuario(id_usuario);
@@ -48,22 +53,45 @@ export class ContaService {
   }
 
   async update(id, nome_conta) {
-    if (!id) throw new Error("ID é obrigatório");
+    if (!id) throw new RequiredFieldError("ID é obrigatório");
     if (!nome_conta || nome_conta.trim() === "") {
-      throw new Error("Nome da conta é obrigatório");
+      throw new RequiredFieldError("Nome da conta é obrigatório");
     }
-
-    return await this.repository.update(id, nome_conta);
+    const existingConta = await this.repository.findById(id);
+    if (!existingConta) {
+      throw new NotFound("Conta não encontrada");
+    }
+    const response = await this.repository.update(id, nome_conta);
+    if (!response) {
+      throw new NotFound("Erro ao atualizar a conta");
+    }
+    return response;
   }
 
   async arquivar(id) {
-    if (!id) throw new Error("ID é obrigatório");
-    return await this.repository.arquivar(id);
+    if (!id) throw new RequiredFieldError("ID é obrigatório");
+    const existingConta = await this.repository.findById(id);
+    if (!existingConta) {
+      throw new NotFound("Conta não encontrada");
+    }
+    const response = await this.repository.arquivar(id);
+    if (!response) {
+      throw new NotFound("Erro ao arquivar a conta");
+    }
+    return response;
   }
 
   async desarquivar(id) {
-    if (!id) throw new Error("Id é obrigatório");
-    return await this.repository.desarquivar(id);
+    if (!id) throw new RequiredFieldError("Id é obrigatório");
+    const existingConta = await this.repository.findById(id);
+    if (!existingConta) {
+      throw new NotFound("Conta não encontrada");
+    }
+    const response = await this.repository.desarquivar(id);
+    if (!response) {
+      throw new NotFound("Erro ao desarquivar a conta");
+    }
+    return response;
   }
 
   // Busca todas as contas de um usuário específico
@@ -76,7 +104,7 @@ export class ContaService {
     // Validação do ID: verifica se foi fornecido e se é um número válido
     // Lança erro se o ID estiver faltando ou não for um número
     if(!id || isNaN(id)){  
-      throw new NotFound('Id não especificado')
+      throw new RequiredFieldError('Id não especificado')
     }
     
     // Verifica se o usuário existe no banco de dados
@@ -91,12 +119,7 @@ export class ContaService {
     // Tratamento de resposta:
     // Se o usuário não possui nenhuma conta, retorna mensagem amigável
     // Caso contrário, retorna o array com todos os dados das contas
-    if(!response || response.length == 0){
-      // return {
-        
-      //   "data":"Usuário sem Conta",
-      //   "verify":false
-      // }
+    if(!response || response.length == 0){      
       throw new NotFound('Usuario sem conta')
     }
     return response
