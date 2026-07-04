@@ -61,17 +61,17 @@ const Conta = () => {
     try {
       // const response = await axios.get(`${API_BASE_URL}/contas/search/${usuario.id_usuario}`)
       const response = await axios.get(
-        `${API_BASE_URL}/contas/search/${idUsuario}`,
-        { withCredentials: true },
+        `${API_BASE_URL}/contas/search/${idUsuario}`
       );
       if (!response) {
-        throw new Error("falha em buscar conta");
+        console.log("sem contas")
+        throw new Error("erro ao buscar contas");
       }
 
       setConta(response.data.dados);
       console.log(conta);
     } catch (error) {
-      console.error(error);
+      return
     }
   };
 
@@ -82,8 +82,7 @@ const Conta = () => {
       console.log(contaInfos);
       const response = await axios.post(
         `${API_BASE_URL}/contas`,
-        contaInfos,
-        { withCredentials: true },
+        contaInfos
       );
       console.log(response);
       if (!response) {
@@ -104,8 +103,6 @@ const Conta = () => {
       console.log(id);
       const response = await axios.put(
         `${API_BASE_URL}/contas/arquivar/${id}`,
-        null,
-        { withCredentials: true },
       );
       if(!response){
         throw new Error('erro ao arquivar a conta')
@@ -122,8 +119,6 @@ const Conta = () => {
       console.log(id);
       const response = await axios.put(
         `${API_BASE_URL}/contas/desarquivar/${id}`,
-        null,
-        { withCredentials: true },
       );
       if(!response){
         throw new Error('erro ao desarquivar a conta')
@@ -143,8 +138,7 @@ const Conta = () => {
       console.log(nome, id);
       const response = await axios.put(
         `${API_BASE_URL}/contas/${id}`,
-        dados,
-        { withCredentials: true },
+        dados
       );
       if(!response){
         throw new Error("Nao deu pra atualizar")

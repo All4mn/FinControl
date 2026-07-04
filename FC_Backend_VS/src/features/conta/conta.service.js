@@ -13,26 +13,24 @@ export class ContaService {
     this.carteiraHasContaRepository = new CarteiraHasContaRepository();
   }
 
-  async findAll(id_usuario) {
-    if (!id_usuario) throw new NotFound("ID do usuário é obrigatório");
-    return await this.repository.findAllByUsuario(id_usuario);
+  async findAll() {
+    const response = await this.repository.findAll();
+    if(!response || response.length == 0){
+      throw new NotFound('Nenhuma conta encontrada')
+    }
+    return response;
   }
 
-  async findById(id, id_usuario) {
+  async findById(id) {
     if (!id) throw new Error("ID é obrigatório");
-    if (!id_usuario) throw new Error("ID do usuário é obrigatório");
-    return await this.repository.findByIdAndUsuario(id, id_usuario);
+    return await this.repository.findById(id);
   }
 
   async create({ id_usuario, id_moeda, nome_conta, saldo_conta }) {
-    if (!id_usuario) throw new Error("ID do usuário é obrigatório");
     if (!nome_conta || nome_conta.trim() === "") {
       throw new Error("Nome da conta é obrigatório");
     }
-    if (!id_moeda) throw new Error("Moeda não especificada");
-
     const conta = await this.repository.create({ id_usuario, id_moeda, nome_conta, saldo_conta });
-
     let carteira = await this.carteiraRepository.findByUsuario(id_usuario);
     if (!carteira) {
       carteira = await this.carteiraRepository.create({
@@ -49,26 +47,23 @@ export class ContaService {
     return conta;
   }
 
-  async update(id, nome_conta, id_usuario) {
+  async update(id, nome_conta) {
     if (!id) throw new Error("ID é obrigatório");
-    if (!id_usuario) throw new Error("ID do usuário é obrigatório");
     if (!nome_conta || nome_conta.trim() === "") {
       throw new Error("Nome da conta é obrigatório");
     }
 
-    return await this.repository.updateByUsuario(id, nome_conta, id_usuario);
+    return await this.repository.update(id, nome_conta);
   }
 
-  async arquivar(id, id_usuario) {
+  async arquivar(id) {
     if (!id) throw new Error("ID é obrigatório");
-    if (!id_usuario) throw new Error("ID do usuário é obrigatório");
-    return await this.repository.arquivar(id, id_usuario);
+    return await this.repository.arquivar(id);
   }
 
-  async desarquivar(id, id_usuario) {
+  async desarquivar(id) {
     if (!id) throw new Error("Id é obrigatório");
-    if (!id_usuario) throw new Error("ID do usuário é obrigatório");
-    return await this.repository.desarquivar(id, id_usuario);
+    return await this.repository.desarquivar(id);
   }
 
   // Busca todas as contas de um usuário específico

@@ -39,6 +39,7 @@ app.setErrorHandler((error, request, reply) => {
   return reply.status(500).send({
     status: "error",
     message: "Internal Server Error",
+    error: error.message, // <-- Adicionado para depuração
   });
 });
 
