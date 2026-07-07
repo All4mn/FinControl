@@ -12,10 +12,10 @@ export default function Dashboard() {
   const [carteira, setCarteira] = useState(null);
   const [carteiraLoading, setCarteiraLoading] = useState(false);
 
-  const formatCurrency = (value) =>
+  const formatCurrency = (value, currency = "BRL") =>
     new Intl.NumberFormat("pt-BR", {
       style: "currency",
-      currency: "BRL",
+      currency,
     }).format(Number(value) || 0);
 
   useEffect(() => {
@@ -75,6 +75,14 @@ export default function Dashboard() {
     );
   }
 
+  const getCurrencyCode = (nome_moeda) => {
+    const name = String(nome_moeda || "").toLowerCase();
+    if (name.includes("euro")) return "EUR";
+    if (name.includes("dólar") || name.includes("dolar") || name.includes("usd")) return "USD";
+    if (name.includes("real") || name.includes("brl")) return "BRL";
+    return "BRL";
+  };
+
   return (
     <div className={styles.dashboard}>
       <Header usuario={usuario} logado={true} />
@@ -94,14 +102,21 @@ export default function Dashboard() {
               </span>
             </div>
             <div className={styles.carteiraCardBody}>
-              <p className={styles.carteiraLabel}>Saldo consolidado</p>
-              <p className={styles.carteiraSaldo}>
-                {carteiraLoading
-                  ? "Carregando..."
-                  : carteira
-                  ? formatCurrency(carteira.saldo_total)
-                  : "R$ 0,00"}
-              </p>
+              <p className={styles.carteiraLabel}>Saldo por moeda</p>
+              {carteiraLoading ? (
+                <p className={styles.carteiraSaldo}>Carregando...</p>
+              ) : carteira && carteira.saldos?.length ? (
+                <div className={styles.carteiraSaldos}>
+                  {carteira.saldos.map((saldo) => (
+                    <div className={styles.carteiraSaldoItem} key={`${saldo.id_moeda}-${saldo.nome_moeda}`}>
+                      <span className={styles.carteiraSaldoName}>{saldo.nome_moeda || "Sem moeda"}</span>
+                      <span className={styles.carteiraSaldoValue}>{formatCurrency(saldo.saldo_total, getCurrencyCode(saldo.nome_moeda))}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className={styles.carteiraSaldo}>R$ 0,00</p>
+              )}
             </div>
           </div>
         )}

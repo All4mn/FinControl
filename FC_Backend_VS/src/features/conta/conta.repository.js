@@ -29,6 +29,25 @@ export class ContaRepository {
     return response.rows[0] || null;
   }
 
+  async findAllByUsuario(id_usuario) {
+    const response = await database.query(
+      "SELECT * FROM conta WHERE id_usuario = $1 ORDER BY id_conta DESC",
+      [id_usuario],
+    );
+    return response.rows;
+  }
+
+  async archiveByUsuario(id_usuario) {
+    const response = await database.query(
+      `UPDATE conta
+       SET ativo = FALSE
+       WHERE id_usuario = $1
+       RETURNING *`,
+      [id_usuario],
+    );
+    return response.rows;
+  }
+
   async create({ id_usuario, id_moeda, nome_conta, saldo_conta }) {
     const response = await database.query(
       `INSERT INTO conta (id_usuario, id_moeda, nome_conta, saldo_conta)
