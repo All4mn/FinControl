@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./formMoeda.module.css";
+import styles from "./FormMoeda.module.css";
 
 export default function FormMoeda({ formData, carregando, erro, sucesso, handleChange, handleSubmit }) {
   return (
