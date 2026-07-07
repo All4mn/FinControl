@@ -1,5 +1,5 @@
 import React from "react";
-import axios from "axios"; // Adicionado pois é usado no fetchCarteiraHasConta
+import axios from "axios";
 import Header from "../../components/componentesPadrao/header/Header";
 import Footer from "../../components/componentesPadrao/footer/Footer";
 import styles from "./CarteiraHasConta.module.css";
@@ -10,6 +10,7 @@ const API_BASE_URL =
 
 const CarteiraHasConta = () => {
   const [carteiraHasConta, setCarteiraHasConta] = React.useState([]);
+  const [sucesso, setSucesso] = React.useState("");
 
   const fetchCarteiraHasConta = React.useCallback(async () => {
     try {
@@ -35,7 +36,9 @@ const CarteiraHasConta = () => {
     const success = await handleSubmit(e);
 
     if (success) {
+      setSucesso("Vínculo criado com sucesso!");
       await fetchCarteiraHasConta();
+      setTimeout(() => setSucesso(""), 3000);
     }
   };
 
@@ -48,17 +51,14 @@ const CarteiraHasConta = () => {
       <Header logado={true} />
 
       <div className={styles.container}>
-        <div className={styles.title}>
-          <h1>CarteiraHasConta</h1>
-        </div>
+        <h1 className={styles.subTitulo}></h1>
 
-        {/* Layout estruturado para exibir o Formulário e a Tabela lado a lado ou empilhados */}
         <div className={styles.contentLayout}>
-          {/* COLUNA/SEÇÃO DO FORMULÁRIO */}
           <div className={styles.card}>
             <h2 className={styles.subTitulo}>Novo Vínculo</h2>
 
             {error && <div className={styles.erro}>{error}</div>}
+            {sucesso && <div className={styles.sucesso}>{sucesso}</div>}
 
             <form onSubmit={handleSubmitSuccess} className={styles.form}>
               <div className={styles.inputGroup}>
@@ -88,12 +88,11 @@ const CarteiraHasConta = () => {
               </div>
 
               <button type="submit" disabled={loading} className={styles.btn}>
-                {loading ? "Processando..." : "Criar Vínculo"}
+                {loading ? <span className={styles.spinner} /> : "Criar Vínculo"}
               </button>
             </form>
           </div>
 
-          {/* COLUNA/SEÇÃO DA TABELA DE VÍNCULOS */}
           <section className={styles.tableSection}>
             <h2 className={styles.subTitulo}>Vínculos Existentes</h2>
 
@@ -101,12 +100,12 @@ const CarteiraHasConta = () => {
               <table className={styles.carteiraHasContaTable}>
                 <thead>
                   <tr>
-                    <th>ID CarteiraHasConta</th>
+                    <th>ID</th>
                     <th>ID Carteira</th>
                     <th>ID Conta</th>
                     <th>Nome Carteira</th>
                     <th>Nome Conta</th>
-                    <th>Usuário Carteira</th>
+                    <th>Usuário</th>
                   </tr>
                 </thead>
                 <tbody>

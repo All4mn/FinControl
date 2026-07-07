@@ -10,6 +10,7 @@ export const useStatusUsuario = () => {
   const [editId, setEditId] = useState(null); // null = criação, número = edição
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [sucesso, setSucesso] = useState("");
 
   // Carregar todos os status ao montar
   useEffect(() => {
@@ -73,6 +74,8 @@ export const useStatusUsuario = () => {
           { withCredentials: true }
         );
       }
+      setSucesso(editId ? "Status atualizado com sucesso!" : "Status criado com sucesso!");
+      setTimeout(() => setSucesso(""), 3000);
       resetForm();
       await fetchStatus(); // recarrega a lista
     } catch (err) {
@@ -89,6 +92,8 @@ export const useStatusUsuario = () => {
       await axios.delete(`${API_BASE_URL}/status-usuario/${id}`, {
         withCredentials: true,
       });
+      setSucesso("Status excluído com sucesso!");
+      setTimeout(() => setSucesso(""), 3000);
       await fetchStatus();
     } catch (err) {
       setError(err.response?.data?.mensagem || "Erro ao excluir status.");
@@ -109,6 +114,7 @@ export const useStatusUsuario = () => {
     editId,
     loading,
     error,
+    sucesso,
     handleChange,
     handleSubmit,
     handleDelete,

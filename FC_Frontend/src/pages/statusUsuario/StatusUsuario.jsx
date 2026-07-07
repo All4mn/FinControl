@@ -13,6 +13,7 @@ export default function StatusUsuario() {
     editId,
     loading,
     error,
+    sucesso,
     handleChange,
     handleSubmit,
     handleDelete,
@@ -28,6 +29,7 @@ export default function StatusUsuario() {
           <h1 className={styles.titulo}>Gerenciar Status de Usuário</h1>
 
           {error && <div className={styles.erro}>{error}</div>}
+          {sucesso && <div className={styles.sucesso}>{sucesso}</div>}
 
           <FormStatusUsuario
             formData={formData}
