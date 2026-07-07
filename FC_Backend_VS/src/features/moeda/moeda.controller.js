@@ -62,19 +62,20 @@ export class MoedaController {
     }
   }
 
-  async deletar(req, res) {
-    try {
-      const { id } = req.params;
-      const deletado = await this.service.delete(id);
-      if (!deletado)
-        return res
-          .status(404)
-          .send({ sucesso: false, mensagem: "Moeda não encontrada" });
+async deletar(req, res) {
+  try {
+    const { id } = req.params;
+    const deletado = await this.service.delete(id);
+    if (!deletado)
       return res
-        .status(200)
-        .send({ sucesso: true, mensagem: "Moeda removida" });
-    } catch (err) {
-      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
-    }
+        .status(404)
+        .send({ sucesso: false, mensagem: "Moeda não encontrada" });
+    return res
+      .status(200)
+      .send({ sucesso: true, mensagem: "Moeda removida" });
+  } catch (err) {
+    // Alterado de 500 para 400 para expor a mensagem de validação do Service
+    return res.status(400).send({ sucesso: false, mensagem: err.message });
   }
+}
 }

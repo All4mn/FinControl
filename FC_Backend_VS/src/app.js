@@ -64,7 +64,7 @@ app.register(CarteiraHasContaRoutes, { prefix: "/carteira-has-conta" });
 app.register(transacaoRoutes, { prefix: "/transacoes" });
 app.register(logsRoutes, { prefix: "/logs" });
 app.register(statusUsuarioRoutes, { prefix: "/status-usuario" });
-app.register(moedaRoutes, { prefix: "/moedas" }); // <-- Rota registrada aqui
+app.register(moedaRoutes, { prefix: "/moedas" }); 
 
 app.get("/", async () => {
   return { status: "online" };
