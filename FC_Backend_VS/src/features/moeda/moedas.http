@@ -1,0 +1,96 @@
+@url = http://localhost:3000
+
+# ==================== MOEDAS ====================
+
+### 1. Criar moeda com SUCESSO
+# Esperado: Status 201 com JSON contendo "sucesso: true" e o objeto criado com seu respectivo id_moeda
+POST {{url}}/moedas
+Content-Type: application/json
+
+{
+  "nome_moeda": "teste"
+}
+
+###
+
+### 2. Criar moeda com ERRO (Nome vazio/inválido)
+# Esperado: Status 400 com JSON contendo "sucesso: false" e mensagem "Nome da moeda é obrigatório"
+POST {{url}}/moedas
+Content-Type: application/json
+
+{
+  "nome_moeda": " "
+}
+
+###
+
+### 3. Buscar TODAS as moedas
+# Esperado: Status 200 com a lista de todas as moedas ordenadas por nome
+GET {{url}}/moedas
+
+###
+
+### 4. Buscar moeda por ID com SUCESSO
+# Nota: Substitua o '1' pelo ID de uma moeda existente no seu banco
+# Esperado: Status 200 com os dados da moeda correspondente
+GET {{url}}/moedas/1
+
+###
+
+### 5. Buscar moeda por ID com ERRO (Não existente)
+# Esperado: Status 404 com JSON contendo "sucesso: false" e mensagem "Moeda não encontrada"
+GET {{url}}/moedas/999999
+
+###
+
+### 6. Atualizar moeda com SUCESSO
+# Nota: Substitua o '1' pelo ID da moeda que deseja alterar
+# Esperado: Status 200 com os dados atualizados da moeda
+PUT {{url}}/moedas/1
+Content-Type: application/json
+
+{
+  "nome_moeda": "Dólar de teste"
+}
+
+###
+
+### 7. Atualizar moeda com ERRO (Nome em branco)
+# Nota: Substitua o '1' pelo ID da moeda
+# Esperado: Status 400 com mensagem "Nome da moeda é obrigatório"
+PUT {{url}}/moedas/1
+Content-Type: application/json
+
+{
+  "nome_moeda": ""
+}
+
+###
+
+### 8. Atualizar moeda com ERRO (ID não existe)
+# Esperado: Status 404 com mensagem "Moeda não encontrada"
+PUT {{url}}/moedas/999999
+Content-Type: application/json
+
+{
+  "nome_moeda": "Euro"
+}
+
+###
+
+### 9. Deletar moeda com ERRO (Moeda vinculada a alguma conta/Em uso)
+# Nota: Use o ID de uma moeda que já esteja configurada em alguma conta da tabela 'conta'
+# Esperado: Status 400 com mensagem "Não é possível excluir esta moeda pois ela já está vinculada a uma conta ativa."
+DELETE {{url}}/moedas/1
+
+###
+
+### 10. Deletar moeda com SUCESSO (Não está em uso)
+# Esperado: Status 200 com mensagem "Moeda removida"
+DELETE {{url}}/moedas/21
+
+###
+
+### 11. Deletar moeda com ERRO (ID não existe)
+# Esperado: Status 404 com mensagem "Moeda não encontrada"
+DELETE {{url}}/moedas/999999

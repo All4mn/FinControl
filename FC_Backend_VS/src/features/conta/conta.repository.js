@@ -58,36 +58,36 @@ export class ContaRepository {
     return response.rows[0];
   }
 
-  async updateByUsuario(id, nome_conta, id_usuario) {
+  async update(id, nome_conta) {
     const response = await database.query(
       `UPDATE conta 
        SET nome_conta = $1
-       WHERE id_conta = $2 AND id_usuario = $3
+       WHERE id_conta = $2
        RETURNING *`,
-      [nome_conta, id, id_usuario],
+      [nome_conta, id],
     );
     return response.rows[0] || null;
   }
 
-  async arquivar(id, id_usuario) {
+  async arquivar(id) {
     const response = await database.query(
       `UPDATE conta
       SET ativo = FALSE
-      WHERE id_conta = $1 AND id_usuario = $2
+      WHERE id_conta = $1
       RETURNING *`,
-      [id, id_usuario],
+      [id],
     );
     return response.rowCount > 0;
   }
 
-  async desarquivar(id, id_usuario){
+  async desarquivar(id){
     const response = await database.query(
       `
       UPDATE conta
       SET ativo = TRUE
-      WHERE id_conta = $1 AND id_usuario = $2
+      WHERE id_conta = $1 
       RETURNING *
-      `,[id, id_usuario]
+      `,[id]
     )
     return response.rowCount > 0;
   }

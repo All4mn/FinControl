@@ -35,11 +35,12 @@ export default function App() {
         <Route path="/create-moeda" element={<CreateMoeda />} />
 
         <Route path="/dashboard/status-usuario" element={<StatusUsuario />} />
-          
+
         <Route path="/dashboard/conta" element={<Conta />} />
         <Route path="/dashboard/carteira" element={<Carteira />} />
         <Route path="/dashboard/carteiras" element={<CarteirasAdmin />} />
         <Route path="/carteiras" element={<CarteirasAdmin />} />
+        <Route path="/categorias" element={<CategoriaPage />} />
         <Route
           path="/dashboard/carteira-has-conta"
           element={<CarteiraHasConta />}
