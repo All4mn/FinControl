@@ -2,6 +2,8 @@
 // src/features/moeda/moeda.service.js
 // Lógica de negócios para moeda
 // =============================================================================
+import { NotFound, RequiredFieldError } from "./moeda.error.js";
+
 
 export class MoedaService {
   constructor(repository) {
@@ -9,48 +11,47 @@ export class MoedaService {
   }
 
   async findAll() {
-    return await this.repository.findAll();
+    const response = await this.repository.findAll();
+    if (!response) {
+      throw new NotFound("Nenhuma moeda encontrada");
+    }
+    return response;
   }
 
   async findById(id) {
-    if (!id) throw new Error("ID é obrigatório");
-    return await this.repository.findById(id);
-  }
-
-  async create(data) {
-  if (!data.nome_moeda?.trim()) throw new Error("Nome da moeda é obrigatório");
-
-  // Validação de duplicidade
-  const existe = await this.repository.findByName(data.nome_moeda.trim());
-  if (existe) throw new Error("Já existe uma moeda cadastrada com este nome.");
-
-  return await this.repository.create(data);
-  }
-
-  async update(id, data) {
-    if (!id) throw new Error("ID é obrigatório");
-    if (!data.nome_moeda?.trim()) throw new Error("Nome da moeda é obrigatório");
-
-    // Validação de duplicidade ao editar (ignora a própria moeda que está sendo editada)
-    const existe = await this.repository.findByName(data.nome_moeda.trim());
-    if (existe && existe.id_moeda !== Number(id)) {
-      throw new Error("Já existe outra moeda cadastrada com este nome.");
+    if (!id) throw new RequiredFieldError("ID é obrigatório");
+    const response = await this.repository.findById(id);
+    if (!response) {
+      throw new NotFound("Moeda não encontrada");
     }
-
-    return await this.repository.update(id, data);
+    return response;
   }
 
-async delete(id) {
-  if (!id) throw new Error("ID é obrigatório");
-
-  // Verifica se a moeda está sendo usada em alguma conta
-  const emUso = await this.repository.hasConnections(id);
-  if (emUso) {
-    throw new Error("Não é possível excluir esta moeda pois ela já está vinculada a uma conta ativa.");
+  async create(nome_moeda) {
+    if (!nome_moeda || nome_moeda.trim() === "") {
+      throw new RequiredFieldError("Nome da moeda é obrigatório");
+    }
+    return await this.repository.create({ nome_moeda });
   }
 
-  return await this.repository.delete(id);
+  async update(id, nome_moeda ) {
+    if (!id) throw new RequiredFieldError("ID é obrigatório");
+    if (!nome_moeda || nome_moeda.trim() === "") {
+      throw new RequiredFieldError("Nome da moeda é obrigatório");
+    }
+    const existingMoeda = await this.repository.findById(id);
+    if (!existingMoeda) {
+      throw new NotFound("Moeda não encontrada");
+    }
+    const response = await this.repository.update(id, nome_moeda );
+      if (!response) {
+        throw new NotFound("Erro ao atualizar a moeda");
+      }
+    return response;
+  }
+
+  async delete(id) {
+    if (!id) throw new RequiredFieldError("ID é obrigatório");
+    return await this.repository.delete(id);
+  }
 }
-
-
-  }

@@ -1,0 +1,20 @@
+@url = http://localhost:3000
+
+# ==================== CONTAS ====================
+
+### Buscar contas
+GET {{url}}/moedas
+
+###
+GET {{url}}/moedas/99
+
+###
+POST {{url}}/moedas
+Content-Type: application/json
+
+###
+PUT {{url}}/moedas/1
+Content-Type: application/json
+
+###
+DELETE  {{url}}/moedas/19

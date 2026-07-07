@@ -156,7 +156,7 @@ const TableConta = ({ conta, archiveConta, desarchiveConta, updateConta }) => {
               <span className={`${styles.saldo} ${inativa ? styles.saldo_inativa : ""}`}>
                 {new Intl.NumberFormat("pt-BR", {
                   style: "currency",
-                  currency: "BRL",
+                  currency: "BRL" //criar coluna em moedas que defina o tipo de moeda, e não deixar fixo em BRL para dar o charme
                 }).format(item.saldo_conta)}
               </span>
             </div>
