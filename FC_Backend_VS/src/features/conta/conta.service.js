@@ -2,7 +2,7 @@
 // models/services/conta.service.js
 // Lógica de negócios para conta
 // =============================================================================
-import { NotFound } from "./conta.error.js";
+import { NotFound, RequiredFieldError } from "./conta.error.js";
 import { CarteiraRepository } from "../carteira/carteira.repository.js";
 import { CarteiraHasContaRepository } from "../carteiraHasConta/carteiraHasConta.repository.js";
 
@@ -13,26 +13,29 @@ export class ContaService {
     this.carteiraHasContaRepository = new CarteiraHasContaRepository();
   }
 
-  async findAll(id_usuario) {
-    if (!id_usuario) throw new NotFound("ID do usuário é obrigatório");
-    return await this.repository.findAllByUsuario(id_usuario);
+  async findAll() {
+    const response = await this.repository.findAll();
+    if(!response || response.length == 0){
+      throw new NotFound('Nenhuma conta encontrada')
+    }
+    return response;
   }
 
-  async findById(id, id_usuario) {
-    if (!id) throw new Error("ID é obrigatório");
-    if (!id_usuario) throw new Error("ID do usuário é obrigatório");
-    return await this.repository.findByIdAndUsuario(id, id_usuario);
+  async findById(id) {
+    if (!id) throw new RequiredFieldError("ID é obrigatório");
+    const response = await this.repository.findById(id);
+    if (!response) throw new NotFound("Conta não encontrada");
+    return response;
   }
 
   async create({ id_usuario, id_moeda, nome_conta, saldo_conta }) {
-    if (!id_usuario) throw new Error("ID do usuário é obrigatório");
     if (!nome_conta || nome_conta.trim() === "") {
-      throw new Error("Nome da conta é obrigatório");
+      throw new RequiredFieldError("Nome da conta é obrigatório");
     }
-    if (!id_moeda) throw new Error("Moeda não especificada");
-
+    if(!id_usuario || !id_moeda || saldo_conta === undefined) {
+      throw new RequiredFieldError("Todos os campos são obrigatórios: id_usuario, id_moeda, nome_conta, saldo_conta");
+    }
     const conta = await this.repository.create({ id_usuario, id_moeda, nome_conta, saldo_conta });
-
     let carteira = await this.carteiraRepository.findByUsuario(id_usuario);
     if (!carteira) {
       carteira = await this.carteiraRepository.create({
@@ -49,26 +52,46 @@ export class ContaService {
     return conta;
   }
 
-  async update(id, nome_conta, id_usuario) {
-    if (!id) throw new Error("ID é obrigatório");
-    if (!id_usuario) throw new Error("ID do usuário é obrigatório");
+  async update(id, nome_conta) {
+    if (!id) throw new RequiredFieldError("ID é obrigatório");
     if (!nome_conta || nome_conta.trim() === "") {
-      throw new Error("Nome da conta é obrigatório");
+      throw new RequiredFieldError("Nome da conta é obrigatório");
     }
-
-    return await this.repository.updateByUsuario(id, nome_conta, id_usuario);
+    const existingConta = await this.repository.findById(id);
+    if (!existingConta) {
+      throw new NotFound("Conta não encontrada");
+    }
+    const response = await this.repository.update(id, nome_conta);
+    if (!response) {
+      throw new NotFound("Erro ao atualizar a conta");
+    }
+    return response;
   }
 
-  async arquivar(id, id_usuario) {
-    if (!id) throw new Error("ID é obrigatório");
-    if (!id_usuario) throw new Error("ID do usuário é obrigatório");
-    return await this.repository.arquivar(id, id_usuario);
+  async arquivar(id) {
+    if (!id) throw new RequiredFieldError("ID é obrigatório");
+    const existingConta = await this.repository.findById(id);
+    if (!existingConta) {
+      throw new NotFound("Conta não encontrada");
+    }
+    const response = await this.repository.arquivar(id);
+    if (!response) {
+      throw new NotFound("Erro ao arquivar a conta");
+    }
+    return response;
   }
 
-  async desarquivar(id, id_usuario) {
-    if (!id) throw new Error("Id é obrigatório");
-    if (!id_usuario) throw new Error("ID do usuário é obrigatório");
-    return await this.repository.desarquivar(id, id_usuario);
+  async desarquivar(id) {
+    if (!id) throw new RequiredFieldError("Id é obrigatório");
+    const existingConta = await this.repository.findById(id);
+    if (!existingConta) {
+      throw new NotFound("Conta não encontrada");
+    }
+    const response = await this.repository.desarquivar(id);
+    if (!response) {
+      throw new NotFound("Erro ao desarquivar a conta");
+    }
+    return response;
   }
 
   // Busca todas as contas de um usuário específico
@@ -81,7 +104,7 @@ export class ContaService {
     // Validação do ID: verifica se foi fornecido e se é um número válido
     // Lança erro se o ID estiver faltando ou não for um número
     if(!id || isNaN(id)){  
-      throw new NotFound('Id não especificado')
+      throw new RequiredFieldError('Id não especificado')
     }
     
     // Verifica se o usuário existe no banco de dados
@@ -96,12 +119,7 @@ export class ContaService {
     // Tratamento de resposta:
     // Se o usuário não possui nenhuma conta, retorna mensagem amigável
     // Caso contrário, retorna o array com todos os dados das contas
-    if(!response || response.length == 0){
-      // return {
-        
-      //   "data":"Usuário sem Conta",
-      //   "verify":false
-      // }
+    if(!response || response.length == 0){      
       throw new NotFound('Usuario sem conta')
     }
     return response

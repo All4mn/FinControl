@@ -5,17 +5,37 @@
 ### Buscar contas
 GET {{url}}/contas
 
+###
+GET {{url}}/contas/
+
 ### Criar conta
 POST {{url}}/contas
 Content-Type: application/json
 
 {
-  "id_usuario": 1,
+  "id_usuario": 70,
   "id_moeda": 1, 
-  "nome_conta": "Conta Corrente Nubank",
+  "nome_conta": "teste de primeira conta do usuario",
   "saldo_conta": 1500.50
 }
 
 ###
 GET {{url}}/contas/search/61
+
+
+###
+PUT {{url}}/contas/arquivar/8
+###
+PUT {{url}}/contas/desarquivar/8
+
+
+###
+PUT {{url}}/contas/8
+Content-Type: application/json
+
+{
+  "nome_conta": "Conta atualizada"
+}
+
+
 

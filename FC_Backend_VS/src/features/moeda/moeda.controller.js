@@ -16,65 +16,38 @@ export class MoedaController {
   }
 
   async listar(req, res) {
-    try {
       const moedas = await this.service.findAll();
-      return res.status(200).send({ sucesso: true, dados: moedas });
-    } catch (err) {
-      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
-    }
+      return res.status(200).send({ sucesso: true, dados: moedas })
   }
 
   async buscarPorId(req, res) {
-    try {
       const { id } = req.params;
       const moeda = await this.service.findById(id);
-      if (!moeda)
-        return res
-          .status(404)
-          .send({ sucesso: false, mensagem: "Moeda não encontrada" });
       return res.status(200).send({ sucesso: true, dados: moeda });
-    } catch (err) {
-      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
-    }
   }
 
   async criar(req, res) {
-    try {
-      const novaMoeda = await this.service.create(req.body);
+      const { nome_moeda } = req.body;
+      const novaMoeda = await this.service.create(nome_moeda);
       return res.status(201).send({ sucesso: true, dados: novaMoeda });
-    } catch (err) {
-      // Diferente do erro 500, usamos 400 ou repassamos a mensagem do service
-      return res.status(400).send({ sucesso: false, mensagem: err.message });
-    }
+    
   }
 
   async atualizar(req, res) {
-    try {
       const { id } = req.params;
-      const moeda = await this.service.update(id, req.body);
-      if (!moeda)
-        return res
-          .status(404)
-          .send({ sucesso: false, mensagem: "Moeda não encontrada" });
+      const { nome_moeda } = req.body;
+      const moeda = await this.service.update(id, nome_moeda);
       return res.status(200).send({ sucesso: true, dados: moeda });
-    } catch (err) {
-      return res.status(400).send({ sucesso: false, mensagem: err.message });
-    }
   }
 
   async deletar(req, res) {
-    try {
       const { id } = req.params;
+      const existingMoeda = await this.service.findById(id);
       const deletado = await this.service.delete(id);
-      if (!deletado)
-        return res
-          .status(404)
-          .send({ sucesso: false, mensagem: "Moeda não encontrada" });
       return res
         .status(200)
-        .send({ sucesso: true, mensagem: "Moeda removida" });
-    } catch (err) {
-      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
-    }
+        .send({ sucesso: true, mensagem: "Moeda removida" })
+  
+    
   }
 }

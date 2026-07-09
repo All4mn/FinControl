@@ -81,12 +81,42 @@ body {
 .carteiraCardBody {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
 }
 
 .carteiraLabel {
   margin: 0;
   opacity: 0.9;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
+.carteiraSaldos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.carteiraSaldoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.carteiraSaldoName {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.carteiraSaldoValue {
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 800;
 }
 
 .carteiraSaldo {

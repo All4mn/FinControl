@@ -39,6 +39,7 @@ app.setErrorHandler((error, request, reply) => {
   return reply.status(500).send({
     status: "error",
     message: "Internal Server Error",
+    error: error.message, // <-- Adicionado para depuração
   });
 });
 
@@ -64,7 +65,7 @@ app.register(CarteiraHasContaRoutes, { prefix: "/carteira-has-conta" });
 app.register(transacaoRoutes, { prefix: "/transacoes" });
 app.register(logsRoutes, { prefix: "/logs" });
 app.register(statusUsuarioRoutes, { prefix: "/status-usuario" });
-app.register(moedaRoutes, { prefix: "/moedas" }); // <-- Rota registrada aqui
+app.register(moedaRoutes, { prefix: "/moedas" }); 
 
 app.get("/", async () => {
   return { status: "online" };

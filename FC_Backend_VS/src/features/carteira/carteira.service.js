@@ -13,14 +13,39 @@ export class CarteiraService {
     return await this.repository.findAllWithUsers();
   }
 
+  formatCarteira(rows) {
+    if (!rows || rows.length === 0) return null;
+
+    const { id_carteira, id_usuario, nome_carteira, ativo } = rows[0];
+    const saldos = rows.map((row) => ({
+      id_moeda: row.id_moeda,
+      nome_moeda: row.nome_moeda || "Sem moeda",
+      saldo_total: row.saldo_total,
+    }));
+
+    const saldo_total = saldos.reduce(
+      (sum, row) => sum + Number(row.saldo_total || 0),
+      0,
+    );
+
+    return {
+      id_carteira,
+      id_usuario,
+      nome_carteira,
+      ativo,
+      saldos,
+      saldo_total: Number(saldo_total).toFixed(2),
+    };
+  }
+
   async findById(id, id_usuario) {
     if (!id) throw new AppError("ID é obrigatório", 400);
-    const carteira = await this.repository.findById(id);
-    if (!carteira) throw new AppError("Carteira não encontrada", 404);
-    if (carteira.id_usuario !== Number(id_usuario)) {
+    const rows = await this.repository.findById(id);
+    if (!rows || rows.length === 0) throw new AppError("Carteira não encontrada", 404);
+    if (rows[0].id_usuario !== Number(id_usuario)) {
       throw new AppError("Acesso negado", 403);
     }
-    return carteira;
+    return this.formatCarteira(rows);
   }
 
   async create() {
@@ -36,8 +61,9 @@ export class CarteiraService {
       throw new AppError("Nome da carteira é obrigatório", 400);
     }
 
-    const carteira = await this.repository.findById(id);
-    if (!carteira) throw new AppError("Carteira não encontrada", 404);
+    const rows = await this.repository.findById(id);
+    if (!rows || rows.length === 0) throw new AppError("Carteira não encontrada", 404);
+    const carteira = rows[0];
     if (carteira.id_usuario !== Number(id_usuario)) {
       throw new AppError("Acesso negado", 403);
     }
@@ -51,8 +77,8 @@ export class CarteiraService {
       throw new AppError("Nome da carteira é obrigatório", 400);
     }
 
-    const carteira = await this.repository.findById(id);
-    if (!carteira) throw new AppError("Carteira não encontrada", 404);
+    const rows = await this.repository.findById(id);
+    if (!rows || rows.length === 0) throw new AppError("Carteira não encontrada", 404);
 
     return await this.repository.update(id, { nome_carteira });
   }
@@ -66,6 +92,7 @@ export class CarteiraService {
 
   async findByUsuario(id_usuario) {
     if (!id_usuario) throw new AppError("ID do usuário é obrigatório", 400);
-    return await this.repository.findByUsuario(id_usuario);
+    const rows = await this.repository.findByUsuario(id_usuario);
+    return this.formatCarteira(rows);
   }
 }

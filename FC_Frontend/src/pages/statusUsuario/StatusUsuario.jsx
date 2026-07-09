@@ -1,10 +1,9 @@
 import React from "react";
 import Header from "../../components/componentesPadrao/header/Header";
 import Footer from "../../components/componentesPadrao/footer/Footer";
-import FormStatusUsuario from "../../components/componentesPadrao/formStatusUsuario/FormStatusUsuario";
-import TableStatusUsuario from "../../components/componentesPadrao/tableStatusUsuario/TableStatusUsuario";
 import styles from "./StatusUsuario.module.css";
 import { useStatusUsuario } from "./useStatusUsuario";
+import StatusUsuarioCard from "./components/StatusUsuarioCard/StatusUsuarioCard.jsx";
 
 export default function StatusUsuario() {
   const {
@@ -13,6 +12,7 @@ export default function StatusUsuario() {
     editId,
     loading,
     error,
+    sucesso,
     handleChange,
     handleSubmit,
     handleDelete,
@@ -22,12 +22,13 @@ export default function StatusUsuario() {
 
   return (
     <div className={styles.page}>
-      <Header logado={true} /> {/* ou false, conforme seu layout */}
+      <Header logado={true} />
       <main className={styles.main}>
         <div className={styles.card}>
           <h1 className={styles.titulo}>Gerenciar Status de Usuário</h1>
 
           {error && <div className={styles.erro}>{error}</div>}
+          {sucesso && <div className={styles.sucesso}>{sucesso}</div>}
 
           <FormStatusUsuario
             formData={formData}

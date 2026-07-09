@@ -1,5 +1,5 @@
 import React from "react";
-import axios from "axios"; // Adicionado pois é usado no fetchCarteiraHasConta
+import axios from "axios";
 import Header from "../../components/componentesPadrao/header/Header";
 import Footer from "../../components/componentesPadrao/footer/Footer";
 import styles from "./CarteiraHasConta.module.css";
@@ -10,6 +10,7 @@ const API_BASE_URL =
 
 const CarteiraHasConta = () => {
   const [carteiraHasConta, setCarteiraHasConta] = React.useState([]);
+  const [sucesso, setSucesso] = React.useState("");
 
   const fetchCarteiraHasConta = React.useCallback(async () => {
     try {
@@ -28,15 +29,60 @@ const CarteiraHasConta = () => {
     }
   }, []);
 
-  const { formData, loading, error, handleChange, handleSubmit } =
-    useCarteiraHasConta();
+  const {
+    formData,
+    loading,
+    error,
+    handleChange,
+    handleSubmit,
+    handleDelete,
+    handleEdit,
+    setFormData,
+    resetForm,
+  } = useCarteiraHasConta();
 
   const handleSubmitSuccess = async (e) => {
+    if (editandoId) {
+      const success = await handleEdit(editandoId, {
+        id_carteira: Number(formData.id_carteira),
+        id_conta: Number(formData.id_conta),
+      });
+
+      if (success) {
+        setEditandoId(null);
+        resetForm();
+        await fetchCarteiraHasConta();
+      }
+      return;
+    }
+
     const success = await handleSubmit(e);
 
     if (success) {
+      setSucesso("Vínculo criado com sucesso!");
+      await fetchCarteiraHasConta();
+      setTimeout(() => setSucesso(""), 3000);
+    }
+  };
+
+  const handleDeleteSucess = async (id) => {
+    const success = await handleDelete(id);
+    if (success) {
       await fetchCarteiraHasConta();
     }
+  };
+
+  const handleEditClick = (item) => {
+    setEditandoId(item.id_carteira_has_conta);
+    setFormData({
+      id_carteira: item.id_carteira ?? "",
+      id_conta: item.id_conta ?? "",
+    });
+  };
+
+  const handleCancelarEdicao = () => {
+    setEditandoId(null);
+    resetForm();
   };
 
   React.useEffect(() => {
@@ -48,17 +94,16 @@ const CarteiraHasConta = () => {
       <Header logado={true} />
 
       <div className={styles.container}>
-        <div className={styles.title}>
-          <h1>CarteiraHasConta</h1>
-        </div>
+        <h1 className={styles.subTitulo}></h1>
 
-        {/* Layout estruturado para exibir o Formulário e a Tabela lado a lado ou empilhados */}
         <div className={styles.contentLayout}>
-          {/* COLUNA/SEÇÃO DO FORMULÁRIO */}
           <div className={styles.card}>
-            <h2 className={styles.subTitulo}>Novo Vínculo</h2>
+            <h2 className={styles.subTitulo}>
+              {editandoId ? "Editar Vínculo" : "Novo Vínculo"}
+            </h2>
 
             {error && <div className={styles.erro}>{error}</div>}
+            {sucesso && <div className={styles.sucesso}>{sucesso}</div>}
 
             <form onSubmit={handleSubmitSuccess} className={styles.form}>
               <div className={styles.inputGroup}>
@@ -88,12 +133,30 @@ const CarteiraHasConta = () => {
               </div>
 
               <button type="submit" disabled={loading} className={styles.btn}>
-                {loading ? "Processando..." : "Criar Vínculo"}
+                {loading ? <span className={styles.spinner} /> : "Criar Vínculo"}
               </button>
+              <div className={styles.actionsRow}>
+                <button type="submit" disabled={loading} className={styles.btn}>
+                  {loading
+                    ? "Processando..."
+                    : editandoId
+                      ? "Salvar Alterações"
+                      : "Criar Vínculo"}
+                </button>
+
+                {editandoId && (
+                  <button
+                    type="button"
+                    onClick={handleCancelarEdicao}
+                    className={styles.btnSecondary}
+                  >
+                    Cancelar
+                  </button>
+                )}
+              </div>
             </form>
           </div>
 
-          {/* COLUNA/SEÇÃO DA TABELA DE VÍNCULOS */}
           <section className={styles.tableSection}>
             <h2 className={styles.subTitulo}>Vínculos Existentes</h2>
 
@@ -101,12 +164,14 @@ const CarteiraHasConta = () => {
               <table className={styles.carteiraHasContaTable}>
                 <thead>
                   <tr>
-                    <th>ID CarteiraHasConta</th>
+                    <th>ID</th>
                     <th>ID Carteira</th>
                     <th>ID Conta</th>
                     <th>Nome Carteira</th>
                     <th>Nome Conta</th>
+                    <th>Usuário</th>
                     <th>Usuário Carteira</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -125,6 +190,18 @@ const CarteiraHasConta = () => {
                         <td>{item.nome_carteira ?? "—"}</td>
                         <td>{item.nome_conta ?? "—"}</td>
                         <td>{item.nome_usuario ?? "—"}</td>
+                        <td>
+                          <button onClick={() => handleEditClick(item)}>
+                            Editar
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleDeleteSucess(item.id_carteira_has_conta)
+                            }
+                          >
+                            Excluir
+                          </button>
+                        </td>
                       </tr>
                     ))
                   )}

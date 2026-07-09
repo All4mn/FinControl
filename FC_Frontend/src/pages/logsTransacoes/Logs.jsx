@@ -39,9 +39,7 @@ const Logs = () => {
     <div className={styles.fullWindow}>
       <Header logado={true} />
       <div className={styles.container}>
-        <div className={styles.title}>
-          <h1>Logs</h1>
-        </div>
+        <h1 className={styles.title}></h1>
         <section>
 
           <TableLog 
@@ -49,7 +47,7 @@ const Logs = () => {
           />
         </section>
 
-        <button onClick={()=>console.log(log)}>visualizar log</button>
+        <button onClick={()=>console.log(log)} className={styles.btn}>Visualizar log</button>
       </div>
       <footer className={styles.footer}>
         <Footer />

@@ -108,7 +108,7 @@ export default function CarteirasAdmin() {
         <div className={styles.card}>
           <div className={styles.headerCard}>
             <div>
-              <h1 className={styles.titulo}>Admin de Carteiras</h1>
+              <h1 className={styles.titulo}></h1>
               <p className={styles.descricao}>
                 Visualize todas as carteiras cadastradas e os usuários vinculados.
               </p>
