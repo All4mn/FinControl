@@ -29,10 +29,33 @@ const CarteiraHasConta = () => {
     }
   }, []);
 
-  const { formData, loading, error, handleChange, handleSubmit } =
-    useCarteiraHasConta();
+  const {
+    formData,
+    loading,
+    error,
+    handleChange,
+    handleSubmit,
+    handleDelete,
+    handleEdit,
+    setFormData,
+    resetForm,
+  } = useCarteiraHasConta();
 
   const handleSubmitSuccess = async (e) => {
+    if (editandoId) {
+      const success = await handleEdit(editandoId, {
+        id_carteira: Number(formData.id_carteira),
+        id_conta: Number(formData.id_conta),
+      });
+
+      if (success) {
+        setEditandoId(null);
+        resetForm();
+        await fetchCarteiraHasConta();
+      }
+      return;
+    }
+
     const success = await handleSubmit(e);
 
     if (success) {
@@ -40,6 +63,26 @@ const CarteiraHasConta = () => {
       await fetchCarteiraHasConta();
       setTimeout(() => setSucesso(""), 3000);
     }
+  };
+
+  const handleDeleteSucess = async (id) => {
+    const success = await handleDelete(id);
+    if (success) {
+      await fetchCarteiraHasConta();
+    }
+  };
+
+  const handleEditClick = (item) => {
+    setEditandoId(item.id_carteira_has_conta);
+    setFormData({
+      id_carteira: item.id_carteira ?? "",
+      id_conta: item.id_conta ?? "",
+    });
+  };
+
+  const handleCancelarEdicao = () => {
+    setEditandoId(null);
+    resetForm();
   };
 
   React.useEffect(() => {
@@ -55,7 +98,9 @@ const CarteiraHasConta = () => {
 
         <div className={styles.contentLayout}>
           <div className={styles.card}>
-            <h2 className={styles.subTitulo}>Novo Vínculo</h2>
+            <h2 className={styles.subTitulo}>
+              {editandoId ? "Editar Vínculo" : "Novo Vínculo"}
+            </h2>
 
             {error && <div className={styles.erro}>{error}</div>}
             {sucesso && <div className={styles.sucesso}>{sucesso}</div>}
@@ -90,6 +135,25 @@ const CarteiraHasConta = () => {
               <button type="submit" disabled={loading} className={styles.btn}>
                 {loading ? <span className={styles.spinner} /> : "Criar Vínculo"}
               </button>
+              <div className={styles.actionsRow}>
+                <button type="submit" disabled={loading} className={styles.btn}>
+                  {loading
+                    ? "Processando..."
+                    : editandoId
+                      ? "Salvar Alterações"
+                      : "Criar Vínculo"}
+                </button>
+
+                {editandoId && (
+                  <button
+                    type="button"
+                    onClick={handleCancelarEdicao}
+                    className={styles.btnSecondary}
+                  >
+                    Cancelar
+                  </button>
+                )}
+              </div>
             </form>
           </div>
 
@@ -106,6 +170,8 @@ const CarteiraHasConta = () => {
                     <th>Nome Carteira</th>
                     <th>Nome Conta</th>
                     <th>Usuário</th>
+                    <th>Usuário Carteira</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -124,6 +190,18 @@ const CarteiraHasConta = () => {
                         <td>{item.nome_carteira ?? "—"}</td>
                         <td>{item.nome_conta ?? "—"}</td>
                         <td>{item.nome_usuario ?? "—"}</td>
+                        <td>
+                          <button onClick={() => handleEditClick(item)}>
+                            Editar
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleDeleteSucess(item.id_carteira_has_conta)
+                            }
+                          >
+                            Excluir
+                          </button>
+                        </td>
                       </tr>
                     ))
                   )}

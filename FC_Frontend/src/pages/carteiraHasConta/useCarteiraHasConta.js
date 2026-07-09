@@ -12,6 +12,10 @@ export const useCarteiraHasConta = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const resetForm = () => {
+    setFormData({ id_carteira: "", id_conta: "" });
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -38,7 +42,7 @@ export const useCarteiraHasConta = () => {
         withCredentials: true,
       });
 
-      setFormData({ id_carteira: "", id_conta: "" });
+      resetForm();
       setError("");
       return true;
     } catch (err) {
@@ -49,5 +53,25 @@ export const useCarteiraHasConta = () => {
     }
   };
 
-  return { formData, loading, error, handleChange, handleSubmit };
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`${API_BASE_URL}/carteira-has-conta/${id}`);
+      return true;
+    } catch (error) {
+      setError(error.response?.data?.mensagem || "Erro ao excluir vínculo.");
+      return false;
+    }
+  };
+
+  const handleEdit = async (id, updatedData) => {
+    try {
+      await axios.put(`${API_BASE_URL}/carteira-has-conta/${id}`, updatedData);
+      return true;
+    } catch (error) {
+      setError(error.response?.data?.mensagem || "Erro ao editar vínculo.");
+      return false;
+    }
+  };
+
+  return { formData, loading, error, handleChange, handleSubmit, handleDelete, handleEdit, setFormData, resetForm };
 };

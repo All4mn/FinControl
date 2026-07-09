@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { validarCreateMoeda } from "./createMoedaSchema";
+import { validarCreateMoeda } from "./CreateMoedaSchema";
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
 

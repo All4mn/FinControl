@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./tableMoeda.module.css";
+import styles from "./TableMoeda.module.css";
 
 export default function TableMoeda({
   moedas, carregandoLista, erroLista,
