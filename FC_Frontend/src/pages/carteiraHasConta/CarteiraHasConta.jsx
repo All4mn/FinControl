@@ -11,6 +11,7 @@ const API_BASE_URL =
 const CarteiraHasConta = () => {
   const [carteiraHasConta, setCarteiraHasConta] = React.useState([]);
   const [sucesso, setSucesso] = React.useState("");
+  const [editandoId, setEditandoId] = React.useState(null);
 
   const fetchCarteiraHasConta = React.useCallback(async () => {
     try {
