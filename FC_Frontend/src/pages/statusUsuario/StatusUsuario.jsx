@@ -12,6 +12,7 @@ export default function StatusUsuario() {
     editId,
     loading,
     error,
+    sucesso,
     handleChange,
     handleSubmit,
     handleDelete,
@@ -23,18 +24,28 @@ export default function StatusUsuario() {
     <div className={styles.page}>
       <Header logado={true} />
       <main className={styles.main}>
-        <StatusUsuarioCard
-          statusList={statusList}
-          formData={formData}
-          editId={editId}
-          loading={loading}
-          error={error}
-          onChange={handleChange}
-          onSubmit={handleSubmit}
-          onCancel={resetForm}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        <div className={styles.card}>
+          <h1 className={styles.titulo}>Gerenciar Status de Usuário</h1>
+
+          {error && <div className={styles.erro}>{error}</div>}
+          {sucesso && <div className={styles.sucesso}>{sucesso}</div>}
+
+          <FormStatusUsuario
+            formData={formData}
+            editId={editId}
+            loading={loading}
+            onChange={handleChange}
+            onSubmit={handleSubmit}
+            onCancel={resetForm}
+          />
+
+          <TableStatusUsuario
+            statusList={statusList}
+            loading={loading}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </div>
       </main>
       <Footer />
     </div>
