@@ -4,6 +4,8 @@ import Footer from "../../components/componentesPadrao/footer/Footer";
 import styles from "./StatusUsuario.module.css";
 import { useStatusUsuario } from "./useStatusUsuario";
 import StatusUsuarioCard from "./components/StatusUsuarioCard/StatusUsuarioCard.jsx";
+import FormStatusUsuario from "./components/StatusUsuarioFeedback/StatusUsuarioFeedback.jsx";
+import TableStatusUsuario from "../../components/componentesPadrao/table/TableStatusUsuario.jsx";
 
 export default function StatusUsuario() {
   const {
