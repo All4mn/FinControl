@@ -1,0 +1,632 @@
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "prevId": "",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.logs": {
+      "name": "logs",
+      "schema": "",
+      "columns": {
+        "id_log": {
+          "name": "id_log",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "id_usuario": {
+          "name": "id_usuario",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operacao": {
+          "name": "operacao",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tabela": {
+          "name": "tabela",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "anterior": {
+          "name": "anterior",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "posterior": {
+          "name": "posterior",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "data": {
+          "name": "data",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.transacao": {
+      "name": "transacao",
+      "schema": "",
+      "columns": {
+        "id_transacao": {
+          "name": "id_transacao",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "id_conta": {
+          "name": "id_conta",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id_categoria": {
+          "name": "id_categoria",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id_metodo": {
+          "name": "id_metodo",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id_carteira": {
+          "name": "id_carteira",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "valor": {
+          "name": "valor",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "descricao": {
+          "name": "descricao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quitado": {
+          "name": "quitado",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "arquivado": {
+          "name": "arquivado",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "data": {
+          "name": "data",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "entrada": {
+          "name": "entrada",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "fk_transacao_carteira": {
+          "name": "fk_transacao_carteira",
+          "tableFrom": "transacao",
+          "tableTo": "carteira",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "id_carteira"
+          ],
+          "columnsTo": [
+            "id_carteira"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "fk_transacao_categoria": {
+          "name": "fk_transacao_categoria",
+          "tableFrom": "transacao",
+          "tableTo": "categoria",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "id_categoria"
+          ],
+          "columnsTo": [
+            "id_categoria"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "fk_transacao_conta": {
+          "name": "fk_transacao_conta",
+          "tableFrom": "transacao",
+          "tableTo": "conta",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "id_conta"
+          ],
+          "columnsTo": [
+            "id_conta"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_transacao_metodo": {
+          "name": "fk_transacao_metodo",
+          "tableFrom": "transacao",
+          "tableTo": "metodo",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "id_metodo"
+          ],
+          "columnsTo": [
+            "id_metodo"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.carteira": {
+      "name": "carteira",
+      "schema": "",
+      "columns": {
+        "id_carteira": {
+          "name": "id_carteira",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "id_usuario": {
+          "name": "id_usuario",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nome_carteira": {
+          "name": "nome_carteira",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ativo": {
+          "name": "ativo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "fk_carteira_usuario": {
+          "name": "fk_carteira_usuario",
+          "tableFrom": "carteira",
+          "tableTo": "usuario",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "id_usuario"
+          ],
+          "columnsTo": [
+            "id_usuario"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "carteira_id_usuario_fkey": {
+          "name": "carteira_id_usuario_fkey",
+          "tableFrom": "carteira",
+          "tableTo": "usuario",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "id_usuario"
+          ],
+          "columnsTo": [
+            "id_usuario"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "carteira_unique": {
+          "columns": [
+            "id_usuario"
+          ],
+          "nullsNotDistinct": false,
+          "name": "carteira_unique"
+        }
+      },
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.moeda": {
+      "name": "moeda",
+      "schema": "",
+      "columns": {
+        "id_moeda": {
+          "name": "id_moeda",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nome_moeda": {
+          "name": "nome_moeda",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sigla_moeda": {
+          "name": "sigla_moeda",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.carteira_has_conta": {
+      "name": "carteira_has_conta",
+      "schema": "",
+      "columns": {
+        "id_carteira_has_conta": {
+          "name": "id_carteira_has_conta",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "id_carteira": {
+          "name": "id_carteira",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id_conta": {
+          "name": "id_conta",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "fk_chc_carteira": {
+          "name": "fk_chc_carteira",
+          "tableFrom": "carteira_has_conta",
+          "tableTo": "carteira",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "id_carteira"
+          ],
+          "columnsTo": [
+            "id_carteira"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_chc_conta": {
+          "name": "fk_chc_conta",
+          "tableFrom": "carteira_has_conta",
+          "tableTo": "conta",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "id_conta"
+          ],
+          "columnsTo": [
+            "id_conta"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "unique_carteira_conta": {
+          "columns": [
+            "id_conta",
+            "id_carteira"
+          ],
+          "nullsNotDistinct": false,
+          "name": "unique_carteira_conta"
+        }
+      },
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.metodo": {
+      "name": "metodo",
+      "schema": "",
+      "columns": {
+        "id_metodo": {
+          "name": "id_metodo",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nome_metodo": {
+          "name": "nome_metodo",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.categoria": {
+      "name": "categoria",
+      "schema": "",
+      "columns": {
+        "id_categoria": {
+          "name": "id_categoria",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nome_categoria": {
+          "name": "nome_categoria",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.conta": {
+      "name": "conta",
+      "schema": "",
+      "columns": {
+        "id_conta": {
+          "name": "id_conta",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "id_usuario": {
+          "name": "id_usuario",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id_moeda": {
+          "name": "id_moeda",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome_conta": {
+          "name": "nome_conta",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "saldo_conta": {
+          "name": "saldo_conta",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ativo": {
+          "name": "ativo",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "true"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "fk_conta_moeda": {
+          "name": "fk_conta_moeda",
+          "tableFrom": "conta",
+          "tableTo": "moeda",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "id_moeda"
+          ],
+          "columnsTo": [
+            "id_moeda"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "fk_conta_usuario": {
+          "name": "fk_conta_usuario",
+          "tableFrom": "conta",
+          "tableTo": "usuario",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "id_usuario"
+          ],
+          "columnsTo": [
+            "id_usuario"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.status_usuario": {
+      "name": "status_usuario",
+      "schema": "",
+      "columns": {
+        "id_status_usuario": {
+          "name": "id_status_usuario",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nome_status_usuario": {
+          "name": "nome_status_usuario",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.usuario": {
+      "name": "usuario",
+      "schema": "",
+      "columns": {
+        "id_usuario": {
+          "name": "id_usuario",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nome_usuario": {
+          "name": "nome_usuario",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email_usuario": {
+          "name": "email_usuario",
+          "type": "varchar(150)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "senha_usuario": {
+          "name": "senha_usuario",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "telefone_usuario": {
+          "name": "telefone_usuario",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "google_id_usuario": {
+          "name": "google_id_usuario",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_status_usuario": {
+          "name": "id_status_usuario",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_admin": {
+          "name": "is_admin",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "usuario_status_usuario_fk": {
+          "name": "usuario_status_usuario_fk",
+          "tableFrom": "usuario",
+          "tableTo": "status_usuario",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "id_status_usuario"
+          ],
+          "columnsTo": [
+            "id_status_usuario"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "usuario_email_usuario_key": {
+          "columns": [
+            "email_usuario"
+          ],
+          "nullsNotDistinct": false,
+          "name": "usuario_email_usuario_key"
+        }
+      },
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "tables": {}
+  }
+}
