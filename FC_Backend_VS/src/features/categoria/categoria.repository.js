@@ -1,47 +1,69 @@
 // =============================================================================
 // models/repositories/categoria.repository.js
-// Acesso ao banco de dados para a tabela de categoria
+// Acesso ao banco de dados para a tabela de categoria (via Drizzle ORM)
 // =============================================================================
 
-import database from "../../config/db.js";
+import { eq, asc } from "drizzle-orm";
+import { db } from "../../config/drizzle.js";
+import { categoria } from "../../db/schema.js";
+
+// Converte chaves camelCase (retorno do Drizzle) para snake_case,
+// mantendo o mesmo formato que o restante da aplicação espera.
+const toSnakeCase = (value) =>
+  value.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
+const mapRow = (row) =>
+  Object.fromEntries(
+    Object.entries(row).map(([key, value]) => [toSnakeCase(key), value]),
+  );
+
+const mapRows = (rows) => rows.map(mapRow);
 
 export class CategoriaRepository {
   async findAll() {
-    const response = await database.query(
-      "SELECT * FROM categoria ORDER BY nome_categoria ASC",
-    );
-    return response.rows;
+    const rows = await db
+      .select()
+      .from(categoria)
+      .orderBy(asc(categoria.nomeCategoria));
+    return mapRows(rows);
   }
 
   async findById(id) {
-    const response = await database.query(
-      "SELECT * FROM categoria WHERE id_categoria = $1",
-      [id],
-    );
-    return response.rows[0] || null;
+    const rows = await db
+      .select()
+      .from(categoria)
+      .where(eq(categoria.idCategoria, id));
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
   async create({ nome_categoria }) {
-    const response = await database.query(
-      `INSERT INTO categoria (nome_categoria) VALUES ($1) RETURNING *`,
-      [nome_categoria],
-    );
-    return response.rows[0];
+    const rows = await db
+      .insert(categoria)
+      .values({ nomeCategoria: nome_categoria })
+      .returning({
+        id_categoria: categoria.idCategoria,
+        nome_categoria: categoria.nomeCategoria,
+      });
+    return rows[0] ?? null;
   }
 
   async update(id, { nome_categoria }) {
-    const response = await database.query(
-      `UPDATE categoria SET nome_categoria = $1 WHERE id_categoria = $2 RETURNING *`,
-      [nome_categoria, id],
-    );
-    return response.rows[0] || null;
+    const rows = await db
+      .update(categoria)
+      .set({ nomeCategoria: nome_categoria })
+      .where(eq(categoria.idCategoria, id))
+      .returning({
+        id_categoria: categoria.idCategoria,
+        nome_categoria: categoria.nomeCategoria,
+      });
+    return rows[0] ?? null;
   }
 
   async delete(id) {
-    const response = await database.query(
-      "DELETE FROM categoria WHERE id_categoria = $1",
-      [id],
-    );
-    return response.rowCount > 0;
+    const rows = await db
+      .delete(categoria)
+      .where(eq(categoria.idCategoria, id))
+      .returning({ id_categoria: categoria.idCategoria });
+    return rows.length > 0;
   }
 }
