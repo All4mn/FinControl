@@ -1,74 +1,115 @@
-import database from "../../config/db.js";
+// =============================================================================
+// src/features/carteiraHasConta/carteiraHasConta.repository.js
+// Acesso ao banco de dados para a tabela de carteira_has_conta (via Drizzle ORM)
+// =============================================================================
+
+import { eq, desc } from "drizzle-orm";
+import { db } from "../../config/drizzle.js";
+import {
+  carteiraHasConta,
+  carteira,
+  conta,
+  usuario,
+  moeda,
+} from "../../db/schema.js";
+
+// Converte chaves camelCase (retorno do Drizzle) para snake_case,
+// mantendo o mesmo formato que o restante da aplicação espera.
+const toSnakeCase = (value) =>
+  value.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
+const mapRow = (row) =>
+  Object.fromEntries(
+    Object.entries(row).map(([key, value]) => [toSnakeCase(key), value]),
+  );
+
+const mapRows = (rows) => rows.map(mapRow);
+
+// Remove campos undefined antes de insert/update,
+// para não enviar "undefined" ao banco via Drizzle.
+const semUndefined = (obj) =>
+  Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
 
 export class CarteiraHasContaRepository {
   async findAll() {
-    const response = await database.query(
-      `
-      SELECT
-        t.id_carteira_has_conta,
-        t.id_carteira,
-        t.id_conta,
-        c.nome_carteira,
-        a.nome_conta,
-        u.nome_usuario,
-        a.saldo_conta,
-        m.nome_moeda
-      FROM carteira_has_conta t
-      INNER JOIN carteira c ON c.id_carteira = t.id_carteira
-      INNER JOIN conta a ON a.id_conta = t.id_conta
-      INNER JOIN usuario u ON u.id_usuario = c.id_usuario
-      INNER JOIN moeda m ON m.id_moeda = a.id_moeda
-      ORDER BY t.id_carteira_has_conta DESC
-    `
-    );
-    return response.rows;
+    const rows = await db
+      .select({
+        id_carteira_has_conta: carteiraHasConta.idCarteiraHasConta,
+        id_carteira: carteiraHasConta.idCarteira,
+        id_conta: carteiraHasConta.idConta,
+        nome_carteira: carteira.nomeCarteira,
+        nome_conta: conta.nomeConta,
+        nome_usuario: usuario.nomeUsuario,
+        saldo_conta: conta.saldoConta,
+        nome_moeda: moeda.nomeMoeda,
+      })
+      .from(carteiraHasConta)
+      .innerJoin(carteira, eq(carteiraHasConta.idCarteira, carteira.idCarteira))
+      .innerJoin(conta, eq(carteiraHasConta.idConta, conta.idConta))
+      .innerJoin(usuario, eq(carteira.idUsuario, usuario.idUsuario))
+      .innerJoin(moeda, eq(conta.idMoeda, moeda.idMoeda))
+      .orderBy(desc(carteiraHasConta.idCarteiraHasConta));
+    return rows;
   }
 
   async findById(id) {
-    const response = await database.query(
-      `SELECT * FROM carteira_has_conta WHERE id_carteira_has_conta = $1`,
-      [id]
-    );
-    return response.rows[0] || null;
+    const rows = await db
+      .select()
+      .from(carteiraHasConta)
+      .where(eq(carteiraHasConta.idCarteiraHasConta, id));
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
   async verifyIdCarteiraExistence(id) {
-    const response = await database.query(
-      `SELECT * FROM carteira WHERE id_carteira = $1`,
-      [id]
-    );
-    return response.rows[0] || null;
+    const rows = await db
+      .select()
+      .from(carteira)
+      .where(eq(carteira.idCarteira, id));
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
   async verifyIdContaExistence(id) {
-    const response = await database.query(
-      `SELECT * FROM conta WHERE id_conta = $1`,
-      [id]
-    );
-    return response.rows[0] || null;
+    const rows = await db
+      .select()
+      .from(conta)
+      .where(eq(conta.idConta, id));
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
   async create(dados) {
-    const response = await database.query(
-      `INSERT INTO carteira_has_conta (id_carteira, id_conta) VALUES ($1, $2) RETURNING *`,
-      [dados.id_carteira, dados.id_conta]
-    );
-    return response.rows[0];
+    const rows = await db
+      .insert(carteiraHasConta)
+      .values(
+        semUndefined({
+          idCarteira: dados.id_carteira,
+          idConta: dados.id_conta,
+        }),
+      )
+      .returning();
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
   async update(id, dados) {
-    const response = await database.query(
-      `UPDATE carteira_has_conta SET id_carteira = $1, id_conta = $2 WHERE id_carteira_has_conta = $3 RETURNING *`,
-      [dados.id_carteira, dados.id_conta, id]
-    );
-    return response.rows[0] || null;
+    const rows = await db
+      .update(carteiraHasConta)
+      .set(
+        semUndefined({
+          idCarteira: dados.id_carteira,
+          idConta: dados.id_conta,
+        }),
+      )
+      .where(eq(carteiraHasConta.idCarteiraHasConta, id))
+      .returning();
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
   async delete(id) {
-    const response = await database.query(
-      `DELETE FROM carteira_has_conta WHERE id_carteira_has_conta = $1`,
-      [id]
-    );
-    return response.rowCount > 0;
+    const rows = await db
+      .delete(carteiraHasConta)
+      .where(eq(carteiraHasConta.idCarteiraHasConta, id))
+      .returning({
+        id_carteira_has_conta: carteiraHasConta.idCarteiraHasConta,
+      });
+    return rows.length > 0;
   }
 }

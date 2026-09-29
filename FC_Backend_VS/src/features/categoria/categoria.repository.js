@@ -40,11 +40,8 @@ export class CategoriaRepository {
     const rows = await db
       .insert(categoria)
       .values({ nomeCategoria: nome_categoria })
-      .returning({
-        id_categoria: categoria.idCategoria,
-        nome_categoria: categoria.nomeCategoria,
-      });
-    return rows[0] ?? null;
+      .returning();
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
   async update(id, { nome_categoria }) {
@@ -52,11 +49,8 @@ export class CategoriaRepository {
       .update(categoria)
       .set({ nomeCategoria: nome_categoria })
       .where(eq(categoria.idCategoria, id))
-      .returning({
-        id_categoria: categoria.idCategoria,
-        nome_categoria: categoria.nomeCategoria,
-      });
-    return rows[0] ?? null;
+      .returning();
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
   async delete(id) {
