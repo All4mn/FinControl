@@ -36,6 +36,7 @@ export default function Header({ usuario, logado = false }) {
 
   const navLinks = [
     { href: '/dashboard', label: 'Início', icon: 'home' },
+    { href: '/dashboard/transacoes', label: 'Transações', icon: 'wallet' },
     { href: '/dashboard/relatorios', label: 'Relatórios', icon: 'chart' },
     { href: '/dashboard/arquivados', label: 'Arquivados', icon: 'archive' },
     { href: '/dashboard/conta', label: 'Nova Conta', icon: 'plus' },

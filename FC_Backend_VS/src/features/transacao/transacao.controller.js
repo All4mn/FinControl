@@ -13,7 +13,7 @@ export class TransacaoController {
 
   async listar(req, res) {
     try {
-      const transacoes = await this.service.findAll();
+      const transacoes = await this.service.findAll(req.usuario.id_usuario);
       return res.status(200).send({ sucesso: true, dados: transacoes });
     } catch (err) {
       return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
@@ -23,7 +23,7 @@ export class TransacaoController {
   async archive(req, res) {
     try {
       const { id } = req.params;
-      const transacao = await this.service.archive(id);
+      const transacao = await this.service.archive(id, req.usuario.id_usuario);
       if (!transacao)
         return res
           .status(404)
@@ -37,7 +37,7 @@ export class TransacaoController {
   async buscarPorId(req, res) {
     try {
       const { id } = req.params;
-      const transacao = await this.service.findById(id);
+      const transacao = await this.service.findById(id, req.usuario.id_usuario);
       if (!transacao)
         return res
           .status(404)
@@ -50,7 +50,9 @@ export class TransacaoController {
 
   async criar(req, res) {
     try {
-      const novaTransacao = await this.service.create(req.body);
+      const novaTransacao = await this.service.create(req.body, req.usuario.id_usuario);
+      if (!novaTransacao)
+        return res.status(400).send({ sucesso: false, mensagem: "Conta ou carteira inválida" });
       return res.status(201).send({ sucesso: true, dados: novaTransacao });
     } catch (err) {
       console.error("ERRO AO CRIAR TRANSAÇÃO:", err.message);
@@ -61,7 +63,7 @@ export class TransacaoController {
   async atualizar(req, res) {
     try {
       const { id } = req.params;
-      const transacao = await this.service.update(id, req.body);
+      const transacao = await this.service.update(id, req.body, req.usuario.id_usuario);
       if (!transacao)
         return res
           .status(404)
@@ -75,7 +77,7 @@ export class TransacaoController {
   async deletar(req, res) {
     try {
       const { id } = req.params;
-      const deletado = await this.service.delete(id);
+      const deletado = await this.service.delete(id, req.usuario.id_usuario);
       if (!deletado)
         return res
           .status(404)
