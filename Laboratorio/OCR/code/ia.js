@@ -1,7 +1,9 @@
 import { Groq } from "groq-sdk/client.js";
 
+import { configDotenv } from "dotenv";
+
 const groq = new Groq({
-    apiKey:'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'
+    apiKey:process.env.API_KEY
 })
 
 export const main = async(data)=>{

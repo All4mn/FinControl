@@ -11,6 +11,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "dotenv": "^18.0.4",
     "groq-sdk": "^1.6.0",
     "tesseract.js": "^7.0.0"
   }
