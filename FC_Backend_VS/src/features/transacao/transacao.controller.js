@@ -1,3 +1,5 @@
+import { AppError } from "../../Errors/AppError.js";
+
 export class TransacaoController {
   constructor(service) {
     this.service = service;
@@ -53,6 +55,19 @@ export class TransacaoController {
       const novaTransacao = await this.service.create(req.body);
       return res.status(201).send({ sucesso: true, dados: novaTransacao });
     } catch (err) {
+      if (err instanceof AppError) {
+        return res
+          .status(err.statusCode)
+          .send({ sucesso: false, mensagem: err.message });
+      }
+
+      if (["23503", "23522", "22P02", "23514"].includes(err.code)) {
+        return res.status(400).send({
+          sucesso: false,
+          mensagem: "Dados da transação inválidos",
+        });
+      }
+
       console.error("ERRO AO CRIAR TRANSAÇÃO:", err.message);
       return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
     }
