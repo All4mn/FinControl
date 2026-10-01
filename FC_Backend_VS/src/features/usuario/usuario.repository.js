@@ -1,76 +1,124 @@
 // =============================================================================
 // models/repositories/usuario.repository.js
-// Acesso ao banco de dados para a tabela de usuario
+// Acesso ao banco de dados para a tabela de usuario (via Drizzle ORM)
 // =============================================================================
 
-import database from "../../config/db.js";
+import { eq, and, desc } from "drizzle-orm";
+import { db } from "../../config/drizzle.js";
+import { usuario } from "../../db/schema.js";
+
+// Converte chaves camelCase (retorno do Drizzle) para snake_case,
+// mantendo o mesmo formato que o restante da aplicação espera.
+const toSnakeCase = (value) =>
+  value.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
+const mapRow = (row) =>
+  Object.fromEntries(
+    Object.entries(row).map(([key, value]) => [toSnakeCase(key), value]),
+  );
+
+const mapRows = (rows) => rows.map(mapRow);
+
+// Remove campos undefined antes de insert/update,
+// para não enviar "undefined" ao banco via Drizzle.
+const semUndefined = (obj) =>
+  Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
+
+// Campos seguros para retorno (nunca incluir senha_usuario/is_admin
+// nestas projeções, pois o resultado é devolvido direto na resposta HTTP).
+const camposPublicos = {
+  id_usuario: usuario.idUsuario,
+  nome_usuario: usuario.nomeUsuario,
+  email_usuario: usuario.emailUsuario,
+  telefone_usuario: usuario.telefoneUsuario,
+};
 
 export class UsuarioRepository {
   /**
    * Busca todos os usuários.
    */
   async findAll() {
-    const response = await database.query(
-      "SELECT * FROM usuario ORDER BY id_usuario DESC",
-    );
-    return response.rows;
+    const rows = await db
+      .select()
+      .from(usuario)
+      .orderBy(desc(usuario.idUsuario));
+    return mapRows(rows);
   }
 
   async findByLogin({ email_usuario, senha_usuario }) {
-    const response = await database.query(
-      "SELECT id_usuario, nome_usuario, email_usuario, telefone_usuario FROM usuario WHERE email_usuario = $1 AND senha_usuario = $2 AND id_status_usuario = 1",
-      [email_usuario, senha_usuario],
-    );
-    return response.rows[0] || null;
+    const rows = await db
+      .select(camposPublicos)
+      .from(usuario)
+      .where(
+        and(
+          eq(usuario.emailUsuario, email_usuario),
+          eq(usuario.senhaUsuario, senha_usuario),
+          eq(usuario.idStatusUsuario, 1),
+        ),
+      );
+
+    return rows[0] ?? null;
   }
 
   /**
    * Busca usuário por ID.
    */
   async findById(id) {
-    const response = await database.query(
-      "SELECT * FROM usuario WHERE id_usuario = $1",
-      [id],
-    );
-    return response.rows[0] || null;
+    const rows = await db
+      .select()
+      .from(usuario)
+      .where(eq(usuario.idUsuario, id));
+
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
   /**
    * Busca usuário pelo ID do Google.
    */
   async findByGoogleId(googleId) {
-    console.log("Buscando usuário por Google ID:", googleId);
-    const response = await database.query(
-      "SELECT id_usuario, nome_usuario, email_usuario, telefone_usuario, google_id_usuario FROM usuario WHERE google_id_usuario = $1",
-      [googleId],
-    );
-    return response.rows[0] || null;
+    const rows = await db
+      .select({
+        ...camposPublicos,
+        google_id_usuario: usuario.googleIdUsuario,
+      })
+      .from(usuario)
+      .where(eq(usuario.googleIdUsuario, googleId));
+
+    return rows[0] ?? null;
   }
 
   /**
    * Cria um novo usuário.
    */
   async create({ nome_usuario, email_usuario, senha_usuario, telefone_usuario }) {
-    console.log("Criando usuário:", {
-      nome_usuario,
-      email_usuario,
-      telefone_usuario,
-    });
-    const response = await database.query(
-      `INSERT INTO usuario (nome_usuario, email_usuario, senha_usuario, telefone_usuario, id_status_usuario)
-       VALUES ($1, $2, $3, $4 , 1)
-       RETURNING id_usuario, nome_usuario, email_usuario, telefone_usuario`,
-      [nome_usuario, email_usuario, senha_usuario, telefone_usuario],
-    );
-    return response.rows[0];
+    const rows = await db
+      .insert(usuario)
+      .values(
+        semUndefined({
+          nomeUsuario: nome_usuario,
+          emailUsuario: email_usuario,
+          senhaUsuario: senha_usuario,
+          telefoneUsuario: telefone_usuario,
+          idStatusUsuario: 1,
+        }),
+      )
+      .returning(camposPublicos);
+
+    return rows[0] ?? null;
   }
 
   async buscarPorEmail(email) {
-    const response = await database.query(
-      "SELECT id_usuario, nome_usuario, email_usuario, senha_usuario FROM usuario WHERE email_usuario = $1",
-      [email],
-    );
-    return response.rows[0] || null;
+    const rows = await db
+      .select({
+        id_usuario: usuario.idUsuario,
+        nome_usuario: usuario.nomeUsuario,
+        email_usuario: usuario.emailUsuario,
+        senha_usuario: usuario.senhaUsuario,
+      })
+      .from(usuario)
+      .where(eq(usuario.emailUsuario, email));
+
+    return rows[0] ?? null;
   }
 
   /**
@@ -82,13 +130,23 @@ export class UsuarioRepository {
     email_usuario,
     telefone_usuario = null,
   }) {
-    const response = await database.query(
-      `INSERT INTO usuario (nome_usuario, email_usuario, telefone_usuario, google_id_usuario, id_status_usuario)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id_usuario, nome_usuario, email_usuario, telefone_usuario, google_id_usuario`,
-      [nome_usuario, email_usuario, telefone_usuario, google_id, 1],
-    );
-    return response.rows[0];
+    const rows = await db
+      .insert(usuario)
+      .values(
+        semUndefined({
+          nomeUsuario: nome_usuario,
+          emailUsuario: email_usuario,
+          telefoneUsuario: telefone_usuario,
+          googleIdUsuario: google_id,
+          idStatusUsuario: 1,
+        }),
+      )
+      .returning({
+        ...camposPublicos,
+        google_id_usuario: usuario.googleIdUsuario,
+      });
+
+    return rows[0] ?? null;
   }
 
   /**
@@ -98,36 +156,44 @@ export class UsuarioRepository {
     id,
     { nome_usuario, email_usuario, senha_usuario, telefone_usuario },
   ) {
-    const response = await database.query(
-      `UPDATE usuario
-       SET nome_usuario = $1, email_usuario = $2, senha_usuario = $3, telefone_usuario = $4
-       WHERE id_usuario = $5
-       RETURNING id_usuario, nome_usuario, email_usuario, telefone_usuario`,
-      [nome_usuario, email_usuario, senha_usuario, telefone_usuario, id],
-    );
-    return response.rows[0] || null;
+    const rows = await db
+      .update(usuario)
+      .set(
+        semUndefined({
+          nomeUsuario: nome_usuario,
+          emailUsuario: email_usuario,
+          senhaUsuario: senha_usuario,
+          telefoneUsuario: telefone_usuario,
+        }),
+      )
+      .where(eq(usuario.idUsuario, id))
+      .returning(camposPublicos);
+
+    return rows[0] ?? null;
   }
 
   /**
    * Remove um usuário por ID.
    */
   async delete(id) {
-    const response = await database.query(
-      "DELETE FROM usuario WHERE id_usuario = $1",
-      [id],
-    );
-    return response.rowCount > 0;
+    const rows = await db
+      .delete(usuario)
+      .where(eq(usuario.idUsuario, id))
+      .returning({ id_usuario: usuario.idUsuario });
+
+    return rows.length > 0;
   }
 
   /**
    * Ativa ou desativa um usuário.
    */
   async desativar(id) {
-    console.log("req no model usuario desativar", id);
-    const response = await database.query(
-      "UPDATE usuario SET id_status_usuario = 2 WHERE id_usuario = $1",
-      [id],
-    );
-    return response.rowCount > 0;
+    const rows = await db
+      .update(usuario)
+      .set({ idStatusUsuario: 2 })
+      .where(eq(usuario.idUsuario, id))
+      .returning({ id_usuario: usuario.idUsuario });
+
+    return rows.length > 0;
   }
 }

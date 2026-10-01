@@ -1,63 +1,88 @@
 // =============================================================================
 // src/features/moeda/moeda.repository.js
-// Acesso ao banco de dados para a tabela de moeda
+// Acesso ao banco de dados para a tabela de moeda (via Drizzle ORM)
 // =============================================================================
 
-import database from "../../config/db.js";
+import { eq, asc, sql } from "drizzle-orm";
+import { db } from "../../config/drizzle.js";
+import { moeda, conta } from "../../db/schema.js";
+
+// Converte chaves camelCase (retorno do Drizzle) para snake_case,
+// mantendo o mesmo formato que o restante da aplicação espera.
+const toSnakeCase = (value) =>
+  value.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
+const mapRow = (row) =>
+  Object.fromEntries(
+    Object.entries(row).map(([key, value]) => [toSnakeCase(key), value]),
+  );
+
+const mapRows = (rows) => rows.map(mapRow);
+
+// Remove campos undefined antes de insert/update,
+// para não enviar "undefined" ao banco via Drizzle.
+const semUndefined = (obj) =>
+  Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
 
 export class MoedaRepository {
   async findAll() {
-    const response = await database.query(
-      "SELECT * FROM moeda ORDER BY nome_moeda ASC"
-    );
-    return response.rows;
+    const rows = await db
+      .select()
+      .from(moeda)
+      .orderBy(asc(moeda.nomeMoeda));
+    return mapRows(rows);
   }
 
   async findById(id) {
-    const response = await database.query(
-      "SELECT * FROM moeda WHERE id_moeda = $1",
-      [id]
-    );
-    return response.rows[0] || null;
+    const rows = await db
+      .select()
+      .from(moeda)
+      .where(eq(moeda.idMoeda, id));
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
   async findByName(nome_moeda) {
-    const response = await database.query(
-      "SELECT * FROM moeda WHERE LOWER(nome_moeda) = LOWER($1) LIMIT 1",
-      [nome_moeda]
-    );
-    return response.rows[0];
+    const rows = await db
+      .select()
+      .from(moeda)
+      .where(
+        sql`LOWER(${moeda.nomeMoeda}) = LOWER(${nome_moeda})`,
+      )
+      .limit(1);
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
   async hasConnections(id) {
-    const response = await database.query(
-      "SELECT 1 FROM conta WHERE id_moeda = $1 LIMIT 1",
-      [id]
-    );
-    return response.rowCount > 0;
+    const rows = await db
+      .select({ id_conta: conta.idConta })
+      .from(conta)
+      .where(eq(conta.idMoeda, id))
+      .limit(1);
+    return rows.length > 0;
   }
 
   async create({ nome_moeda }) {
-    const response = await database.query(
-      `INSERT INTO moeda (nome_moeda) VALUES ($1) RETURNING *`,
-      [nome_moeda]
-    );
-    return response.rows[0];
+    const rows = await db
+      .insert(moeda)
+      .values(semUndefined({ nomeMoeda: nome_moeda }))
+      .returning();
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
-  async update(id, nome_moeda ) {
-    const response = await database.query(
-      `UPDATE moeda SET nome_moeda = $1 WHERE id_moeda = $2 RETURNING *`,
-      [nome_moeda, id]
-    );
-    return response.rows[0] || null;
+  async update(id, nome_moeda) {
+    const rows = await db
+      .update(moeda)
+      .set({ nomeMoeda: nome_moeda })
+      .where(eq(moeda.idMoeda, id))
+      .returning();
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
   async delete(id) {
-    const response = await database.query(
-      "DELETE FROM moeda WHERE id_moeda = $1",
-      [id]
-    );
-    return response.rowCount > 0;
+    const rows = await db
+      .delete(moeda)
+      .where(eq(moeda.idMoeda, id))
+      .returning({ id_moeda: moeda.idMoeda });
+    return rows.length > 0;
   }
 }

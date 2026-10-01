@@ -1,113 +1,103 @@
 // =============================================================================
 // models/repositories/transacao.repository.js
-// Acesso ao banco de dados para a tabela de transacao
+// Acesso ao banco de dados para a tabela de transacao (via Drizzle ORM)
 // =============================================================================
 
-import database from "../../config/db.js";
+import { eq, desc } from "drizzle-orm";
+import { db } from "../../config/drizzle.js";
+import { transacao } from "../../db/schema.js";
+
+// Converte chaves camelCase (retorno do Drizzle) para snake_case,
+// mantendo o mesmo formato que o restante da aplicação espera.
+const toSnakeCase = (value) =>
+  value.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
+const mapRow = (row) =>
+  Object.fromEntries(
+    Object.entries(row).map(([key, value]) => [toSnakeCase(key), value]),
+  );
+
+const mapRows = (rows) => rows.map(mapRow);
+
+// Remove campos undefined antes de insert/update,
+// para não enviar "undefined" ao banco via Drizzle.
+const semUndefined = (obj) =>
+  Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
 
 export class TransacaoRepository {
   async findAll() {
-    const response = await database.query(
-      "SELECT * FROM transacao ORDER BY data DESC",
-    );
-    return response.rows;
+    const rows = await db
+      .select()
+      .from(transacao)
+      .orderBy(desc(transacao.data));
+    return mapRows(rows);
   }
 
   async archive(id) {
-    const response = await database.query(
-      `UPDATE transacao 
-       SET arquivado = true
-       WHERE id_transacao = $1
-       RETURNING *`,
-      [id],
-    );
-    return response.rows[0] || null;
+    const rows = await db
+      .update(transacao)
+      .set({ arquivado: true })
+      .where(eq(transacao.idTransacao, id))
+      .returning();
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
   async findById(id) {
-    const response = await database.query(
-      "SELECT * FROM transacao WHERE id_transacao = $1",
-      [id],
-    );
-    return response.rows[0] || null;
+    const rows = await db
+      .select()
+      .from(transacao)
+      .where(eq(transacao.idTransacao, id));
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
-  async create({
-    id_conta,
-    id_categoria,
-    id_metodo,
-    id_carteira,
-    valor,
-    descricao,
-    quitado,
-    arquivado,
-    data,
-    entrada,
-  }) {
-    const response = await database.query(
-      `INSERT INTO transacao 
-        (id_conta, id_categoria, id_metodo, id_carteira, valor, descricao, quitado, arquivado, data, entrada)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-       RETURNING *`,
-      [
-        id_conta,
-        id_categoria,
-        id_metodo,
-        id_carteira,
-        valor,
-        descricao,
-        quitado,
-        arquivado,
-        data,
-        entrada,
-      ],
-    );
-    return response.rows[0];
+  async create(dados) {
+    const rows = await db
+      .insert(transacao)
+      .values(
+        semUndefined({
+          idConta: dados.id_conta,
+          idCategoria: dados.id_categoria,
+          idMetodo: dados.id_metodo,
+          idCarteira: dados.id_carteira,
+          valor: dados.valor,
+          descricao: dados.descricao,
+          quitado: dados.quitado,
+          arquivado: dados.arquivado,
+          data: dados.data,
+          entrada: dados.entrada,
+        }),
+      )
+      .returning();
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
-  async update(
-    id,
-    {
-      id_conta,
-      id_categoria,
-      id_metodo,
-      id_carteira,
-      valor,
-      descricao,
-      quitado,
-      arquivado,
-      data,
-      entrada,
-    },
-  ) {
-    const response = await database.query(
-      `UPDATE transacao 
-       SET id_conta = $1, id_categoria = $2, id_metodo = $3, id_carteira = $4, 
-           valor = $5, descricao = $6, quitado = $7, arquivado = $8, data = $9, entrada = $10
-       WHERE id_transacao = $11
-       RETURNING *`,
-      [
-        id_conta,
-        id_categoria,
-        id_metodo,
-        id_carteira,
-        valor,
-        descricao,
-        quitado,
-        arquivado,
-        data,
-        entrada,
-        id,
-      ],
-    );
-    return response.rows[0] || null;
+  async update(id, dados) {
+    const rows = await db
+      .update(transacao)
+      .set(
+        semUndefined({
+          idConta: dados.id_conta,
+          idCategoria: dados.id_categoria,
+          idMetodo: dados.id_metodo,
+          idCarteira: dados.id_carteira,
+          valor: dados.valor,
+          descricao: dados.descricao,
+          quitado: dados.quitado,
+          arquivado: dados.arquivado,
+          data: dados.data,
+          entrada: dados.entrada,
+        }),
+      )
+      .where(eq(transacao.idTransacao, id))
+      .returning();
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
   async delete(id) {
-    const response = await database.query(
-      "DELETE FROM transacao WHERE id_transacao = $1",
-      [id],
-    );
-    return response.rowCount > 0;
+    const rows = await db
+      .delete(transacao)
+      .where(eq(transacao.idTransacao, id))
+      .returning({ id_transacao: transacao.idTransacao });
+    return rows.length > 0;
   }
 }
