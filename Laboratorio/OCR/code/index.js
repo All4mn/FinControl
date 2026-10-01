@@ -4,9 +4,9 @@ import { main } from "./ia.js";
 
 const worker = await createWorker('por')
 
-const {data} =  await worker.recognize('./image/comprovante.jpeg')
+const {data} =  await worker.recognize('./image/andrei.jpeg')
 
-main(data)
+console.log(await main(data))
 
-// console.log('texto:', data.text)
-// console.log('Confiança:', data.confidence);
+console.log('texto:', data.text)
+console.log('Confiança:', data.confidence);
