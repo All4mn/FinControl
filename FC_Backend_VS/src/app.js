@@ -8,16 +8,16 @@ import cookie from "@fastify/cookie";
 import dotenv from "dotenv";
 
 // Importando as rotas do Fastify
-import { usuarioRoutes } from "./features/usuario/usuarioRoutes.js";
-import { categoriaRoutes } from "./features/categoria/categoriaRoutes.js";
-import { metodoRoutes } from "./features/metodo/metodoRoutes.js";
-import { contaRoutes } from "./features/conta/contaRoutes.js";
-import { carteiraRoutes } from "./features/carteira/carteiraRoutes.js";
+import { usuarioRoutes } from "./features/usuario/usuario.routes.js";
+import { categoriaRoutes } from "./features/categoria/categoria.routes.js";
+import { metodoRoutes } from "./features/metodo/metodo.routes.js";
+import { contaRoutes } from "./features/conta/conta.routes.js";
+import { carteiraRoutes } from "./features/carteira/carteira.routes.js";
 import { CarteiraHasContaRoutes } from "./features/carteiraHasConta/carteiraHasConta.routes.js";
-import { transacaoRoutes } from "./features/transacao/transacaoRoutes.js";
-import { statusUsuarioRoutes } from "./features/status_usuario/statusUsuarioRoutes.js";
-import { logsRoutes } from "./features/logs/logsRoutes.js";
-import { moedaRoutes } from "./features/moeda/moedaRoutes.js"; // <-- Import adicionado
+import { transacaoRoutes } from "./features/transacao/transacao.routes.js";
+import { statusUsuarioRoutes } from "./features/status_usuario/statusUsuario.routes.js";
+import { logsRoutes } from "./features/logs/logs.routes.js";
+import { moedaRoutes } from "./features/moeda/moeda.routes.js"; // <-- Import adicionado
 import { AppError } from "./Errors/AppError.js";
 
 dotenv.config();

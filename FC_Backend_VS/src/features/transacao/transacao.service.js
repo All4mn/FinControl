@@ -3,6 +3,8 @@
 // Lógica de negócios para transacao
 // =============================================================================
 
+import { AppError } from "../../Errors/AppError.js";
+
 export class TransacaoService {
   constructor(repository) {
     this.repository = repository;
@@ -34,12 +36,12 @@ export class TransacaoService {
     data,
     entrada,
   }) {
-    if (!id_conta) throw new Error("ID da conta é obrigatório");
+    if (!id_conta) throw new AppError("ID da conta é obrigatório", 400);
     if (valor === undefined || valor === null) {
-      throw new Error("Valor da transação é obrigatório");
+      throw new AppError("Valor da transação é obrigatório", 400);
     }
     if (!descricao || descricao.trim() === "") {
-      throw new Error("Descrição é obrigatória");
+      throw new AppError("Descrição é obrigatória", 400);
     }
 
     return await this.repository.create({
