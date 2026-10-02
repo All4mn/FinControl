@@ -1,0 +1,3 @@
+# VITE_BACKEND_RENDER_URL=http://localhost:3000
+VITE_BACKEND_RENDER_URL=https://fincontrol-1-ya5j.onrender.com
+VITE_GOOGLE_CLIENT_ID ='507845155016-ka9aldom1ud6urvtd8r7a79hg5oe97e9.apps.googleusercontent.com'

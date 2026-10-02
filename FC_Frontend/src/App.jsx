@@ -15,6 +15,8 @@ import CreateMoeda from "./pages/createMoeda/createMoeda.jsx";
 // import NovaConta from "./pages/novaConta/NovaConta.jsx"
 import Conta from "./pages/conta/Conta.jsx";
 import CarteiraHasConta from "./pages/carteiraHasConta/CarteiraHasConta.jsx";
+import Transacoes from "./pages/transacoes/Transacoes.jsx";
+import Relatorios from "./pages/relatorios/Relatorios.jsx";
 
 export default function App() {
   return (
@@ -29,6 +31,8 @@ export default function App() {
         <Route path="/completar-cadastro" element={<CompletarCadastro />} />
 
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard/transacoes" element={<Transacoes />} />
+        <Route path="/dashboard/relatorios" element={<Relatorios />} />
 
         <Route path="/dashboard/logs" element={<Logs />} />
 
@@ -45,8 +49,6 @@ export default function App() {
           path="/dashboard/carteira-has-conta"
           element={<CarteiraHasConta />}
         />
-
-        {/* <Route path="/dashboard/relatorios" element={<Relatorios />} /> */}
 
         {/* <Route path="/dashboard/arquivados" element={<Arquivados />} /> */}
 
