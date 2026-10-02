@@ -241,24 +241,67 @@ export default function Transacoes() {
 
         {erro && <p className={styles.erro} role="alert">{erro}</p>}
 
-        <section className={styles.resumo} aria-label="Resumo do mês">
-          <article className={styles.resumoItem}>
-            <span className={styles.resumoRotulo}><ArrowDownLeft size={16} /> Entradas no mês</span>
-            {resumo.length ? resumo.map((linha) => (
-              <strong className={styles.resumoValor} key={`entrada-${linha.moeda}`}>{moedaParaCodigo(linha.moeda)} {formatarMoeda(linha.entradas, linha.moeda)}</strong>
-            )) : <strong className={styles.resumoValor}>{formatarMoeda(0, "Real")}</strong>}
-          </article>
-          <article className={styles.resumoItem}>
-            <span className={styles.resumoRotulo}><ArrowUpRight size={16} /> Saídas no mês</span>
-            {resumo.length ? resumo.map((linha) => (
-              <strong className={styles.resumoValor} key={`saida-${linha.moeda}`}>{moedaParaCodigo(linha.moeda)} {formatarMoeda(linha.saidas, linha.moeda)}</strong>
-            )) : <strong className={styles.resumoValor}>{formatarMoeda(0, "Real")}</strong>}
-          </article>
-          <article className={`${styles.resumoItem} ${styles.resumoSaldo}`}>
-            <span className={styles.resumoRotulo}>Movimentações registradas</span>
-            <strong className={styles.resumoValor}>{transacoes.length}</strong>
-            <span className={styles.resumoNota}>no período completo</span>
-          </article>
+        <section className={styles.listaSection}>
+          <div className={styles.listaTopo}>
+            <h2>Movimentações</h2>
+            <div className={styles.controles}>
+              <div className={styles.filtros} role="group" aria-label="Filtrar por tipo">
+                {[["todas", "Todas"], ["entradas", "Receitas"], ["saidas", "Despesas"]].map(([valor, rotulo]) => (
+                  <button key={valor} className={tipoFiltro === valor ? styles.filtroAtivo : ""} onClick={() => setTipoFiltro(valor)}>{rotulo}</button>
+                ))}
+              </div>
+              <label className={styles.busca}>
+                <Search size={17} aria-hidden="true" />
+                <input value={busca} onChange={(evento) => setBusca(evento.target.value)} placeholder="Buscar movimentação" aria-label="Buscar movimentação" />
+              </label>
+            </div>
+          </div>
+
+          {falhaCarregamento ? (
+            <div className={styles.vazio}>
+              <h3>Não foi possível conectar ao FinControl</h3>
+              <p>Confira se o servidor está disponível e atualize a página.</p>
+            </div>
+          ) : !contas.length ? (
+            <div className={styles.vazio}>
+              <h3>Adicione uma conta para começar</h3>
+              <p>As transações precisam estar vinculadas a uma das suas contas.</p>
+              <Link to="/dashboard/conta" className={styles.linkAcao}>Criar conta</Link>
+            </div>
+          ) : transacoesFiltradas.length ? (
+            <div className={styles.tabelaRolagem}>
+              <table className={styles.tabela}>
+                <thead><tr><th>Data</th><th className={styles.valorCabecalho}>Valor</th><th>Descrição</th><th>Método</th><th>Quitado</th><th>Categoria</th><th>Conta</th><th><span className={styles.somenteLeitor}>Ações</span></th></tr></thead>
+                <tbody>
+                  {transacoesFiltradas.map((transacao) => (
+                    <tr key={transacao.id_transacao}>
+                      <td>{new Intl.DateTimeFormat("pt-BR").format(new Date(transacao.data))}</td>
+                      <td className={`${styles.valor} ${transacao.entrada ? styles.valorEntrada : styles.valorSaida}`}>
+                        {transacao.entrada ? "+ " : "− "}{formatarMoeda(transacao.valor, transacao.nome_moeda)}
+                      </td>
+                      <td><span className={styles.descricao}>{transacao.descricao}</span></td>
+                      <td>{transacao.nome_metodo || "Sem método"}</td>
+                      <td><span className={transacao.quitado ? styles.statusPago : styles.statusPendente}>{transacao.quitado ? "Concluída" : "Pendente"}</span></td>
+                      <td>{transacao.nome_categoria || "Sem categoria"}</td>
+                      <td>{transacao.nome_conta}</td>
+                      <td>
+                        <div className={styles.acoesLinha}>
+                          <button type="button" onClick={() => abrirEdicao(transacao)} aria-label={`Editar ${transacao.descricao}`} title="Editar"><Pencil size={16} /></button>
+                          <button type="button" onClick={() => arquivarTransacao(transacao)} aria-label={`Arquivar ${transacao.descricao}`} title="Arquivar"><Archive size={16} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className={styles.vazio}>
+              <h3>{transacoes.length ? "Nenhuma transação encontrada" : "Sua atividade começa aqui"}</h3>
+              <p>{transacoes.length ? "Tente alterar a busca ou o filtro." : "Registre sua primeira receita ou despesa."}</p>
+              {!transacoes.length && <button className={styles.linkAcao} onClick={abrirNovo}>Registrar transação</button>}
+            </div>
+          )}
         </section>
 
         {formAberto && (
@@ -327,67 +370,26 @@ export default function Transacoes() {
           </section>
         )}
 
-        <section className={styles.listaSection}>
-          <div className={styles.listaTopo}>
-            <h2>Movimentações</h2>
-            <div className={styles.controles}>
-              <div className={styles.filtros} role="group" aria-label="Filtrar por tipo">
-                {[["todas", "Todas"], ["entradas", "Receitas"], ["saidas", "Despesas"]].map(([valor, rotulo]) => (
-                  <button key={valor} className={tipoFiltro === valor ? styles.filtroAtivo : ""} onClick={() => setTipoFiltro(valor)}>{rotulo}</button>
-                ))}
-              </div>
-              <label className={styles.busca}>
-                <Search size={17} aria-hidden="true" />
-                <input value={busca} onChange={(evento) => setBusca(evento.target.value)} placeholder="Buscar movimentação" aria-label="Buscar movimentação" />
-              </label>
-            </div>
-          </div>
-
-          {falhaCarregamento ? (
-            <div className={styles.vazio}>
-              <h3>Não foi possível conectar ao FinControl</h3>
-              <p>Confira se o servidor está disponível e atualize a página.</p>
-            </div>
-          ) : !contas.length ? (
-            <div className={styles.vazio}>
-              <h3>Adicione uma conta para começar</h3>
-              <p>As transações precisam estar vinculadas a uma das suas contas.</p>
-              <Link to="/dashboard/conta" className={styles.linkAcao}>Criar conta</Link>
-            </div>
-          ) : transacoesFiltradas.length ? (
-            <div className={styles.tabelaRolagem}>
-              <table className={styles.tabela}>
-                <thead><tr><th>Descrição</th><th>Categoria</th><th>Conta</th><th>Data</th><th>Status</th><th className={styles.valorCabecalho}>Valor</th><th><span className={styles.somenteLeitor}>Ações</span></th></tr></thead>
-                <tbody>
-                  {transacoesFiltradas.map((transacao) => (
-                    <tr key={transacao.id_transacao}>
-                      <td><span className={styles.descricao}>{transacao.descricao}</span><span className={styles.metodo}>{transacao.nome_metodo || "Sem método"}</span></td>
-                      <td>{transacao.nome_categoria || "Sem categoria"}</td>
-                      <td>{transacao.nome_conta}</td>
-                      <td>{new Intl.DateTimeFormat("pt-BR").format(new Date(transacao.data))}</td>
-                      <td><span className={transacao.quitado ? styles.statusPago : styles.statusPendente}>{transacao.quitado ? "Concluída" : "Pendente"}</span></td>
-                      <td className={`${styles.valor} ${transacao.entrada ? styles.valorEntrada : styles.valorSaida}`}>
-                        {transacao.entrada ? "+ " : "− "}{formatarMoeda(transacao.valor, transacao.nome_moeda)}
-                      </td>
-                      <td>
-                        <div className={styles.acoesLinha}>
-                          <button type="button" onClick={() => abrirEdicao(transacao)} aria-label={`Editar ${transacao.descricao}`} title="Editar"><Pencil size={16} /></button>
-                          <button type="button" onClick={() => arquivarTransacao(transacao)} aria-label={`Arquivar ${transacao.descricao}`} title="Arquivar"><Archive size={16} /></button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className={styles.vazio}>
-              <h3>{transacoes.length ? "Nenhuma transação encontrada" : "Sua atividade começa aqui"}</h3>
-              <p>{transacoes.length ? "Tente alterar a busca ou o filtro." : "Registre sua primeira receita ou despesa."}</p>
-              {!transacoes.length && <button className={styles.linkAcao} onClick={abrirNovo}>Registrar transação</button>}
-            </div>
-          )}
+        <section className={styles.resumo} aria-label="Resumo do mês">
+          <article className={styles.resumoItem}>
+            <span className={styles.resumoRotulo}><ArrowDownLeft size={16} /> Entradas no mês</span>
+            {resumo.length ? resumo.map((linha) => (
+              <strong className={styles.resumoValor} key={`entrada-${linha.moeda}`}>{moedaParaCodigo(linha.moeda)} {formatarMoeda(linha.entradas, linha.moeda)}</strong>
+            )) : <strong className={styles.resumoValor}>{formatarMoeda(0, "Real")}</strong>}
+          </article>
+          <article className={styles.resumoItem}>
+            <span className={styles.resumoRotulo}><ArrowUpRight size={16} /> Saídas no mês</span>
+            {resumo.length ? resumo.map((linha) => (
+              <strong className={styles.resumoValor} key={`saida-${linha.moeda}`}>{moedaParaCodigo(linha.moeda)} {formatarMoeda(linha.saidas, linha.moeda)}</strong>
+            )) : <strong className={styles.resumoValor}>{formatarMoeda(0, "Real")}</strong>}
+          </article>
+          <article className={`${styles.resumoItem} ${styles.resumoSaldo}`}>
+            <span className={styles.resumoRotulo}>Movimentações registradas</span>
+            <strong className={styles.resumoValor}>{transacoes.length}</strong>
+            <span className={styles.resumoNota}>no período completo</span>
+          </article>
         </section>
+
       </main>
       <Footer />
     </div>
