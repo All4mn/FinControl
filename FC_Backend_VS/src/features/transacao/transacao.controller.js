@@ -1,3 +1,27 @@
+import { AppError } from "../../Errors/AppError.js";
+
+const responderErro = (reply, error, contexto) => {
+  if (error instanceof AppError) {
+    return reply.status(error.statusCode).send({
+      sucesso: false,
+      mensagem: error.message,
+    });
+  }
+
+  console.error(contexto, error);
+  if (["ETIMEDOUT", "ECONNREFUSED", "ENETUNREACH", "ECONNRESET"].includes(error.code)) {
+    return reply.status(503).send({
+      sucesso: false,
+      mensagem: "Banco de dados indisponível. Verifique a conexão e tente novamente.",
+    });
+  }
+
+  return reply.status(500).send({
+    sucesso: false,
+    mensagem: "Não foi possível processar a transação. Tente novamente.",
+  });
+};
+
 export class TransacaoController {
   constructor(service) {
     this.service = service;
@@ -16,7 +40,7 @@ export class TransacaoController {
       const transacoes = await this.service.findAll(req.usuario.id_usuario);
       return res.status(200).send({ sucesso: true, dados: transacoes });
     } catch (err) {
-      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
+      return responderErro(res, err, "Erro ao listar transações:");
     }
   }
 
@@ -30,7 +54,7 @@ export class TransacaoController {
           .send({ sucesso: false, mensagem: "Transação não encontrada" });
       return res.status(200).send({ sucesso: true, dados: transacao });
     } catch (err) {
-      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
+      return responderErro(res, err, "Erro ao arquivar transação:");
     }
   }
 
@@ -44,7 +68,7 @@ export class TransacaoController {
           .send({ sucesso: false, mensagem: "Transação não encontrada" });
       return res.status(200).send({ sucesso: true, dados: transacao });
     } catch (err) {
-      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
+      return responderErro(res, err, "Erro ao buscar transação:");
     }
   }
 
@@ -55,8 +79,7 @@ export class TransacaoController {
         return res.status(400).send({ sucesso: false, mensagem: "Conta ou carteira inválida" });
       return res.status(201).send({ sucesso: true, dados: novaTransacao });
     } catch (err) {
-      console.error("ERRO AO CRIAR TRANSAÇÃO:", err.message);
-      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
+      return responderErro(res, err, "Erro ao criar transação:");
     }
   }
 
@@ -70,7 +93,7 @@ export class TransacaoController {
           .send({ sucesso: false, mensagem: "Transação não encontrada" });
       return res.status(200).send({ sucesso: true, dados: transacao });
     } catch (err) {
-      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
+      return responderErro(res, err, "Erro ao atualizar transação:");
     }
   }
 
@@ -86,7 +109,7 @@ export class TransacaoController {
         .status(200)
         .send({ sucesso: true, mensagem: "Transação removida" });
     } catch (err) {
-      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
+      return responderErro(res, err, "Erro ao excluir transação:");
     }
   }
 }

@@ -32,11 +32,15 @@ export class ContaService {
     if (!nome_conta || nome_conta.trim() === "") {
       throw new RequiredFieldError("Nome da conta é obrigatório");
     }
-    if(!id_usuario || !id_moeda || saldo_conta === undefined) {
+    if (!id_usuario || !id_moeda || saldo_conta === undefined || saldo_conta === null || String(saldo_conta).trim() === "") {
       throw new RequiredFieldError("Todos os campos são obrigatórios: id_usuario, id_moeda, nome_conta, saldo_conta");
     }
+    if (!Number.isFinite(Number(saldo_conta))) {
+      throw new RequiredFieldError("O saldo inicial deve ser um número válido");
+    }
     const conta = await this.repository.create({ id_usuario, id_moeda, nome_conta, saldo_conta });
-    let carteira = await this.carteiraRepository.findByUsuario(id_usuario);
+    const carteiras = await this.carteiraRepository.findByUsuario(id_usuario);
+    let carteira = carteiras[0];
     if (!carteira) {
       carteira = await this.carteiraRepository.create({
         id_usuario,

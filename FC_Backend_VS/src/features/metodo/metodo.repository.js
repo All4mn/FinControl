@@ -8,7 +8,13 @@ import database from "../../config/db.js";
 export class MetodoRepository {
   async findAll() {
     const response = await database.query(
-      "SELECT * FROM metodo ORDER BY nome_metodo ASC",
+      `SELECT id_metodo, nome_metodo
+       FROM (
+         SELECT DISTINCT ON (lower(btrim(nome_metodo))) id_metodo, nome_metodo
+         FROM metodo
+         ORDER BY lower(btrim(nome_metodo)), id_metodo
+       ) metodos_unicos
+       ORDER BY nome_metodo ASC`,
     );
     return response.rows;
   }

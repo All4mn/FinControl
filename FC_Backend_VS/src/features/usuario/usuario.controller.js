@@ -199,6 +199,7 @@ export class UsuarioController {
       }
 
       const novoUsuario = await this.service.create(dados);
+      res.clearCookie(COOKIE_NAME, { path: "/" });
       return res.status(201).send({ sucesso: true, dados: novoUsuario });
     } catch (err) {
       console.error("Erro ao criar usuário:", err.message);

@@ -2,6 +2,7 @@
 // models/services/transacao.service.js
 // Lógica de negócios para transacao
 // =============================================================================
+import { AppError } from "../../Errors/AppError.js";
 
 export class TransacaoService {
   constructor(repository) {
@@ -13,12 +14,12 @@ export class TransacaoService {
   }
 
   async archive(id, id_usuario) {
-    if (!id) throw new Error("ID é obrigatório");
+    if (!id) throw new AppError("ID é obrigatório", 400);
     return await this.repository.archive(id, id_usuario);
   }
 
   async findById(id, id_usuario) {
-    if (!id) throw new Error("ID é obrigatório");
+    if (!id) throw new AppError("ID é obrigatório", 400);
     return await this.repository.findById(id, id_usuario);
   }
 
@@ -34,18 +35,19 @@ export class TransacaoService {
     data,
     entrada,
   }, id_usuario) {
-    if (!id_conta) throw new Error("ID da conta é obrigatório");
+    if (!id_usuario) throw new AppError("Usuário não autenticado", 401);
+    if (!id_conta) throw new AppError("Selecione uma conta", 400);
     if (valor === undefined || valor === null) {
-      throw new Error("Valor da transação é obrigatório");
+      throw new AppError("Informe o valor da transação", 400);
     }
     if (!Number.isFinite(Number(valor)) || Number(valor) <= 0) {
-      throw new Error("O valor da transação deve ser maior que zero");
+      throw new AppError("O valor da transação deve ser maior que zero", 400);
     }
     if (!descricao || descricao.trim() === "") {
-      throw new Error("Descrição é obrigatória");
+      throw new AppError("Informe a descrição da transação", 400);
     }
     if (!data || Number.isNaN(new Date(data).getTime())) {
-      throw new Error("Data da transação é obrigatória");
+      throw new AppError("Informe uma data válida para a transação", 400);
     }
 
     return await this.repository.create({
@@ -78,19 +80,20 @@ export class TransacaoService {
     },
     id_usuario,
   ) {
-    if (!id) throw new Error("ID é obrigatório");
-    if (!id_conta) throw new Error("ID da conta é obrigatório");
+    if (!id) throw new AppError("ID é obrigatório", 400);
+    if (!id_usuario) throw new AppError("Usuário não autenticado", 401);
+    if (!id_conta) throw new AppError("Selecione uma conta", 400);
     if (valor === undefined || valor === null) {
-      throw new Error("Valor da transação é obrigatório");
+      throw new AppError("Informe o valor da transação", 400);
     }
     if (!Number.isFinite(Number(valor)) || Number(valor) <= 0) {
-      throw new Error("O valor da transação deve ser maior que zero");
+      throw new AppError("O valor da transação deve ser maior que zero", 400);
     }
     if (!descricao || descricao.trim() === "") {
-      throw new Error("Descrição é obrigatória");
+      throw new AppError("Informe a descrição da transação", 400);
     }
     if (!data || Number.isNaN(new Date(data).getTime())) {
-      throw new Error("Data da transação é obrigatória");
+      throw new AppError("Informe uma data válida para a transação", 400);
     }
 
     return await this.repository.update(id, {
@@ -108,7 +111,7 @@ export class TransacaoService {
   }
 
   async delete(id, id_usuario) {
-    if (!id) throw new Error("ID é obrigatório");
+    if (!id) throw new AppError("ID é obrigatório", 400);
     return await this.repository.delete(id, id_usuario);
   }
 }

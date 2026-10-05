@@ -1,4 +1,3 @@
-import React from "react";
 import styles from "./FormularioConta.module.css";
 
 const FormularioConta = ({ postConta, setContaInfos, contaInfos, moeda, carregando, erro, sucesso }) => {
@@ -24,10 +23,11 @@ const FormularioConta = ({ postConta, setContaInfos, contaInfos, moeda, carregan
           <select
             className={`${styles.input} ${styles.select}`}
             value={contaInfos.id_moeda}
-            onChange={(e) => setContaInfos({ ...contaInfos, id_moeda: Number(e.target.value) })}
+            onChange={(e) => setContaInfos({ ...contaInfos, id_moeda: e.target.value ? Number(e.target.value) : "" })}
             required
+            disabled={!moeda?.length || carregando}
           >
-            <option value="">Selecione uma moeda</option>
+            <option value="">{moeda?.length ? "Selecione uma moeda" : "Nenhuma moeda disponível"}</option>
             {moeda &&
               moeda.map((m) => (
                 <option key={m.id_moeda} value={m.id_moeda}>{m.nome_moeda}</option>
@@ -37,15 +37,16 @@ const FormularioConta = ({ postConta, setContaInfos, contaInfos, moeda, carregan
           <input
             className={`${styles.input} ${styles.input_saldo}`}
             type="number"
+            step="0.01"
             placeholder="Saldo inicial"
             value={contaInfos.saldo_conta}
-            onChange={(e) => setContaInfos({ ...contaInfos, saldo_conta: Number(e.target.value) })}
+            onChange={(e) => setContaInfos({ ...contaInfos, saldo_conta: e.target.value })}
             autoComplete="off"
             required
           />
         </div>
 
-        <button type="submit" disabled={carregando} className={styles.btn}>
+        <button type="submit" disabled={carregando || !moeda?.length} className={styles.btn}>
           {carregando ? <span className={styles.spinner} /> : "Criar conta"}
         </button>
       </form>

@@ -34,7 +34,11 @@ export class TransacaoRepository {
 
   async findAll(id_usuario) {
     const response = await database.query(
-      `SELECT t.*, c.nome_conta, moeda.nome_moeda, cat.nome_categoria, m.nome_metodo
+            `SELECT t.*,
+              c.nome_conta,
+              moeda.nome_moeda AS nome_moeda,
+              cat.nome_categoria AS nome_categoria,
+              m.nome_metodo AS nome_metodo
        FROM transacao t
        INNER JOIN conta c ON c.id_conta = t.id_conta
        LEFT JOIN moeda ON moeda.id_moeda = c.id_moeda

@@ -10,13 +10,21 @@ INSERT INTO categoria (nome_categoria) VALUES
 ('Despesas fixas');
 
 -- Métodos
-INSERT INTO metodo (nome_metodo) VALUES
-('Pix'),
-('Dinheiro'),
-('Débito'),
-('Crédito'),
-('Transferência Bancária'),
-('Outro');
+INSERT INTO metodo (nome_metodo)
+SELECT novos.nome_metodo
+FROM (VALUES
+	('Pix'),
+	('Dinheiro'),
+	('Débito'),
+	('Crédito'),
+	('Transferência Bancária'),
+	('Outro')
+) AS novos(nome_metodo)
+WHERE NOT EXISTS (
+	SELECT 1
+	FROM metodo existentes
+	WHERE lower(btrim(existentes.nome_metodo)) = lower(btrim(novos.nome_metodo))
+);
 
 -- Moedas
 INSERT INTO moeda (nome_moeda) VALUES

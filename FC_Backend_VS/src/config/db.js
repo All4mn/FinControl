@@ -22,6 +22,7 @@ class database {
         // do PostgreSQL (pode vir de variáveis de ambiente para segurança).
         this.pool = new Pool({
             connectionString: process.env.DB_CONNECTION_STRING,
+            connectionTimeoutMillis: 5000,
             ssl:{
                 rejectUnauthorized: false
             }
@@ -33,12 +34,8 @@ class database {
     // Em produção, pode ser chamado no startup da aplicação para validar a configuração.
     // Para replicar: Use em aplicações onde você quer confirmar a conectividade no início.
     async connection(){
-        try {
-            await this.pool.connect();
-            console.log('Conexão com o banco de dados estabelecida com sucesso!');
-        } catch (error) {
-            console.error('Erro ao conectar ao banco de dados:', error);
-        }
+        const client = await this.pool.connect();
+        client.release();
     }
 
     // Método principal para executar queries SQL.

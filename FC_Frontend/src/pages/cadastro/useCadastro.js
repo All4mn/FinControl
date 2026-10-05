@@ -53,7 +53,9 @@ export const useCadastro = () => {
         telefone_usuario: formData.telefone.replace(/\D/g, ""),
       };
 
-      await axios.post(`${API_BASE_URL}/usuarios`, dados);
+      await axios.post(`${API_BASE_URL}/usuarios`, dados, {
+        withCredentials: true,
+      });
       
       alert("Cadastro realizado com sucesso! Faça login para continuar.");
       navigate("/login");

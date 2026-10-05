@@ -22,6 +22,23 @@ const formatarMoeda = (valor, moeda) =>
     currency: moedaParaCodigo(moeda),
   }).format(Number(valor) || 0);
 
+const metodosUnicos = (metodos, idSelecionado) => {
+  const porNome = new Map();
+  metodos.forEach((metodo) => {
+    const nomeNormalizado = String(metodo.nome_metodo || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim()
+      .replace(/\s+/g, " ")
+      .toLocaleLowerCase("pt-BR");
+    const existente = porNome.get(nomeNormalizado);
+    if (!existente || String(metodo.id_metodo) === String(idSelecionado)) {
+      porNome.set(nomeNormalizado, metodo);
+    }
+  });
+  return [...porNome.values()];
+};
+
 const dataLocal = (data = new Date()) => {
   const ano = data.getFullYear();
   const mes = String(data.getMonth() + 1).padStart(2, "0");
@@ -56,14 +73,20 @@ export default function Transacoes() {
   const [busca, setBusca] = useState("");
   const [erro, setErro] = useState("");
 
-  const carregarTransacoes = async () => {
+  const carregarTransacoes = async (idsContasPermitidas) => {
     const resposta = await axios.get(`${API_BASE_URL}/transacoes`, { withCredentials: true });
-    setTransacoes(resposta.data.dados || []);
+    const permitidas = new Set(idsContasPermitidas.map(Number));
+    const transacoesDoUsuario = (resposta.data.dados || []).filter((transacao) =>
+      permitidas.has(Number(transacao.id_conta)),
+    );
+    setTransacoes(transacoesDoUsuario);
   };
 
   useEffect(() => {
     const carregarDados = async () => {
       try {
+        setTransacoes([]);
+        setContas([]);
         const respostaUsuario = await axios.get(`${API_BASE_URL}/usuarios/me`, { withCredentials: true });
         if (!respostaUsuario.data.sucesso) {
           window.location.href = "/login";
@@ -72,18 +95,19 @@ export default function Transacoes() {
 
         const dadosUsuario = respostaUsuario.data.dados;
         setUsuario(dadosUsuario);
-        const [respostaContas, respostaCategorias, respostaMetodos, respostaTransacoes] = await Promise.all([
+        const [respostaContas, respostaCategorias, respostaMetodos] = await Promise.all([
           axios.get(`${API_BASE_URL}/contas/search/${dadosUsuario.id_usuario}`, { withCredentials: true }),
           axios.get(`${API_BASE_URL}/categorias`, { withCredentials: true }),
           axios.get(`${API_BASE_URL}/metodos`, { withCredentials: true }),
-          axios.get(`${API_BASE_URL}/transacoes`, { withCredentials: true }),
         ]);
 
-        setContas(respostaContas.data.dados || []);
+        const contasDoUsuario = respostaContas.data.dados || [];
+        setContas(contasDoUsuario);
         setCategorias(respostaCategorias.data.dados || []);
         setMetodos(respostaMetodos.data.dados || []);
-        setTransacoes(respostaTransacoes.data.dados || []);
+        await carregarTransacoes(contasDoUsuario.map((conta) => conta.id_conta));
       } catch (falha) {
+        setTransacoes([]);
         if (falha.response?.status === 401) {
           window.location.href = "/login";
           return;
@@ -194,10 +218,14 @@ export default function Transacoes() {
       } else {
         await axios.post(`${API_BASE_URL}/transacoes`, dados, { withCredentials: true });
       }
-      await carregarTransacoes();
+      await carregarTransacoes(contas.map((conta) => conta.id_conta));
       fecharForm();
     } catch (falha) {
-      setErro(falha.response?.data?.mensagem || "Não foi possível salvar a transação.");
+      setErro(
+        falha.response?.data?.mensagem ||
+          falha.response?.data?.message ||
+          "Não foi possível salvar a transação. Verifique sua conexão e tente novamente.",
+      );
     } finally {
       setSalvando(false);
     }
@@ -208,7 +236,7 @@ export default function Transacoes() {
     if (!confirmar) return;
     try {
       await axios.put(`${API_BASE_URL}/transacoes/${transacao.id_transacao}/archive`, {}, { withCredentials: true });
-      await carregarTransacoes();
+      await carregarTransacoes(contas.map((conta) => conta.id_conta));
     } catch (falha) {
       setErro(falha.response?.data?.mensagem || "Não foi possível arquivar a transação.");
     }
@@ -280,9 +308,9 @@ export default function Transacoes() {
                         {transacao.entrada ? "+ " : "− "}{formatarMoeda(transacao.valor, transacao.nome_moeda)}
                       </td>
                       <td><span className={styles.descricao}>{transacao.descricao}</span></td>
-                      <td>{transacao.nome_metodo || "Sem método"}</td>
+                      <td>{transacao.nome_metodo || metodos.find((metodo) => String(metodo.id_metodo) === String(transacao.id_metodo))?.nome_metodo || "Sem método"}</td>
                       <td><span className={transacao.quitado ? styles.statusPago : styles.statusPendente}>{transacao.quitado ? "Concluída" : "Pendente"}</span></td>
-                      <td>{transacao.nome_categoria || "Sem categoria"}</td>
+                      <td>{transacao.nome_categoria || categorias.find((categoria) => String(categoria.id_categoria) === String(transacao.id_categoria))?.nome_categoria || "Sem categoria"}</td>
                       <td>{transacao.nome_conta}</td>
                       <td>
                         <div className={styles.acoesLinha}>
@@ -353,7 +381,7 @@ export default function Transacoes() {
                 <span>Método</span>
                 <select name="id_metodo" value={form.id_metodo} onChange={alterarCampo}>
                   <option value="">Sem método</option>
-                  {metodos.map((metodo) => <option key={metodo.id_metodo} value={metodo.id_metodo}>{metodo.nome_metodo}</option>)}
+                  {metodosUnicos(metodos, form.id_metodo).map((metodo) => <option key={metodo.id_metodo} value={metodo.id_metodo}>{metodo.nome_metodo}</option>)}
                 </select>
               </label>
               <label className={styles.checkboxCampo}>

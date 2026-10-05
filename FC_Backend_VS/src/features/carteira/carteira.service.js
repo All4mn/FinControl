@@ -23,10 +23,11 @@ export class CarteiraService {
       saldo_total: row.saldo_total,
     }));
 
-    const saldo_total = saldos.reduce(
-      (sum, row) => sum + Number(row.saldo_total || 0),
-      0,
-    );
+    const moedas = new Set(saldos.map((saldo) => saldo.id_moeda).filter((id) => id != null).map(String));
+    const valoresValidos = saldos.every((saldo) => saldo.id_moeda != null && Number.isFinite(Number(saldo.saldo_total)));
+    const saldo_total = moedas.size === 1 && valoresValidos
+      ? saldos.reduce((sum, row) => sum + Number(row.saldo_total), 0).toFixed(2)
+      : null;
 
     return {
       id_carteira,
@@ -34,7 +35,7 @@ export class CarteiraService {
       nome_carteira,
       ativo,
       saldos,
-      saldo_total: Number(saldo_total).toFixed(2),
+      saldo_total,
     };
   }
 
