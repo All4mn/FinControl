@@ -4,9 +4,16 @@ import { main } from "./ia.js";
 
 const worker = await createWorker('por')
 
-const {data} =  await worker.recognize('./image/andrei.jpeg')
+// const {data} =  await worker.recognize('./image/andrei.jpeg')
 
-console.log(await main(data))
+export async function reader(pic){
+    console.log('chegou aqui');
+    
+    const {data} = await worker.recognize(pic)
+    return data.text
+} 
 
-console.log('texto:', data.text)
-console.log('Confiança:', data.confidence);
+// console.log(await reader())
+
+// console.log('texto:', data.text)
+// console.log('Confiança:', data.confidence);

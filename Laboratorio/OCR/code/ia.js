@@ -1,9 +1,15 @@
 import { Groq } from "groq-sdk/client.js";
 
-import { configDotenv } from "dotenv";
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+// console.log(process.env.API_KEY);
+
 
 const groq = new Groq({
-    apiKey:'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'
+    // apiKey:process.env.API_KEY
+    apiKey:'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'
 })
 
 export const main = async(data)=>{
@@ -13,18 +19,24 @@ export const main = async(data)=>{
 }
 
 export const chatMessage = async(data)=>{
+    console.log('chegou na ia');
+    
     return groq.chat.completions.create({
         messages:[
             {
                 role: 'system',
                 content:'voce tem que pegar os dados entregues e interpreta-las para me retornar as seguintes informções: Quem fez a transferencia; qual o valor; Para quem foi feita; A data da transferencia; Tipo da transferencia'
+                // content:'me trate igual um rei'
             },
             {
                 role:'user',
-                content:data.text
+                content:data
+                // content:data
 
             }
         ],
         model:'openai/gpt-oss-20b'
     })
 }
+
+// main('ola')
