@@ -51,6 +51,71 @@ export class TransacaoRepository {
     return response.rows;
   }
 
+  async findArchived(id_usuario) {
+    const response = await database.query(
+      `SELECT t.*,
+              c.nome_conta,
+              moeda.nome_moeda AS nome_moeda,
+              cat.nome_categoria AS nome_categoria,
+              m.nome_metodo AS nome_metodo
+       FROM transacao t
+       INNER JOIN conta c ON c.id_conta = t.id_conta
+       LEFT JOIN moeda ON moeda.id_moeda = c.id_moeda
+       LEFT JOIN categoria cat ON cat.id_categoria = t.id_categoria
+       LEFT JOIN metodo m ON m.id_metodo = t.id_metodo
+       WHERE c.id_usuario = $1 AND t.arquivado = TRUE
+       ORDER BY t.data DESC, t.id_transacao DESC`,
+      [id_usuario],
+    );
+    return response.rows;
+  }
+
+  async archive(id, id_usuario) {
+    return this.withTransaction(async (client) => {
+      const existente = await client.query(
+        `SELECT t.* FROM transacao t
+         INNER JOIN conta c ON c.id_conta = t.id_conta
+         WHERE t.id_transacao = $1 AND c.id_usuario = $2
+         FOR UPDATE OF t, c`,
+        [id, id_usuario],
+      );
+      const transacao = existente.rows[0];
+      if (!transacao) return null;
+      if (transacao.arquivado) return transacao;
+
+      await this.atualizarSaldo(client, transacao.id_conta, transacao.valor, !transacao.entrada, transacao.quitado);
+      const response = await client.query(
+        `UPDATE transacao SET arquivado = true
+         WHERE id_transacao = $1 RETURNING *`,
+        [id],
+      );
+      return response.rows[0];
+    });
+  }
+
+  async restore(id, id_usuario) {
+    return this.withTransaction(async (client) => {
+      const existente = await client.query(
+        `SELECT t.* FROM transacao t
+         INNER JOIN conta c ON c.id_conta = t.id_conta
+         WHERE t.id_transacao = $1 AND c.id_usuario = $2
+         FOR UPDATE OF t, c`,
+        [id, id_usuario],
+      );
+      const transacao = existente.rows[0];
+      if (!transacao) return null;
+      if (!transacao.arquivado) return transacao;
+
+      const response = await client.query(
+        `UPDATE transacao SET arquivado = false
+         WHERE id_transacao = $1 RETURNING *`,
+        [id],
+      );
+      await this.atualizarSaldo(client, transacao.id_conta, transacao.valor, transacao.entrada, transacao.quitado);
+      return response.rows[0];
+    });
+  }
+
   async findById(id, id_usuario) {
     const response = await database.query(
       `SELECT t.* FROM transacao t

@@ -28,6 +28,9 @@ export class TransacaoController {
 
     // Vincular o context 'this' para evitar perda de contexto nas rotas
     this.listar = this.listar.bind(this);
+    this.listarArquivadas = this.listarArquivadas.bind(this);
+    this.archive = this.archive.bind(this);
+    this.restore = this.restore.bind(this);
     this.buscarPorId = this.buscarPorId.bind(this);
     this.criar = this.criar.bind(this);
     this.atualizar = this.atualizar.bind(this);
@@ -40,6 +43,39 @@ export class TransacaoController {
       return res.status(200).send({ sucesso: true, dados: transacoes });
     } catch (err) {
       return responderErro(res, err, "Erro ao listar transações:");
+    }
+  }
+
+  async listarArquivadas(req, res) {
+    try {
+      const transacoes = await this.service.findArchived(req.usuario.id_usuario);
+      return res.status(200).send({ sucesso: true, dados: transacoes });
+    } catch (err) {
+      return responderErro(res, err, "Erro ao listar transações arquivadas:");
+    }
+  }
+
+  async archive(req, res) {
+    try {
+      const transacao = await this.service.archive(req.params.id, req.usuario.id_usuario);
+      if (!transacao) {
+        return res.status(404).send({ sucesso: false, mensagem: "Transação não encontrada" });
+      }
+      return res.status(200).send({ sucesso: true, dados: transacao });
+    } catch (err) {
+      return responderErro(res, err, "Erro ao arquivar transação:");
+    }
+  }
+
+  async restore(req, res) {
+    try {
+      const transacao = await this.service.restore(req.params.id, req.usuario.id_usuario);
+      if (!transacao) {
+        return res.status(404).send({ sucesso: false, mensagem: "Transação não encontrada" });
+      }
+      return res.status(200).send({ sucesso: true, dados: transacao });
+    } catch (err) {
+      return responderErro(res, err, "Erro ao restaurar transação:");
     }
   }
 

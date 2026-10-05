@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { ArrowDownLeft, ArrowUpRight, Pencil, Plus, Search, X } from "lucide-react";
+import { Archive, ArrowDownLeft, ArrowUpRight, Pencil, Plus, Search, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "../../components/componentesPadrao/headerLogged/HeaderLogged.jsx";
 import Footer from "../../components/componentesPadrao/footer/Footer.jsx";
@@ -228,6 +228,16 @@ export default function Transacoes() {
     }
   };
 
+  const arquivarTransacao = async (transacao) => {
+    if (!window.confirm(`Arquivar a transação "${transacao.descricao}"?`)) return;
+    try {
+      await axios.put(`${API_BASE_URL}/transacoes/${transacao.id_transacao}/archive`, {}, { withCredentials: true });
+      await carregarTransacoes(contas.map((conta) => conta.id_conta));
+    } catch (falha) {
+      setErro(falha.response?.data?.mensagem || "Não foi possível arquivar a transação.");
+    }
+  };
+
   if (carregando) {
     return (
       <div className={styles.page}>
@@ -289,7 +299,7 @@ export default function Transacoes() {
                 <tbody>
                   {transacoesFiltradas.map((transacao) => (
                     <tr key={transacao.id_transacao}>
-                      <td>{new Intl.DateTimeFormat("pt-BR").format(new Date(transacao.data))}</td>
+                      <td>{new Intl.DateTimeFormat("pt-BR").format(dataTransacaoParaDataLocal(transacao.data))}</td>
                       <td className={`${styles.valor} ${transacao.entrada ? styles.valorEntrada : styles.valorSaida}`}>
                         {transacao.entrada ? "+ " : "− "}{formatarMoeda(transacao.valor, transacao.nome_moeda)}
                       </td>
@@ -301,6 +311,7 @@ export default function Transacoes() {
                       <td>
                         <div className={styles.acoesLinha}>
                           <button type="button" onClick={() => abrirEdicao(transacao)} aria-label={`Editar ${transacao.descricao}`} title="Editar"><Pencil size={16} /></button>
+                          <button type="button" onClick={() => arquivarTransacao(transacao)} aria-label={`Arquivar ${transacao.descricao}`} title="Arquivar"><Archive size={16} /></button>
                         </div>
                       </td>
                     </tr>

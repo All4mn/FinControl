@@ -4,6 +4,7 @@ import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import Header from "../../components/componentesPadrao/headerLogged/HeaderLogged.jsx";
 import Footer from "../../components/componentesPadrao/footer/Footer.jsx";
 import { dataTransacaoParaDataLocal } from "../../utils/dataTransacao.js";
+import { calcularSaldoAcumulado, filtrarTransacoesDasContas } from "../../utils/relatorioFinanceiro.js";
 import styles from "./Relatorios.module.css";
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
@@ -27,7 +28,6 @@ const formatarMoeda = (valor, moeda) => new Intl.NumberFormat("pt-BR", {
 export default function Relatorios() {
   const anoAtual = new Date().getFullYear();
   const [usuario, setUsuario] = useState(null);
-  const [contas, setContas] = useState([]);
   const [transacoes, setTransacoes] = useState([]);
   const [anoSelecionado, setAnoSelecionado] = useState(anoAtual);
   const [mesSelecionado, setMesSelecionado] = useState(new Date().getMonth());
@@ -49,8 +49,10 @@ export default function Relatorios() {
           axios.get(`${API_BASE_URL}/contas/search/${dadosUsuario.id_usuario}`, { withCredentials: true }),
           axios.get(`${API_BASE_URL}/transacoes`, { withCredentials: true }),
         ]);
-        setContas(respostaContas.data.dados || []);
-        setTransacoes((respostaTransacoes.data.dados || []).filter((transacao) => transacao.arquivado !== true));
+        setTransacoes(filtrarTransacoesDasContas(
+          respostaTransacoes.data.dados,
+          respostaContas.data.dados,
+        ));
       } catch (falha) {
         if (falha.response?.status === 401) {
           window.location.href = "/login";
@@ -119,23 +121,15 @@ export default function Relatorios() {
 
   const pontosLinha = useMemo(() => {
     const hoje = new Date();
-    const saldoAtual = contas
-      .filter((conta) => (conta.moeda || "Real") === moeda)
-      .reduce((total, conta) => total + (Number(conta.saldo_conta) || 0), 0);
     const pontos = mesesDoAno.map((item, indice) => {
       const fimMes = new Date(anoSelecionado, item.mes + 1, 0, 23, 59, 59, 999);
-      if (fimMes > hoje || !contas.some((conta) => (conta.moeda || "Real") === moeda)) {
+      if (fimMes > hoje) {
         return { ...item, x: 56 + indice * (608 / 11), saldo: null };
       }
-      const movimentosPosteriores = transacoes.reduce((total, transacao) => {
-        const data = dataTransacaoParaDataLocal(transacao.data);
-        if (!transacao.quitado || transacao.arquivado === true || (transacao.nome_moeda || "Real") !== moeda || data <= fimMes) return total;
-        return total + (transacao.entrada ? 1 : -1) * (Number(transacao.valor) || 0);
-      }, 0);
       return {
         ...item,
         x: 56 + indice * (608 / 11),
-        saldo: saldoAtual - movimentosPosteriores,
+        saldo: calcularSaldoAcumulado(transacoes, moeda, fimMes),
       };
     });
     const valores = pontos.map((item) => item.saldo).filter((valor) => valor !== null);
@@ -146,7 +140,7 @@ export default function Relatorios() {
       ...item,
       y: item.saldo === null ? null : 210 - ((item.saldo - menor) / amplitude) * 174,
     }));
-  }, [anoSelecionado, contas, mesesDoAno, moeda, transacoes]);
+  }, [anoSelecionado, mesesDoAno, moeda, transacoes]);
 
   if (carregando) {
     return <div className={styles.page}><Header usuario={usuario} logado={true} /><main className={styles.main}><p className={styles.estado}>Carregando relatórios...</p></main><Footer /></div>;
@@ -215,10 +209,10 @@ export default function Relatorios() {
         <section className={styles.secaoGraficos} aria-label="Gráficos do relatório">
           <article className={styles.graficoPainel}>
             <div className={styles.graficoCabecalho}>
-              <div><h2>Saldo bancário por mês</h2><p>Saldo estimado ao fim de cada mês de {anoSelecionado}.</p></div>
+              <div><h2>Saldo acumulado pelas transações</h2><p>Soma das movimentações quitadas até o fim do mês; não inclui saldo inicial não registrado como transação.</p></div>
             </div>
             <div className={styles.linhaRolagem}>
-              <svg className={styles.graficoLinha} viewBox="0 0 720 260" role="img" aria-label={`Saldo bancário mensal em ${moedaParaCodigo(moeda)} durante ${anoSelecionado}`}>
+              <svg className={styles.graficoLinha} viewBox="0 0 720 260" role="img" aria-label={`Saldo acumulado pelas transações em ${moedaParaCodigo(moeda)} durante ${anoSelecionado}`}>
                 {[36, 94, 152, 210].map((y) => <line key={y} x1="42" x2="684" y1={y} y2={y} className={styles.linhaGrade} />)}
                 <polyline points={pontosLinha.filter((ponto) => ponto.y !== null).map((ponto) => `${ponto.x},${ponto.y}`).join(" ")} className={styles.linhaDados} />
                 {pontosLinha.map((ponto) => <g key={ponto.mes}>{ponto.y !== null && <circle cx={ponto.x} cy={ponto.y} r="4" className={styles.pontoDados} />}<text x={ponto.x} y="244" textAnchor="middle" className={styles.rotuloEixo}>{ponto.nome}</text></g>)}

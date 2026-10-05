@@ -16,6 +16,7 @@ import CreateMoeda from "./pages/createMoeda/createMoeda.jsx";
 import Conta from "./pages/conta/Conta.jsx";
 import CarteiraHasConta from "./pages/carteiraHasConta/CarteiraHasConta.jsx";
 import Transacoes from "./pages/transacoes/Transacoes.jsx";
+import Arquivados from "./pages/transacoes/Arquivados.jsx";
 import Relatorios from "./pages/relatorios/Relatorios.jsx";
 
 export default function App() {
@@ -32,6 +33,7 @@ export default function App() {
 
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/transacoes" element={<Transacoes />} />
+        <Route path="/dashboard/arquivados" element={<Arquivados />} />
         <Route path="/dashboard/relatorios" element={<Relatorios />} />
 
         <Route path="/dashboard/logs" element={<Logs />} />

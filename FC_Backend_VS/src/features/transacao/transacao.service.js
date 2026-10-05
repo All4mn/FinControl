@@ -19,6 +19,20 @@ export class TransacaoService {
     return await this.repository.findAll(id_usuario);
   }
 
+  async findArchived(id_usuario) {
+    return await this.repository.findArchived(id_usuario);
+  }
+
+  async archive(id, id_usuario) {
+    validarId(id);
+    return await this.repository.archive(id, id_usuario);
+  }
+
+  async restore(id, id_usuario) {
+    validarId(id);
+    return await this.repository.restore(id, id_usuario);
+  }
+
   async findById(id, id_usuario) {
     validarId(id);
     return await this.repository.findById(id, id_usuario);
