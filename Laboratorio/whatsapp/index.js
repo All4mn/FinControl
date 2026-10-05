@@ -22,13 +22,15 @@ client.on('ready', () => {
 //     }
 // });
 client.on('message_create', (msg) => {
-    console.log(msg)
+    console.log(`Numero: ${msg.from}
+        Mensagem: ${msg.body}`)
     if (msg.body === '!ping') {
         msg.reply('pong');
     }
-    if (msg.body === "!ola") {
-        msg.reply('vai toma no cu');
-    }
+    // if (msg.body === "!ola") {
+    //     msg.reply('vai toma no cu');
+    // }
+
 });
 
 client.initialize();
