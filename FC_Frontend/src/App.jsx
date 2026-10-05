@@ -50,8 +50,6 @@ export default function App() {
           element={<CarteiraHasConta />}
         />
 
-        {/* <Route path="/dashboard/arquivados" element={<Arquivados />} /> */}
-
         {/* <Route path="/dashboard/conta" element={<NovaConta />} /> */}
       </Routes>
     </BrowserRouter>

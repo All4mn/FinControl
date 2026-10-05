@@ -51,35 +51,6 @@ export class TransacaoRepository {
     return response.rows;
   }
 
-  async archive(id, id_usuario) {
-    return this.withTransaction(async (client) => {
-      const existente = await client.query(
-        `SELECT t.* FROM transacao t
-         INNER JOIN conta c ON c.id_conta = t.id_conta
-         WHERE t.id_transacao = $1 AND c.id_usuario = $2
-         FOR UPDATE OF t, c`,
-        [id, id_usuario],
-      );
-      const transacao = existente.rows[0];
-      if (!transacao) return null;
-      if (transacao.arquivado) return transacao;
-
-      await this.atualizarSaldo(
-        client,
-        transacao.id_conta,
-        transacao.valor,
-        !transacao.entrada,
-        transacao.quitado,
-      );
-      const response = await client.query(
-        `UPDATE transacao SET arquivado = true
-         WHERE id_transacao = $1 RETURNING *`,
-        [id],
-      );
-      return response.rows[0];
-    });
-  }
-
   async findById(id, id_usuario) {
     const response = await database.query(
       `SELECT t.* FROM transacao t

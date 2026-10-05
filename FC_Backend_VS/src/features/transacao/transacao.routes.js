@@ -9,7 +9,6 @@ const transacaoController = new TransacaoController(transacaoService);
 
 export async function transacaoRoutes(app) {
   app.get("/", { preHandler: [requireAuth] }, transacaoController.listar);
-  app.put("/:id/archive", { preHandler: [requireAuth] }, transacaoController.archive);
   app.get("/:id", { preHandler: [requireAuth] }, transacaoController.buscarPorId);
   app.post("/", { preHandler: [requireAuth] }, transacaoController.criar);
   app.put("/:id", { preHandler: [requireAuth] }, transacaoController.atualizar);

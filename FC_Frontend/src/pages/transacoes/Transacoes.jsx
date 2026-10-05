@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { Archive, ArrowDownLeft, ArrowUpRight, Pencil, Plus, Search, X } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Pencil, Plus, Search, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "../../components/componentesPadrao/headerLogged/HeaderLogged.jsx";
 import Footer from "../../components/componentesPadrao/footer/Footer.jsx";
+import { dataTransacaoParaDataLocal } from "../../utils/dataTransacao.js";
 import styles from "./Transacoes.module.css";
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
@@ -77,7 +78,7 @@ export default function Transacoes() {
     const resposta = await axios.get(`${API_BASE_URL}/transacoes`, { withCredentials: true });
     const permitidas = new Set(idsContasPermitidas.map(Number));
     const transacoesDoUsuario = (resposta.data.dados || []).filter((transacao) =>
-      permitidas.has(Number(transacao.id_conta)),
+      transacao.arquivado !== true && permitidas.has(Number(transacao.id_conta)),
     );
     setTransacoes(transacoesDoUsuario);
   };
@@ -139,8 +140,9 @@ export default function Transacoes() {
   const resumo = useMemo(() => {
     const agora = new Date();
     const doMes = transacoes.filter((transacao) => {
-      const data = new Date(transacao.data);
-      return data.getMonth() === agora.getMonth() && data.getFullYear() === agora.getFullYear();
+      const data = dataTransacaoParaDataLocal(transacao.data);
+      return transacao.arquivado !== true && transacao.quitado
+        && data.getMonth() === agora.getMonth() && data.getFullYear() === agora.getFullYear();
     });
     const totais = new Map();
 
@@ -169,7 +171,7 @@ export default function Transacoes() {
     setForm({
       descricao: transacao.descricao || "",
       valor: String(transacao.valor || ""),
-      data: dataLocal(new Date(transacao.data)),
+      data: dataLocal(dataTransacaoParaDataLocal(transacao.data)),
       id_conta: String(transacao.id_conta || ""),
       id_categoria: transacao.id_categoria ? String(transacao.id_categoria) : "",
       id_metodo: transacao.id_metodo ? String(transacao.id_metodo) : "",
@@ -208,11 +210,6 @@ export default function Transacoes() {
     };
 
     try {
-      const carteiraResposta = await axios.get(
-        `${API_BASE_URL}/carteiras/usuario/${usuario.id_usuario}`,
-        { withCredentials: true },
-      );
-      dados.id_carteira = carteiraResposta.data.dados?.id_carteira || null;
       if (transacaoEditando) {
         await axios.put(`${API_BASE_URL}/transacoes/${transacaoEditando.id_transacao}`, dados, { withCredentials: true });
       } else {
@@ -228,17 +225,6 @@ export default function Transacoes() {
       );
     } finally {
       setSalvando(false);
-    }
-  };
-
-  const arquivarTransacao = async (transacao) => {
-    const confirmar = window.confirm(`Arquivar a transação “${transacao.descricao}”?`);
-    if (!confirmar) return;
-    try {
-      await axios.put(`${API_BASE_URL}/transacoes/${transacao.id_transacao}/archive`, {}, { withCredentials: true });
-      await carregarTransacoes(contas.map((conta) => conta.id_conta));
-    } catch (falha) {
-      setErro(falha.response?.data?.mensagem || "Não foi possível arquivar a transação.");
     }
   };
 
@@ -315,7 +301,6 @@ export default function Transacoes() {
                       <td>
                         <div className={styles.acoesLinha}>
                           <button type="button" onClick={() => abrirEdicao(transacao)} aria-label={`Editar ${transacao.descricao}`} title="Editar"><Pencil size={16} /></button>
-                          <button type="button" onClick={() => arquivarTransacao(transacao)} aria-label={`Arquivar ${transacao.descricao}`} title="Arquivar"><Archive size={16} /></button>
                         </div>
                       </td>
                     </tr>
@@ -400,13 +385,13 @@ export default function Transacoes() {
 
         <section className={styles.resumo} aria-label="Resumo do mês">
           <article className={styles.resumoItem}>
-            <span className={styles.resumoRotulo}><ArrowDownLeft size={16} /> Entradas no mês</span>
+            <span className={styles.resumoRotulo}><ArrowDownLeft size={16} /> Entradas quitadas no mês</span>
             {resumo.length ? resumo.map((linha) => (
               <strong className={styles.resumoValor} key={`entrada-${linha.moeda}`}>{moedaParaCodigo(linha.moeda)} {formatarMoeda(linha.entradas, linha.moeda)}</strong>
             )) : <strong className={styles.resumoValor}>{formatarMoeda(0, "Real")}</strong>}
           </article>
           <article className={styles.resumoItem}>
-            <span className={styles.resumoRotulo}><ArrowUpRight size={16} /> Saídas no mês</span>
+            <span className={styles.resumoRotulo}><ArrowUpRight size={16} /> Saídas pagas no mês</span>
             {resumo.length ? resumo.map((linha) => (
               <strong className={styles.resumoValor} key={`saida-${linha.moeda}`}>{moedaParaCodigo(linha.moeda)} {formatarMoeda(linha.saidas, linha.moeda)}</strong>
             )) : <strong className={styles.resumoValor}>{formatarMoeda(0, "Real")}</strong>}

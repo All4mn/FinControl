@@ -28,7 +28,6 @@ export class TransacaoController {
 
     // Vincular o context 'this' para evitar perda de contexto nas rotas
     this.listar = this.listar.bind(this);
-    this.archive = this.archive.bind(this);
     this.buscarPorId = this.buscarPorId.bind(this);
     this.criar = this.criar.bind(this);
     this.atualizar = this.atualizar.bind(this);
@@ -41,20 +40,6 @@ export class TransacaoController {
       return res.status(200).send({ sucesso: true, dados: transacoes });
     } catch (err) {
       return responderErro(res, err, "Erro ao listar transações:");
-    }
-  }
-
-  async archive(req, res) {
-    try {
-      const { id } = req.params;
-      const transacao = await this.service.archive(id, req.usuario.id_usuario);
-      if (!transacao)
-        return res
-          .status(404)
-          .send({ sucesso: false, mensagem: "Transação não encontrada" });
-      return res.status(200).send({ sucesso: true, dados: transacao });
-    } catch (err) {
-      return responderErro(res, err, "Erro ao arquivar transação:");
     }
   }
 

@@ -20,8 +20,13 @@ class database {
         // - Database: nome do banco de dados a ser usado
         // Para replicar: Substitua a connectionString pela sua própria string de conexão
         // do PostgreSQL (pode vir de variáveis de ambiente para segurança).
+        const connectionString = process.env.DATABASE_URL || process.env.DB_CONNECTION_STRING;
+        if (!connectionString) {
+            throw new Error('Defina DATABASE_URL ou DB_CONNECTION_STRING para conectar ao PostgreSQL.');
+        }
+
         this.pool = new Pool({
-            connectionString: process.env.DB_CONNECTION_STRING,
+            connectionString,
             connectionTimeoutMillis: 5000,
             ssl:{
                 rejectUnauthorized: false

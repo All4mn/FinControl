@@ -78,6 +78,26 @@
   border-color: #d9e2dc;
 }
 
+.botaoRestaurar {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #d9e2dc;
+  border-radius: 5px;
+  padding: 0 10px;
+  background: #fff;
+  color: #286a46;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.botaoRestaurar:hover {
+  background: #eff8f2;
+}
+
 .resumo {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

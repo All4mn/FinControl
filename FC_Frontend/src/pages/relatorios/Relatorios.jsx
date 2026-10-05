@@ -3,6 +3,7 @@ import axios from "axios";
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import Header from "../../components/componentesPadrao/headerLogged/HeaderLogged.jsx";
 import Footer from "../../components/componentesPadrao/footer/Footer.jsx";
+import { dataTransacaoParaDataLocal } from "../../utils/dataTransacao.js";
 import styles from "./Relatorios.module.css";
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
@@ -49,7 +50,7 @@ export default function Relatorios() {
           axios.get(`${API_BASE_URL}/transacoes`, { withCredentials: true }),
         ]);
         setContas(respostaContas.data.dados || []);
-        setTransacoes(respostaTransacoes.data.dados || []);
+        setTransacoes((respostaTransacoes.data.dados || []).filter((transacao) => transacao.arquivado !== true));
       } catch (falha) {
         if (falha.response?.status === 401) {
           window.location.href = "/login";
@@ -70,16 +71,17 @@ export default function Relatorios() {
   const moeda = moedas.includes(moedaSelecionada) ? moedaSelecionada : moedas[0] || "Real";
 
   const anos = useMemo(() => {
-    const anosDados = transacoes.map((transacao) => new Date(transacao.data).getFullYear()).filter(Number.isFinite);
+    const anosDados = transacoes.map((transacao) => dataTransacaoParaDataLocal(transacao.data).getFullYear()).filter(Number.isFinite);
     const primeiroAno = Math.min(2020, ...anosDados);
     return Array.from({ length: Math.max(1, anoAtual - primeiroAno + 1) }, (_, indice) => primeiroAno + indice);
   }, [anoAtual, transacoes]);
 
   const mesesDoAno = useMemo(() => MESES.map((nome, mes) => {
     const doMes = transacoes.filter((transacao) => {
-      const data = new Date(transacao.data);
+      const data = dataTransacaoParaDataLocal(transacao.data);
       return data.getFullYear() === anoSelecionado
         && data.getMonth() === mes
+        && transacao.quitado
         && (transacao.nome_moeda || "Real") === moeda;
     });
     const entradas = doMes.reduce((total, transacao) => total + (transacao.entrada ? Number(transacao.valor) || 0 : 0), 0);
@@ -90,8 +92,8 @@ export default function Relatorios() {
   const despesas = useMemo(() => {
     const agrupadas = new Map();
     transacoes.forEach((transacao) => {
-      const data = new Date(transacao.data);
-      if (transacao.entrada || data.getFullYear() !== anoSelecionado || data.getMonth() !== mesSelecionado
+      const data = dataTransacaoParaDataLocal(transacao.data);
+      if (transacao.entrada || !transacao.quitado || data.getFullYear() !== anoSelecionado || data.getMonth() !== mesSelecionado
         || (transacao.nome_moeda || "Real") !== moeda) return;
       const categoria = transacao.nome_categoria || "Sem categoria";
       agrupadas.set(categoria, (agrupadas.get(categoria) || 0) + (Number(transacao.valor) || 0));
@@ -126,8 +128,8 @@ export default function Relatorios() {
         return { ...item, x: 56 + indice * (608 / 11), saldo: null };
       }
       const movimentosPosteriores = transacoes.reduce((total, transacao) => {
-        const data = new Date(transacao.data);
-        if (!transacao.quitado || (transacao.nome_moeda || "Real") !== moeda || data <= fimMes) return total;
+        const data = dataTransacaoParaDataLocal(transacao.data);
+        if (!transacao.quitado || transacao.arquivado === true || (transacao.nome_moeda || "Real") !== moeda || data <= fimMes) return total;
         return total + (transacao.entrada ? 1 : -1) * (Number(transacao.valor) || 0);
       }, 0);
       return {
@@ -205,8 +207,8 @@ export default function Relatorios() {
         </section>
 
         <section className={styles.resumoMes} aria-label={`Resumo de ${MESES[mesSelecionado]} de ${anoSelecionado}`}>
-          <div><span><ArrowDownLeft size={16} /> Entradas</span><strong>{formatarMoeda(mesesDoAno[mesSelecionado].entradas, moeda)}</strong></div>
-          <div><span><ArrowUpRight size={16} /> Saídas</span><strong>{formatarMoeda(mesesDoAno[mesSelecionado].saidas, moeda)}</strong></div>
+          <div><span><ArrowDownLeft size={16} /> Entradas quitadas</span><strong>{formatarMoeda(mesesDoAno[mesSelecionado].entradas, moeda)}</strong></div>
+          <div><span><ArrowUpRight size={16} /> Saídas pagas</span><strong>{formatarMoeda(mesesDoAno[mesSelecionado].saidas, moeda)}</strong></div>
           <div><span>Resultado do mês</span><strong>{formatarMoeda(mesesDoAno[mesSelecionado].saldo, moeda)}</strong></div>
         </section>
 

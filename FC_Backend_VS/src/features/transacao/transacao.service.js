@@ -4,6 +4,12 @@
 // =============================================================================
 import { AppError } from "../../Errors/AppError.js";
 
+const validarId = (id) => {
+  if (!/^[1-9]\d*$/.test(String(id))) {
+    throw new AppError("ID inválido", 400);
+  }
+};
+
 export class TransacaoService {
   constructor(repository) {
     this.repository = repository;
@@ -13,13 +19,8 @@ export class TransacaoService {
     return await this.repository.findAll(id_usuario);
   }
 
-  async archive(id, id_usuario) {
-    if (!id) throw new AppError("ID é obrigatório", 400);
-    return await this.repository.archive(id, id_usuario);
-  }
-
   async findById(id, id_usuario) {
-    if (!id) throw new AppError("ID é obrigatório", 400);
+    validarId(id);
     return await this.repository.findById(id, id_usuario);
   }
 
@@ -80,7 +81,7 @@ export class TransacaoService {
     },
     id_usuario,
   ) {
-    if (!id) throw new AppError("ID é obrigatório", 400);
+    validarId(id);
     if (!id_usuario) throw new AppError("Usuário não autenticado", 401);
     if (!id_conta) throw new AppError("Selecione uma conta", 400);
     if (valor === undefined || valor === null) {
@@ -111,7 +112,7 @@ export class TransacaoService {
   }
 
   async delete(id, id_usuario) {
-    if (!id) throw new AppError("ID é obrigatório", 400);
+    validarId(id);
     return await this.repository.delete(id, id_usuario);
   }
 }
