@@ -1,26 +1,19 @@
 import database from "../../config/db.js";
 
+// DÍVIDA CONHECIDA: o saldo soma por id_usuario, não por carteira_has_conta
+// como manda Documentacao-Carteira.md, porque hoje isso somaria saldo de outra
+// pessoa. carteira_has_conta cobre 10 das 29 contas (6 de 14 usuários) e a
+// conta do usuário 1 (R$ 1500,50) está vinculada à carteira do usuário 16.
+// Antes de migrar: preencher os vínculos e definir a semântica de contas
+// compartilhadas/carteiras múltiplas.
 export class CarteiraRepository {
   async findAll(id_usuario) {
     return await this.findByUsuario(id_usuario);
   }
 
-  async hasAtivoColumn() {
-    const response = await database.query(
-      `SELECT 1
-       FROM information_schema.columns
-       WHERE table_name = 'carteira'
-         AND column_name = 'ativo'
-       LIMIT 1`,
-    );
-    return response.rows.length > 0;
-  }
-
   async findById(id) {
-    const hasAtivo = await this.hasAtivoColumn();
     const response = await database.query(
-      hasAtivo
-        ? `SELECT c.id_carteira,
+      `SELECT c.id_carteira,
               c.id_usuario,
               c.nome_carteira,
               ct.id_moeda,
@@ -28,32 +21,22 @@ export class CarteiraRepository {
               COALESCE(SUM(ct.saldo_conta), 0)::numeric(14,2) AS saldo_total,
               c.ativo
          FROM carteira c
-         LEFT JOIN conta ct ON ct.id_usuario = c.id_usuario
+         LEFT JOIN conta ct ON ct.id_usuario = c.id_usuario AND ct.ativo = TRUE
          LEFT JOIN moeda m ON m.id_moeda = ct.id_moeda
-         WHERE c.id_carteira = $1
-         GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira, ct.id_moeda, m.nome_moeda, c.ativo
-         ORDER BY m.nome_moeda`
-        : `SELECT c.id_carteira,
-              c.id_usuario,
-              c.nome_carteira,
-              ct.id_moeda,
-              m.nome_moeda,
-              COALESCE(SUM(ct.saldo_conta), 0)::numeric(14,2) AS saldo_total
-         FROM carteira c
-         LEFT JOIN conta ct ON ct.id_usuario = c.id_usuario
-         LEFT JOIN moeda m ON m.id_moeda = ct.id_moeda
-         WHERE c.id_carteira = $1
-         GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira, ct.id_moeda, m.nome_moeda
-         ORDER BY m.nome_moeda`,
+        WHERE c.id_carteira = $1
+        GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira, ct.id_moeda, m.nome_moeda, c.ativo
+        ORDER BY m.nome_moeda`,
       [id],
     );
     return response.rows;
   }
 
-  async create({ id_usuario, nome_carteira }) {
-    const response = await database.query(
-      `INSERT INTO carteira (id_usuario, nome_carteira)
-       VALUES ($1, $2)
+  // 'client' opcional: roda dentro da transação de conta.service.create.
+  async create({ id_usuario, nome_carteira }, client = null) {
+    const executor = client || database;
+    const response = await executor.query(
+      `INSERT INTO carteira (id_usuario, nome_carteira, ativo)
+       VALUES ($1, $2, TRUE)
        RETURNING *`,
       [id_usuario, nome_carteira],
     );
@@ -79,11 +62,11 @@ export class CarteiraRepository {
     return response.rowCount > 0;
   }
 
-  async findByUsuario(id_usuario) {
-    const hasAtivo = await this.hasAtivoColumn();
-    const response = await database.query(
-      hasAtivo
-        ? `SELECT c.id_carteira,
+  // 'client' opcional: roda dentro da transação de conta.service.create.
+  async findByUsuario(id_usuario, client = null) {
+    const executor = client || database;
+    const response = await executor.query(
+      `SELECT c.id_carteira,
               c.id_usuario,
               c.nome_carteira,
               ct.id_moeda,
@@ -91,65 +74,35 @@ export class CarteiraRepository {
               COALESCE(SUM(ct.saldo_conta), 0)::numeric(14,2) AS saldo_total,
               c.ativo
          FROM carteira c
-         LEFT JOIN conta ct ON ct.id_usuario = c.id_usuario
+         LEFT JOIN conta ct ON ct.id_usuario = c.id_usuario AND ct.ativo = TRUE
          LEFT JOIN moeda m ON m.id_moeda = ct.id_moeda
-         WHERE c.id_usuario = $1 AND c.ativo = TRUE
-         GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira, ct.id_moeda, m.nome_moeda, c.ativo
-         ORDER BY m.nome_moeda`
-        : `SELECT c.id_carteira,
-              c.id_usuario,
-              c.nome_carteira,
-              ct.id_moeda,
-              m.nome_moeda,
-              COALESCE(SUM(ct.saldo_conta), 0)::numeric(14,2) AS saldo_total
-         FROM carteira c
-         LEFT JOIN conta ct ON ct.id_usuario = c.id_usuario
-         LEFT JOIN moeda m ON m.id_moeda = ct.id_moeda
-         WHERE c.id_usuario = $1
-         GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira, ct.id_moeda, m.nome_moeda
-         ORDER BY m.nome_moeda`,
+        WHERE c.id_usuario = $1 AND c.ativo = TRUE
+        GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira, ct.id_moeda, m.nome_moeda, c.ativo
+        ORDER BY m.nome_moeda`,
       [id_usuario],
     );
     return response.rows;
   }
 
   async findAllWithUsers() {
-    const hasAtivo = await this.hasAtivoColumn();
     const response = await database.query(
-      hasAtivo
-        ? `SELECT c.id_carteira,
+      `SELECT c.id_carteira,
               c.id_usuario,
               c.nome_carteira,
               c.ativo,
               u.nome_usuario,
               u.email_usuario,
               COALESCE(SUM(ct.saldo_conta), 0)::numeric(14,2) AS saldo_total
-           FROM carteira c
-           LEFT JOIN conta ct ON ct.id_usuario = c.id_usuario
-           INNER JOIN usuario u ON u.id_usuario = c.id_usuario
-           GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira, c.ativo, u.nome_usuario, u.email_usuario
-           ORDER BY c.id_carteira DESC`
-        : `SELECT c.id_carteira,
-              c.id_usuario,
-              c.nome_carteira,
-              u.nome_usuario,
-              u.email_usuario,
-              COALESCE(SUM(ct.saldo_conta), 0)::numeric(14,2) AS saldo_total
-           FROM carteira c
-           LEFT JOIN conta ct ON ct.id_usuario = c.id_usuario
-           INNER JOIN usuario u ON u.id_usuario = c.id_usuario
-           GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira, u.nome_usuario, u.email_usuario
-           ORDER BY c.id_carteira DESC`,
+         FROM carteira c
+         LEFT JOIN conta ct ON ct.id_usuario = c.id_usuario AND ct.ativo = TRUE
+         INNER JOIN usuario u ON u.id_usuario = c.id_usuario
+        GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira, c.ativo, u.nome_usuario, u.email_usuario
+        ORDER BY c.id_carteira DESC`,
     );
     return response.rows;
   }
 
   async archiveByUsuario(id_usuario) {
-    const hasAtivo = await this.hasAtivoColumn();
-    if (!hasAtivo) {
-      return [];
-    }
-
     const response = await database.query(
       `UPDATE carteira
        SET ativo = FALSE
@@ -160,4 +113,3 @@ export class CarteiraRepository {
     return response.rows;
   }
 }
-

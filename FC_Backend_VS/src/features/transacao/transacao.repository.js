@@ -6,19 +6,9 @@
 import database from "../../config/db.js";
 
 export class TransacaoRepository {
+  // Delega ao helper de config/db.js, que trata a falha do ROLLBACK.
   async withTransaction(operation) {
-    const client = await database.pool.connect();
-    try {
-      await client.query("BEGIN");
-      const result = await operation(client);
-      await client.query("COMMIT");
-      return result;
-    } catch (error) {
-      await client.query("ROLLBACK");
-      throw error;
-    } finally {
-      client.release();
-    }
+    return database.withTransaction(operation);
   }
 
   async atualizarSaldo(client, id_conta, valor, entrada, aplicado) {
@@ -40,7 +30,7 @@ export class TransacaoRepository {
               cat.nome_categoria AS nome_categoria,
               m.nome_metodo AS nome_metodo
        FROM transacao t
-       INNER JOIN conta c ON c.id_conta = t.id_conta
+       INNER JOIN conta c ON c.id_conta = t.id_conta AND c.ativo = TRUE
        LEFT JOIN moeda ON moeda.id_moeda = c.id_moeda
        LEFT JOIN categoria cat ON cat.id_categoria = t.id_categoria
        LEFT JOIN metodo m ON m.id_metodo = t.id_metodo
@@ -59,7 +49,7 @@ export class TransacaoRepository {
               cat.nome_categoria AS nome_categoria,
               m.nome_metodo AS nome_metodo
        FROM transacao t
-       INNER JOIN conta c ON c.id_conta = t.id_conta
+       INNER JOIN conta c ON c.id_conta = t.id_conta AND c.ativo = TRUE
        LEFT JOIN moeda ON moeda.id_moeda = c.id_moeda
        LEFT JOIN categoria cat ON cat.id_categoria = t.id_categoria
        LEFT JOIN metodo m ON m.id_metodo = t.id_metodo

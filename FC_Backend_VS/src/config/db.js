@@ -27,10 +27,20 @@ class database {
 
         this.pool = new Pool({
             connectionString,
-            connectionTimeoutMillis: 5000,
+            connectionTimeoutMillis: 15000,
+            max: Number(process.env.DB_POOL_MAX) || 10,
+            idleTimeoutMillis: 30000,
+            keepAlive: true,
             ssl:{
                 rejectUnauthorized: false
             }
+        });
+
+        // Timeouts via SET no 'connect', nunca pelo campo 'options': o Neon
+        // rejeita parâmetros de startup com 08P01 e TODA consulta vira 500.
+        this.pool.on('connect', (client) => {
+            client.query("SET lock_timeout = '5s'");
+            client.query("SET statement_timeout = '10s'");
         });
     }
 
@@ -41,6 +51,37 @@ class database {
     async connection(){
         const client = await this.pool.connect();
         client.release();
+    }
+
+    // A função deve usar APENAS o client recebido, senão as queries saem da
+    // transação. Se o ROLLBACK falhar, o client é descartado em vez de voltar
+    // ao pool: o pg não faz rollback no release() e a conexão ficaria travada.
+    async withTransaction(operacao) {
+        const client = await this.pool.connect();
+        let liberado = false;
+
+        const liberar = (erro) => {
+            if (liberado) return;
+            liberado = true;
+            client.release(erro);
+        };
+
+        try {
+            await client.query('BEGIN');
+            const resultado = await operacao(client);
+            await client.query('COMMIT');
+            liberar();
+            return resultado;
+        } catch (erro) {
+            try {
+                await client.query('ROLLBACK');
+                liberar();
+            } catch (erroRollback) {
+                // Descarta a conexão: voltar ao pool deixaria locks abertos.
+                liberar(erroRollback);
+            }
+            throw erro;
+        }
     }
 
     // Método principal para executar queries SQL.

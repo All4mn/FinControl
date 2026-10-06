@@ -48,8 +48,10 @@ export class CarteiraHasContaRepository {
     return response.rows[0] || null;
   }
 
-  async create(dados) {
-    const response = await database.query(
+  // 'client' opcional: roda dentro da transação de conta.service.create.
+  async create(dados, client = null) {
+    const executor = client || database;
+    const response = await executor.query(
       `INSERT INTO carteira_has_conta (id_carteira, id_conta) VALUES ($1, $2) RETURNING *`,
       [dados.id_carteira, dados.id_conta]
     );
