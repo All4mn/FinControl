@@ -2,5 +2,7 @@
 Laboratorio/OCR/.env
 /Laboratorio/whatsapp/.wwebjs_auth
 /Laboratorio/whatsapp/.wwebjs_cache
+/.wwebjs_auth/
+/.wwebjs_cache/
 /Laboratorio/whatsapp/node_modules
 Laboratorio/OCR/code/.env
