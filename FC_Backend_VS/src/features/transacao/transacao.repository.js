@@ -1,9 +1,28 @@
 // =============================================================================
 // models/repositories/transacao.repository.js
-// Acesso ao banco de dados para a tabela de transacao
+// Acesso ao banco de dados para a tabela de transacao (via Drizzle ORM)
 // =============================================================================
 
-import database from "../../config/db.js";
+import { eq, desc } from "drizzle-orm";
+import { db } from "../../config/drizzle.js";
+import { transacao } from "../../db/schema.js";
+
+// Converte chaves camelCase (retorno do Drizzle) para snake_case,
+// mantendo o mesmo formato que o restante da aplicação espera.
+const toSnakeCase = (value) =>
+  value.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
+const mapRow = (row) =>
+  Object.fromEntries(
+    Object.entries(row).map(([key, value]) => [toSnakeCase(key), value]),
+  );
+
+const mapRows = (rows) => rows.map(mapRow);
+
+// Remove campos undefined antes de insert/update,
+// para não enviar "undefined" ao banco via Drizzle.
+const semUndefined = (obj) =>
+  Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
 
 export class TransacaoRepository {
   // Delega ao helper de config/db.js, que trata a falha do ROLLBACK.

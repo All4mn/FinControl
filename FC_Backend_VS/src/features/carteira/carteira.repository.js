@@ -1,4 +1,49 @@
-import database from "../../config/db.js";
+// =============================================================================
+// src/features/carteira/carteira.repository.js
+// Acesso ao banco de dados para a tabela de carteira (via Drizzle ORM)
+// =============================================================================
+
+import { eq, and, desc, asc, sql } from "drizzle-orm";
+import { db } from "../../config/drizzle.js";
+import { carteira, conta, moeda, usuario } from "../../db/schema.js";
+
+// Converte chaves camelCase (retorno do Drizzle) para snake_case,
+// mantendo o mesmo formato que o restante da aplicação espera.
+const toSnakeCase = (value) =>
+  value.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
+const mapRow = (row) =>
+  Object.fromEntries(
+    Object.entries(row).map(([key, value]) => [toSnakeCase(key), value]),
+  );
+
+const mapRows = (rows) => rows.map(mapRow);
+
+// Remove campos undefined antes de insert/update,
+// para não enviar "undefined" ao banco via Drizzle.
+const semUndefined = (obj) =>
+  Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
+
+// Soma dos saldos das contas do usuário, no mesmo formato do SQL anterior.
+const saldoTotal = sql`COALESCE(SUM(${conta.saldoConta}), 0)::numeric(14,2)`;
+
+// Campos projectionados nas consultas de carteira (alias em snake_case).
+const camposCarteira = {
+  id_carteira: carteira.idCarteira,
+  id_usuario: carteira.idUsuario,
+  nome_carteira: carteira.nomeCarteira,
+  id_moeda: conta.idMoeda,
+  nome_moeda: moeda.nomeMoeda,
+  saldo_total: saldoTotal,
+};
+
+const gruposCarteira = [
+  carteira.idCarteira,
+  carteira.idUsuario,
+  carteira.nomeCarteira,
+  conta.idMoeda,
+  moeda.nomeMoeda,
+];
 
 // DÍVIDA CONHECIDA: o saldo soma por id_usuario, não por carteira_has_conta
 // como manda Documentacao-Carteira.md, porque hoje isso somaria saldo de outra
@@ -44,22 +89,20 @@ export class CarteiraRepository {
   }
 
   async update(id, { nome_carteira }) {
-    const response = await database.query(
-      `UPDATE carteira
-       SET nome_carteira = $1
-       WHERE id_carteira = $2
-       RETURNING *`,
-      [nome_carteira, id],
-    );
-    return response.rows[0] || null;
+    const rows = await db
+      .update(carteira)
+      .set({ nomeCarteira: nome_carteira })
+      .where(eq(carteira.idCarteira, id))
+      .returning();
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
   async delete(id) {
-    const response = await database.query(
-      "DELETE FROM carteira WHERE id_carteira = $1",
-      [id],
-    );
-    return response.rowCount > 0;
+    const rows = await db
+      .delete(carteira)
+      .where(eq(carteira.idCarteira, id))
+      .returning({ id_carteira: carteira.idCarteira });
+    return rows.length > 0;
   }
 
   // 'client' opcional: roda dentro da transação de conta.service.create.

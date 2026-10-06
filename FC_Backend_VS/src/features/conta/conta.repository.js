@@ -1,9 +1,28 @@
 // =============================================================================
 // models/repositories/conta.repository.js
-// Acesso ao banco de dados para a tabela de conta
+// Acesso ao banco de dados para a tabela de conta (via Drizzle ORM)
 // =============================================================================
 
-import database from "../../config/db.js";
+import { eq, and, desc, sql } from "drizzle-orm";
+import { db } from "../../config/drizzle.js";
+import { conta, usuario, moeda } from "../../db/schema.js";
+
+// Converte chaves camelCase (retorno do Drizzle) para snake_case,
+// mantendo o mesmo formato que o restante da aplicação espera.
+const toSnakeCase = (value) =>
+  value.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
+const mapRow = (row) =>
+  Object.fromEntries(
+    Object.entries(row).map(([key, value]) => [toSnakeCase(key), value]),
+  );
+
+const mapRows = (rows) => rows.map(mapRow);
+
+// Remove campos undefined antes de insert/update,
+// para não enviar "undefined" ao banco via Drizzle.
+const semUndefined = (obj) =>
+  Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
 
 export class ContaRepository {
 // Delega ao helper de config/db.js, que trata a falha do ROLLBACK.
@@ -21,19 +40,19 @@ export class ContaRepository {
 
   // Sem filtro de ativo: é o que permite desarquivar.
   async findById(id) {
-    const response = await database.query(
-      "SELECT * FROM conta WHERE id_conta = $1",
-      [id],
-    );
-    return response.rows[0] || null;
+    const rows = await db
+      .select()
+      .from(conta)
+      .where(eq(conta.idConta, id));
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
   async findByIdAndUsuario(id, id_usuario) {
-    const response = await database.query(
-      "SELECT * FROM conta WHERE id_conta = $1 AND id_usuario = $2",
-      [id, id_usuario],
-    );
-    return response.rows[0] || null;
+    const rows = await db
+      .select()
+      .from(conta)
+      .where(and(eq(conta.idConta, id), eq(conta.idUsuario, id_usuario)));
+    return rows[0] ? mapRow(rows[0]) : null;
   }
 
   async findAllByUsuario(id_usuario) {
@@ -45,14 +64,14 @@ export class ContaRepository {
   }
 
   async archiveByUsuario(id_usuario) {
-    const response = await database.query(
-      `UPDATE conta
-       SET ativo = FALSE
-       WHERE id_usuario = $1
-       RETURNING *`,
-      [id_usuario],
-    );
-    return response.rows;
+    // A coluna "ativo" é varchar no schema; o fragmento sql preserva
+    // exatamente o SQL gerado antes da migração (SET ativo = FALSE).
+    const rows = await db
+      .update(conta)
+      .set({ ativo: sql`FALSE` })
+      .where(eq(conta.idUsuario, id_usuario))
+      .returning();
+    return mapRows(rows);
   }
 
   // 'client' opcional: roda dentro da transação de conta.service.create.
@@ -81,14 +100,12 @@ export class ContaRepository {
 // Soft delete, como transacao.arquivado: saldo e transações ficam intactos,
   // então desarquivar restaura tudo.
   async arquivar(id) {
-    const response = await database.query(
-      `UPDATE conta
-      SET ativo = FALSE
-      WHERE id_conta = $1
-      RETURNING *`,
-      [id],
-    );
-    return response.rowCount > 0;
+    const rows = await db
+      .update(conta)
+      .set({ ativo: sql`FALSE` })
+      .where(eq(conta.idConta, id))
+      .returning({ id_conta: conta.idConta });
+    return rows.length > 0;
   }
 
   async desarquivar(id){
