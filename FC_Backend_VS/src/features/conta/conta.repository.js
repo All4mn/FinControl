@@ -25,14 +25,20 @@ const semUndefined = (obj) =>
   Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
 
 export class ContaRepository {
-  async findAll() {
-    const rows = await db
-      .select()
-      .from(conta)
-      .orderBy(desc(conta.idConta));
-    return mapRows(rows);
+// Delega ao helper de config/db.js, que trata a falha do ROLLBACK.
+  async withTransaction(operation) {
+    return database.withTransaction(operation);
   }
 
+  // Só ativas: é o que exclui contas arquivadas do saldo consolidado.
+  async findAll() {
+    const response = await database.query(
+      "SELECT * FROM conta WHERE ativo = TRUE ORDER BY id_conta DESC",
+    );
+    return response.rows;
+  }
+
+  // Sem filtro de ativo: é o que permite desarquivar.
   async findById(id) {
     const rows = await db
       .select()
@@ -50,12 +56,11 @@ export class ContaRepository {
   }
 
   async findAllByUsuario(id_usuario) {
-    const rows = await db
-      .select()
-      .from(conta)
-      .where(eq(conta.idUsuario, id_usuario))
-      .orderBy(desc(conta.idConta));
-    return mapRows(rows);
+    const response = await database.query(
+      "SELECT * FROM conta WHERE id_usuario = $1 AND ativo = TRUE ORDER BY id_conta DESC",
+      [id_usuario],
+    );
+    return response.rows;
   }
 
   async archiveByUsuario(id_usuario) {
@@ -69,30 +74,31 @@ export class ContaRepository {
     return mapRows(rows);
   }
 
-  async create({ id_usuario, id_moeda, nome_conta, saldo_conta }) {
-    const rows = await db
-      .insert(conta)
-      .values(
-        semUndefined({
-          idUsuario: id_usuario,
-          idMoeda: id_moeda,
-          nomeConta: nome_conta,
-          saldoConta: saldo_conta,
-        }),
-      )
-      .returning();
-    return rows[0] ? mapRow(rows[0]) : null;
+  // 'client' opcional: roda dentro da transação de conta.service.create.
+  async create({ id_usuario, id_moeda, nome_conta, saldo_conta }, client = null) {
+    const executor = client || database;
+    const response = await executor.query(
+      `INSERT INTO conta (id_usuario, id_moeda, nome_conta, saldo_conta, ativo)
+       VALUES ($1, $2, $3, $4, TRUE)
+       RETURNING *`,
+      [id_usuario, id_moeda, nome_conta, saldo_conta],
+    );
+    return response.rows[0];
   }
 
   async update(id, nome_conta) {
-    const rows = await db
-      .update(conta)
-      .set({ nomeConta: nome_conta })
-      .where(eq(conta.idConta, id))
-      .returning();
-    return rows[0] ? mapRow(rows[0]) : null;
+    const response = await database.query(
+      `UPDATE conta
+       SET nome_conta = $1
+       WHERE id_conta = $2
+       RETURNING *`,
+      [nome_conta, id],
+    );
+    return response.rows[0] || null;
   }
 
+// Soft delete, como transacao.arquivado: saldo e transações ficam intactos,
+  // então desarquivar restaura tudo.
   async arquivar(id) {
     const rows = await db
       .update(conta)
@@ -102,45 +108,41 @@ export class ContaRepository {
     return rows.length > 0;
   }
 
-  async desarquivar(id) {
-    const rows = await db
-      .update(conta)
-      .set({ ativo: sql`TRUE` })
-      .where(eq(conta.idConta, id))
-      .returning({ id_conta: conta.idConta });
-    return rows.length > 0;
+  async desarquivar(id){
+    const response = await database.query(
+      `
+      UPDATE conta
+      SET ativo = TRUE
+      WHERE id_conta = $1
+      RETURNING *
+      `,[id]
+    )
+    return response.rowCount > 0;
   }
 
-  // Busca todas as contas associadas a um usuário específico
-  // Realiza INNER JOIN entre tabelas conta, usuario e moeda
-  // Retorna: array contendo id_conta, id_usuario, id_moeda, nome_conta,
-  //          saldo_conta, nome_user, moeda e ativo
-  async search(id) {
-    const rows = await db
-      .select({
-        id_conta: conta.idConta,
-        id_usuario: conta.idUsuario,
-        id_moeda: conta.idMoeda,
-        nome_conta: conta.nomeConta,
-        saldo_conta: conta.saldoConta,
-        nome_user: usuario.nomeUsuario,
-        moeda: moeda.nomeMoeda,
-        ativo: conta.ativo,
-      })
-      .from(conta)
-      .innerJoin(usuario, eq(conta.idUsuario, usuario.idUsuario))
-      .innerJoin(moeda, eq(conta.idMoeda, moeda.idMoeda))
-      .where(eq(conta.idUsuario, id));
-    return rows;
+  // LEFT JOIN em usuario/moeda: o schema permite os dois nulos e um INNER JOIN
+  // fazia a conta sumir da lista sem erro. apenasAtivas omite arquivadas para as
+  // telas operacionais; a de gestão usa a lista completa para reativar.
+  async search(id, apenasAtivas = false){
+    const response = await database.query(`
+      SELECT c.id_conta, c.id_usuario, c.id_moeda, c.nome_conta, c.saldo_conta,
+             u.nome_usuario AS nome_user, m.nome_moeda AS moeda, c.ativo
+      FROM conta c
+      LEFT JOIN usuario u ON u.id_usuario = c.id_usuario
+      LEFT JOIN moeda m ON m.id_moeda = c.id_moeda
+      WHERE c.id_usuario = $1
+        AND ($2::boolean IS FALSE OR c.ativo = TRUE)
+      ORDER BY c.ativo DESC, c.id_conta DESC
+      `,[id, apenasAtivas])
+
+    return response.rows
   }
 
-  // Busca um usuário específico pelo ID
-  // Retorna: objeto com dados do usuário ou null se não encontrado
-  async findUserById(id) {
-    const rows = await db
-      .select()
-      .from(usuario)
-      .where(eq(usuario.idUsuario, id));
-    return rows[0] ? mapRow(rows[0]) : null;
+  async findUserById(id){
+    const response = await database.query(`
+      SELECT * FROM usuario WHERE id_usuario = $1
+      `,[id])
+
+    return response.rows[0] || null
   }
 }

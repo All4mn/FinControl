@@ -21,11 +21,16 @@ const mapRows = (rows) => rows.map(mapRow);
 
 export class MetodoRepository {
   async findAll() {
-    const rows = await db
-      .select()
-      .from(metodo)
-      .orderBy(asc(metodo.nomeMetodo));
-    return mapRows(rows);
+    const response = await database.query(
+      `SELECT id_metodo, nome_metodo
+       FROM (
+         SELECT DISTINCT ON (lower(btrim(nome_metodo))) id_metodo, nome_metodo
+         FROM metodo
+         ORDER BY lower(btrim(nome_metodo)), id_metodo
+       ) metodos_unicos
+       ORDER BY nome_metodo ASC`,
+    );
+    return response.rows;
   }
 
   async findById(id) {

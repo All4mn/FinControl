@@ -76,17 +76,14 @@ export class CarteiraHasContaRepository {
     return rows[0] ? mapRow(rows[0]) : null;
   }
 
-  async create(dados) {
-    const rows = await db
-      .insert(carteiraHasConta)
-      .values(
-        semUndefined({
-          idCarteira: dados.id_carteira,
-          idConta: dados.id_conta,
-        }),
-      )
-      .returning();
-    return rows[0] ? mapRow(rows[0]) : null;
+  // 'client' opcional: roda dentro da transação de conta.service.create.
+  async create(dados, client = null) {
+    const executor = client || database;
+    const response = await executor.query(
+      `INSERT INTO carteira_has_conta (id_carteira, id_conta) VALUES ($1, $2) RETURNING *`,
+      [dados.id_carteira, dados.id_conta]
+    );
+    return response.rows[0];
   }
 
   async update(id, dados) {

@@ -17,7 +17,7 @@ import { CarteiraHasContaRoutes } from "./features/carteiraHasConta/carteiraHasC
 import { transacaoRoutes } from "./features/transacao/transacao.routes.js";
 import { statusUsuarioRoutes } from "./features/status_usuario/statusUsuario.routes.js";
 import { logsRoutes } from "./features/logs/logs.routes.js";
-import { moedaRoutes } from "./features/moeda/moeda.routes.js"; // <-- Import adicionado
+import { moedaRoutes } from "./features/moeda/moeda.routes.js";
 import { AppError } from "./Errors/AppError.js";
 
 dotenv.config();

@@ -2,6 +2,13 @@
 // models/services/transacao.service.js
 // Lógica de negócios para transacao
 // =============================================================================
+import { AppError } from "../../Errors/AppError.js";
+
+const validarId = (id) => {
+  if (!/^[1-9]\d*$/.test(String(id))) {
+    throw new AppError("ID inválido", 400);
+  }
+};
 
 import { AppError } from "../../Errors/AppError.js";
 
@@ -10,18 +17,27 @@ export class TransacaoService {
     this.repository = repository;
   }
 
-  async findAll() {
-    return await this.repository.findAll();
+  async findAll(id_usuario) {
+    return await this.repository.findAll(id_usuario);
   }
 
-  async archive(id) {
-    if (!id) throw new Error("ID é obrigatório");
-    return await this.repository.archive(id);
+  async findArchived(id_usuario) {
+    return await this.repository.findArchived(id_usuario);
   }
 
-  async findById(id) {
-    if (!id) throw new Error("ID é obrigatório");
-    return await this.repository.findById(id);
+  async archive(id, id_usuario) {
+    validarId(id);
+    return await this.repository.archive(id, id_usuario);
+  }
+
+  async restore(id, id_usuario) {
+    validarId(id);
+    return await this.repository.restore(id, id_usuario);
+  }
+
+  async findById(id, id_usuario) {
+    validarId(id);
+    return await this.repository.findById(id, id_usuario);
   }
 
   async create({
@@ -35,13 +51,20 @@ export class TransacaoService {
     arquivado,
     data,
     entrada,
-  }) {
-    if (!id_conta) throw new AppError("ID da conta é obrigatório", 400);
+  }, id_usuario) {
+    if (!id_usuario) throw new AppError("Usuário não autenticado", 401);
+    if (!id_conta) throw new AppError("Selecione uma conta", 400);
     if (valor === undefined || valor === null) {
-      throw new AppError("Valor da transação é obrigatório", 400);
+      throw new AppError("Informe o valor da transação", 400);
+    }
+    if (!Number.isFinite(Number(valor)) || Number(valor) <= 0) {
+      throw new AppError("O valor da transação deve ser maior que zero", 400);
     }
     if (!descricao || descricao.trim() === "") {
-      throw new AppError("Descrição é obrigatória", 400);
+      throw new AppError("Informe a descrição da transação", 400);
+    }
+    if (!data || Number.isNaN(new Date(data).getTime())) {
+      throw new AppError("Informe uma data válida para a transação", 400);
     }
 
     return await this.repository.create({
@@ -51,11 +74,11 @@ export class TransacaoService {
       id_carteira,
       valor,
       descricao,
-      quitado,
-      arquivado,
+      quitado: quitado === true || quitado === "true",
+      arquivado: false,
       data,
-      entrada,
-    });
+      entrada: entrada === true || entrada === "true",
+    }, id_usuario);
   }
 
   async update(
@@ -72,14 +95,22 @@ export class TransacaoService {
       data,
       entrada,
     },
+    id_usuario,
   ) {
-    if (!id) throw new Error("ID é obrigatório");
-    if (!id_conta) throw new Error("ID da conta é obrigatório");
+    validarId(id);
+    if (!id_usuario) throw new AppError("Usuário não autenticado", 401);
+    if (!id_conta) throw new AppError("Selecione uma conta", 400);
     if (valor === undefined || valor === null) {
-      throw new Error("Valor da transação é obrigatório");
+      throw new AppError("Informe o valor da transação", 400);
+    }
+    if (!Number.isFinite(Number(valor)) || Number(valor) <= 0) {
+      throw new AppError("O valor da transação deve ser maior que zero", 400);
     }
     if (!descricao || descricao.trim() === "") {
-      throw new Error("Descrição é obrigatória");
+      throw new AppError("Informe a descrição da transação", 400);
+    }
+    if (!data || Number.isNaN(new Date(data).getTime())) {
+      throw new AppError("Informe uma data válida para a transação", 400);
     }
 
     return await this.repository.update(id, {
@@ -89,15 +120,15 @@ export class TransacaoService {
       id_carteira,
       valor,
       descricao,
-      quitado,
-      arquivado,
+      quitado: quitado === true || quitado === "true",
+      arquivado: arquivado === true || arquivado === "true",
       data,
-      entrada,
-    });
+      entrada: entrada === true || entrada === "true",
+    }, id_usuario);
   }
 
-  async delete(id) {
-    if (!id) throw new Error("ID é obrigatório");
-    return await this.repository.delete(id);
+  async delete(id, id_usuario) {
+    validarId(id);
+    return await this.repository.delete(id, id_usuario);
   }
 }

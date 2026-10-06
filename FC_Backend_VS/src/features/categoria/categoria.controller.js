@@ -15,10 +15,10 @@ export class CategoriaController {
       const categorias = await this.service.findAll();
       return res.status(200).send({ sucesso: true, dados: categorias });
     } catch (err) {
-      console.log("Erro ao listar categorias:", err);
+      console.error("Erro ao listar categorias:", err);
       return res
         .status(500)
-        .send({ sucesso: false, mensagem: "Erro interno", stack: err.stack });
+        .send({ sucesso: false, mensagem: "Não foi possível carregar categorias. Verifique a conexão com o banco de dados." });
     }
   }
 

@@ -39,7 +39,9 @@ const TableConta = ({ conta, archiveConta, desarchiveConta, updateConta }) => {
     <>
       {conta.map((item) => {
         const estado = contasState[item.id_conta] || {};
-        const inativa = item.ativo === "false";
+        // conta.ativo é BOOLEAN (migrar_conta_ativo.sql): comparar com a string
+        // "false" nunca fechava e o botão de reativar ficava escondido.
+        const inativa = item.ativo === false;
         const editando = !!estado.editando && !inativa;
 
         return (

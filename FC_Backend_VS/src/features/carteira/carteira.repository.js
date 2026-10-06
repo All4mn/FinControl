@@ -45,52 +45,47 @@ const gruposCarteira = [
   moeda.nomeMoeda,
 ];
 
+// DÍVIDA CONHECIDA: o saldo soma por id_usuario, não por carteira_has_conta
+// como manda Documentacao-Carteira.md, porque hoje isso somaria saldo de outra
+// pessoa. carteira_has_conta cobre 10 das 29 contas (6 de 14 usuários) e a
+// conta do usuário 1 (R$ 1500,50) está vinculada à carteira do usuário 16.
+// Antes de migrar: preencher os vínculos e definir a semântica de contas
+// compartilhadas/carteiras múltiplas.
 export class CarteiraRepository {
   async findAll(id_usuario) {
     return await this.findByUsuario(id_usuario);
   }
 
-  async hasAtivoColumn() {
-    // Verificação de metadados mantida em SQL bruto (via drizzle db.execute),
-    // pois consulta o information_schema do PostgreSQL.
-    const { rows } = await db.execute(sql`
-      SELECT 1
-      FROM information_schema.columns
-      WHERE table_name = 'carteira'
-        AND column_name = 'ativo'
-      LIMIT 1
-    `);
-    return rows.length > 0;
-  }
-
   async findById(id) {
-    const hasAtivo = await this.hasAtivoColumn();
-
-    const rows = await db
-      .select(hasAtivo ? { ...camposCarteira, ativo: carteira.ativo } : camposCarteira)
-      .from(carteira)
-      .leftJoin(conta, eq(conta.idUsuario, carteira.idUsuario))
-      .leftJoin(moeda, eq(moeda.idMoeda, conta.idMoeda))
-      .where(eq(carteira.idCarteira, id))
-      .groupBy(
-        ...(hasAtivo ? [...gruposCarteira, carteira.ativo] : gruposCarteira),
-      )
-      .orderBy(asc(moeda.nomeMoeda));
-
-    return rows;
+    const response = await database.query(
+      `SELECT c.id_carteira,
+              c.id_usuario,
+              c.nome_carteira,
+              ct.id_moeda,
+              m.nome_moeda,
+              COALESCE(SUM(ct.saldo_conta), 0)::numeric(14,2) AS saldo_total,
+              c.ativo
+         FROM carteira c
+         LEFT JOIN conta ct ON ct.id_usuario = c.id_usuario AND ct.ativo = TRUE
+         LEFT JOIN moeda m ON m.id_moeda = ct.id_moeda
+        WHERE c.id_carteira = $1
+        GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira, ct.id_moeda, m.nome_moeda, c.ativo
+        ORDER BY m.nome_moeda`,
+      [id],
+    );
+    return response.rows;
   }
 
-  async create({ id_usuario, nome_carteira }) {
-    const rows = await db
-      .insert(carteira)
-      .values(
-        semUndefined({
-          idUsuario: id_usuario,
-          nomeCarteira: nome_carteira,
-        }),
-      )
-      .returning();
-    return rows[0] ? mapRow(rows[0]) : null;
+  // 'client' opcional: roda dentro da transação de conta.service.create.
+  async create({ id_usuario, nome_carteira }, client = null) {
+    const executor = client || database;
+    const response = await executor.query(
+      `INSERT INTO carteira (id_usuario, nome_carteira, ativo)
+       VALUES ($1, $2, TRUE)
+       RETURNING *`,
+      [id_usuario, nome_carteira],
+    );
+    return response.rows[0];
   }
 
   async update(id, { nome_carteira }) {
@@ -110,72 +105,54 @@ export class CarteiraRepository {
     return rows.length > 0;
   }
 
-  async findByUsuario(id_usuario) {
-    const hasAtivo = await this.hasAtivoColumn();
-
-    const rows = await db
-      .select(hasAtivo ? { ...camposCarteira, ativo: carteira.ativo } : camposCarteira)
-      .from(carteira)
-      .leftJoin(conta, eq(conta.idUsuario, carteira.idUsuario))
-      .leftJoin(moeda, eq(moeda.idMoeda, conta.idMoeda))
-      .where(
-        hasAtivo
-          ? and(eq(carteira.idUsuario, id_usuario), eq(carteira.ativo, true))
-          : eq(carteira.idUsuario, id_usuario),
-      )
-      .groupBy(
-        ...(hasAtivo ? [...gruposCarteira, carteira.ativo] : gruposCarteira),
-      )
-      .orderBy(asc(moeda.nomeMoeda));
-
-    return rows;
+  // 'client' opcional: roda dentro da transação de conta.service.create.
+  async findByUsuario(id_usuario, client = null) {
+    const executor = client || database;
+    const response = await executor.query(
+      `SELECT c.id_carteira,
+              c.id_usuario,
+              c.nome_carteira,
+              ct.id_moeda,
+              m.nome_moeda,
+              COALESCE(SUM(ct.saldo_conta), 0)::numeric(14,2) AS saldo_total,
+              c.ativo
+         FROM carteira c
+         LEFT JOIN conta ct ON ct.id_usuario = c.id_usuario AND ct.ativo = TRUE
+         LEFT JOIN moeda m ON m.id_moeda = ct.id_moeda
+        WHERE c.id_usuario = $1 AND c.ativo = TRUE
+        GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira, ct.id_moeda, m.nome_moeda, c.ativo
+        ORDER BY m.nome_moeda`,
+      [id_usuario],
+    );
+    return response.rows;
   }
 
   async findAllWithUsers() {
-    const hasAtivo = await this.hasAtivoColumn();
-
-    const campos = {
-      id_carteira: carteira.idCarteira,
-      id_usuario: carteira.idUsuario,
-      nome_carteira: carteira.nomeCarteira,
-      nome_usuario: usuario.nomeUsuario,
-      email_usuario: usuario.emailUsuario,
-      saldo_total: saldoTotal,
-    };
-    const grupos = [
-      carteira.idCarteira,
-      carteira.idUsuario,
-      carteira.nomeCarteira,
-      usuario.nomeUsuario,
-      usuario.emailUsuario,
-    ];
-    if (hasAtivo) {
-      campos.ativo = carteira.ativo;
-      grupos.push(carteira.ativo);
-    }
-
-    const rows = await db
-      .select(campos)
-      .from(carteira)
-      .leftJoin(conta, eq(conta.idUsuario, carteira.idUsuario))
-      .innerJoin(usuario, eq(usuario.idUsuario, carteira.idUsuario))
-      .groupBy(...grupos)
-      .orderBy(desc(carteira.idCarteira));
-
-    return rows;
+    const response = await database.query(
+      `SELECT c.id_carteira,
+              c.id_usuario,
+              c.nome_carteira,
+              c.ativo,
+              u.nome_usuario,
+              u.email_usuario,
+              COALESCE(SUM(ct.saldo_conta), 0)::numeric(14,2) AS saldo_total
+         FROM carteira c
+         LEFT JOIN conta ct ON ct.id_usuario = c.id_usuario AND ct.ativo = TRUE
+         INNER JOIN usuario u ON u.id_usuario = c.id_usuario
+        GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira, c.ativo, u.nome_usuario, u.email_usuario
+        ORDER BY c.id_carteira DESC`,
+    );
+    return response.rows;
   }
 
   async archiveByUsuario(id_usuario) {
-    const hasAtivo = await this.hasAtivoColumn();
-    if (!hasAtivo) {
-      return [];
-    }
-
-    const rows = await db
-      .update(carteira)
-      .set({ ativo: false })
-      .where(eq(carteira.idUsuario, id_usuario))
-      .returning();
-    return mapRows(rows);
+    const response = await database.query(
+      `UPDATE carteira
+       SET ativo = FALSE
+       WHERE id_usuario = $1
+       RETURNING *`,
+      [id_usuario],
+    );
+    return response.rows;
   }
 }

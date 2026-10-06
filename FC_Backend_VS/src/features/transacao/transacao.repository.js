@@ -25,79 +25,235 @@ const semUndefined = (obj) =>
   Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
 
 export class TransacaoRepository {
-  async findAll() {
-    const rows = await db
-      .select()
-      .from(transacao)
-      .orderBy(desc(transacao.data));
-    return mapRows(rows);
+  // Delega ao helper de config/db.js, que trata a falha do ROLLBACK.
+  async withTransaction(operation) {
+    return database.withTransaction(operation);
   }
 
-  async archive(id) {
-    const rows = await db
-      .update(transacao)
-      .set({ arquivado: true })
-      .where(eq(transacao.idTransacao, id))
-      .returning();
-    return rows[0] ? mapRow(rows[0]) : null;
+  async atualizarSaldo(client, id_conta, valor, entrada, aplicado) {
+    if (!aplicado) return;
+    const variacao = (entrada ? 1 : -1) * Number(valor);
+    await client.query(
+      `UPDATE conta
+       SET saldo_conta = COALESCE(saldo_conta, 0) + $1
+       WHERE id_conta = $2`,
+      [variacao, id_conta],
+    );
   }
 
-  async findById(id) {
-    const rows = await db
-      .select()
-      .from(transacao)
-      .where(eq(transacao.idTransacao, id));
-    return rows[0] ? mapRow(rows[0]) : null;
+  async findAll(id_usuario) {
+    const response = await database.query(
+            `SELECT t.*,
+              c.nome_conta,
+              moeda.nome_moeda AS nome_moeda,
+              cat.nome_categoria AS nome_categoria,
+              m.nome_metodo AS nome_metodo
+       FROM transacao t
+       INNER JOIN conta c ON c.id_conta = t.id_conta AND c.ativo = TRUE
+       LEFT JOIN moeda ON moeda.id_moeda = c.id_moeda
+       LEFT JOIN categoria cat ON cat.id_categoria = t.id_categoria
+       LEFT JOIN metodo m ON m.id_metodo = t.id_metodo
+       WHERE c.id_usuario = $1 AND t.arquivado = FALSE
+       ORDER BY t.data DESC, t.id_transacao DESC`,
+      [id_usuario],
+    );
+    return response.rows;
   }
 
-  async create(dados) {
-    const rows = await db
-      .insert(transacao)
-      .values(
-        semUndefined({
-          idConta: dados.id_conta,
-          idCategoria: dados.id_categoria,
-          idMetodo: dados.id_metodo,
-          idCarteira: dados.id_carteira,
-          valor: dados.valor,
-          descricao: dados.descricao,
-          quitado: dados.quitado,
-          arquivado: dados.arquivado,
-          data: dados.data,
-          entrada: dados.entrada,
-        }),
-      )
-      .returning();
-    return rows[0] ? mapRow(rows[0]) : null;
+  async findArchived(id_usuario) {
+    const response = await database.query(
+      `SELECT t.*,
+              c.nome_conta,
+              moeda.nome_moeda AS nome_moeda,
+              cat.nome_categoria AS nome_categoria,
+              m.nome_metodo AS nome_metodo
+       FROM transacao t
+       INNER JOIN conta c ON c.id_conta = t.id_conta AND c.ativo = TRUE
+       LEFT JOIN moeda ON moeda.id_moeda = c.id_moeda
+       LEFT JOIN categoria cat ON cat.id_categoria = t.id_categoria
+       LEFT JOIN metodo m ON m.id_metodo = t.id_metodo
+       WHERE c.id_usuario = $1 AND t.arquivado = TRUE
+       ORDER BY t.data DESC, t.id_transacao DESC`,
+      [id_usuario],
+    );
+    return response.rows;
   }
 
-  async update(id, dados) {
-    const rows = await db
-      .update(transacao)
-      .set(
-        semUndefined({
-          idConta: dados.id_conta,
-          idCategoria: dados.id_categoria,
-          idMetodo: dados.id_metodo,
-          idCarteira: dados.id_carteira,
-          valor: dados.valor,
-          descricao: dados.descricao,
-          quitado: dados.quitado,
-          arquivado: dados.arquivado,
-          data: dados.data,
-          entrada: dados.entrada,
-        }),
-      )
-      .where(eq(transacao.idTransacao, id))
-      .returning();
-    return rows[0] ? mapRow(rows[0]) : null;
+  async archive(id, id_usuario) {
+    return this.withTransaction(async (client) => {
+      const existente = await client.query(
+        `SELECT t.* FROM transacao t
+         INNER JOIN conta c ON c.id_conta = t.id_conta
+         WHERE t.id_transacao = $1 AND c.id_usuario = $2
+         FOR UPDATE OF t, c`,
+        [id, id_usuario],
+      );
+      const transacao = existente.rows[0];
+      if (!transacao) return null;
+      if (transacao.arquivado) return transacao;
+
+      await this.atualizarSaldo(client, transacao.id_conta, transacao.valor, !transacao.entrada, transacao.quitado);
+      const response = await client.query(
+        `UPDATE transacao SET arquivado = true
+         WHERE id_transacao = $1 RETURNING *`,
+        [id],
+      );
+      return response.rows[0];
+    });
   }
 
-  async delete(id) {
-    const rows = await db
-      .delete(transacao)
-      .where(eq(transacao.idTransacao, id))
-      .returning({ id_transacao: transacao.idTransacao });
-    return rows.length > 0;
+  async restore(id, id_usuario) {
+    return this.withTransaction(async (client) => {
+      const existente = await client.query(
+        `SELECT t.* FROM transacao t
+         INNER JOIN conta c ON c.id_conta = t.id_conta
+         WHERE t.id_transacao = $1 AND c.id_usuario = $2
+         FOR UPDATE OF t, c`,
+        [id, id_usuario],
+      );
+      const transacao = existente.rows[0];
+      if (!transacao) return null;
+      if (!transacao.arquivado) return transacao;
+
+      const response = await client.query(
+        `UPDATE transacao SET arquivado = false
+         WHERE id_transacao = $1 RETURNING *`,
+        [id],
+      );
+      await this.atualizarSaldo(client, transacao.id_conta, transacao.valor, transacao.entrada, transacao.quitado);
+      return response.rows[0];
+    });
+  }
+
+  async findById(id, id_usuario) {
+    const response = await database.query(
+      `SELECT t.* FROM transacao t
+       INNER JOIN conta c ON c.id_conta = t.id_conta
+       WHERE t.id_transacao = $1 AND c.id_usuario = $2`,
+      [id, id_usuario],
+    );
+    return response.rows[0] || null;
+  }
+
+  async create({
+    id_conta,
+    id_categoria,
+    id_metodo,
+    id_carteira,
+    valor,
+    descricao,
+    quitado,
+    arquivado,
+    data,
+    entrada,
+  }, id_usuario) {
+    return this.withTransaction(async (client) => {
+      const conta = await client.query(
+        "SELECT id_conta FROM conta WHERE id_conta = $1 AND id_usuario = $2 FOR UPDATE",
+        [id_conta, id_usuario],
+      );
+      if (!conta.rows.length) return null;
+      if (id_carteira) {
+        const carteira = await client.query(
+          "SELECT id_carteira FROM carteira WHERE id_carteira = $1 AND id_usuario = $2",
+          [id_carteira, id_usuario],
+        );
+        if (!carteira.rows.length) return null;
+      }
+
+      const response = await client.query(
+        `INSERT INTO transacao
+          (id_conta, id_categoria, id_metodo, id_carteira, valor, descricao, quitado, arquivado, data, entrada)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+         RETURNING *`,
+        [id_conta, id_categoria, id_metodo, id_carteira, valor, descricao, quitado, arquivado, data, entrada],
+      );
+      await this.atualizarSaldo(client, id_conta, valor, entrada, quitado && !arquivado);
+      return response.rows[0];
+    });
+  }
+
+  async update(
+    id,
+    {
+      id_conta,
+      id_categoria,
+      id_metodo,
+      id_carteira,
+      valor,
+      descricao,
+      quitado,
+      arquivado,
+      data,
+      entrada,
+    },
+    id_usuario,
+  ) {
+    return this.withTransaction(async (client) => {
+      const existente = await client.query(
+        `SELECT t.* FROM transacao t
+         INNER JOIN conta c ON c.id_conta = t.id_conta
+         WHERE t.id_transacao = $1 AND c.id_usuario = $2
+         FOR UPDATE OF t`,
+        [id, id_usuario],
+      );
+      const anterior = existente.rows[0];
+      if (!anterior) return null;
+
+      const contas = await client.query(
+        `SELECT id_conta FROM conta
+         WHERE id_conta = ANY($1::int[]) AND id_usuario = $2
+         ORDER BY id_conta FOR UPDATE`,
+        [[...new Set([anterior.id_conta, Number(id_conta)])], id_usuario],
+      );
+      if (contas.rows.length !== new Set([anterior.id_conta, Number(id_conta)]).size) return null;
+      if (id_carteira) {
+        const carteira = await client.query(
+          "SELECT id_carteira FROM carteira WHERE id_carteira = $1 AND id_usuario = $2",
+          [id_carteira, id_usuario],
+        );
+        if (!carteira.rows.length) return null;
+      }
+
+      await this.atualizarSaldo(
+        client,
+        anterior.id_conta,
+        anterior.valor,
+        !anterior.entrada,
+        anterior.quitado && !anterior.arquivado,
+      );
+      const response = await client.query(
+        `UPDATE transacao
+         SET id_conta = $1, id_categoria = $2, id_metodo = $3, id_carteira = $4,
+             valor = $5, descricao = $6, quitado = $7, arquivado = $8, data = $9, entrada = $10
+         WHERE id_transacao = $11 RETURNING *`,
+        [id_conta, id_categoria, id_metodo, id_carteira, valor, descricao, quitado, arquivado, data, entrada, id],
+      );
+      await this.atualizarSaldo(client, id_conta, valor, entrada, quitado && !arquivado);
+      return response.rows[0] || null;
+    });
+  }
+
+  async delete(id, id_usuario) {
+    return this.withTransaction(async (client) => {
+      const existente = await client.query(
+        `SELECT t.* FROM transacao t
+         INNER JOIN conta c ON c.id_conta = t.id_conta
+         WHERE t.id_transacao = $1 AND c.id_usuario = $2
+         FOR UPDATE OF t, c`,
+        [id, id_usuario],
+      );
+      const transacao = existente.rows[0];
+      if (!transacao) return false;
+      await this.atualizarSaldo(
+        client,
+        transacao.id_conta,
+        transacao.valor,
+        !transacao.entrada,
+        transacao.quitado && !transacao.arquivado,
+      );
+      await client.query("DELETE FROM transacao WHERE id_transacao = $1", [id]);
+      return true;
+    });
   }
 }

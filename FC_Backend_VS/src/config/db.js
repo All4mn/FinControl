@@ -20,11 +20,27 @@ class database {
         // - Database: nome do banco de dados a ser usado
         // Para replicar: Substitua a connectionString pela sua própria string de conexão
         // do PostgreSQL (pode vir de variáveis de ambiente para segurança).
+        const connectionString = process.env.DATABASE_URL || process.env.DB_CONNECTION_STRING;
+        if (!connectionString) {
+            throw new Error('Defina DATABASE_URL ou DB_CONNECTION_STRING para conectar ao PostgreSQL.');
+        }
+
         this.pool = new Pool({
-            connectionString: process.env.DB_CONNECTION_STRING,
+            connectionString,
+            connectionTimeoutMillis: 15000,
+            max: Number(process.env.DB_POOL_MAX) || 10,
+            idleTimeoutMillis: 30000,
+            keepAlive: true,
             ssl:{
                 rejectUnauthorized: false
             }
+        });
+
+        // Timeouts via SET no 'connect', nunca pelo campo 'options': o Neon
+        // rejeita parâmetros de startup com 08P01 e TODA consulta vira 500.
+        this.pool.on('connect', (client) => {
+            client.query("SET lock_timeout = '5s'");
+            client.query("SET statement_timeout = '10s'");
         });
     }
 
@@ -33,11 +49,38 @@ class database {
     // Em produção, pode ser chamado no startup da aplicação para validar a configuração.
     // Para replicar: Use em aplicações onde você quer confirmar a conectividade no início.
     async connection(){
+        const client = await this.pool.connect();
+        client.release();
+    }
+
+    // A função deve usar APENAS o client recebido, senão as queries saem da
+    // transação. Se o ROLLBACK falhar, o client é descartado em vez de voltar
+    // ao pool: o pg não faz rollback no release() e a conexão ficaria travada.
+    async withTransaction(operacao) {
+        const client = await this.pool.connect();
+        let liberado = false;
+
+        const liberar = (erro) => {
+            if (liberado) return;
+            liberado = true;
+            client.release(erro);
+        };
+
         try {
-            await this.pool.connect();
-            console.log('Conexão com o banco de dados estabelecida com sucesso!');
-        } catch (error) {
-            console.error('Erro ao conectar ao banco de dados:', error);
+            await client.query('BEGIN');
+            const resultado = await operacao(client);
+            await client.query('COMMIT');
+            liberar();
+            return resultado;
+        } catch (erro) {
+            try {
+                await client.query('ROLLBACK');
+                liberar();
+            } catch (erroRollback) {
+                // Descarta a conexão: voltar ao pool deixaria locks abertos.
+                liberar(erroRollback);
+            }
+            throw erro;
         }
     }
 

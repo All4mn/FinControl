@@ -4,19 +4,28 @@ import Header from "../../components/componentesPadrao/headerLogged/HeaderLogged
 import Footer from "../../components/componentesPadrao/footer/Footer.jsx";
 import styles from "./Dashboard.module.css";
 
+const API_BASE_URL = import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
+
 export default function Dashboard() {
-  const API_BASE_URL =
-    import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
   const [usuario, setUsuario] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [carteira, setCarteira] = useState(null);
   const [carteiraLoading, setCarteiraLoading] = useState(false);
 
-  const formatCurrency = (value, currency = "BRL") =>
-    new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency,
-    }).format(Number(value) || 0);
+  const formatCurrency = (value, currency) => {
+    if (value === null || value === undefined || value === "") return "—";
+    const amount = Number(value);
+    if (!Number.isFinite(amount)) return "—";
+
+    const currencyOptions = currency
+      ? { style: "currency", currency }
+      : { style: "decimal" };
+    return new Intl.NumberFormat("pt-BR", {
+      ...currencyOptions,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  };
 
   useEffect(() => {
     const fetchUsuario = async () => {
@@ -76,11 +85,15 @@ export default function Dashboard() {
   }
 
   const getCurrencyCode = (nome_moeda) => {
-    const name = String(nome_moeda || "").toLowerCase();
-    if (name.includes("euro")) return "EUR";
-    if (name.includes("dólar") || name.includes("dolar") || name.includes("usd")) return "USD";
+    const name = String(nome_moeda || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+    if (name.includes("euro") || name.includes("eur")) return "EUR";
+    if (name.includes("dolar") || name.includes("dollar") || name.includes("usd")) return "USD";
     if (name.includes("real") || name.includes("brl")) return "BRL";
-    return "BRL";
+    if (/^[a-z]{3}$/i.test(name.trim())) return name.trim().toUpperCase();
+    return null;
   };
 
   return (
@@ -102,20 +115,31 @@ export default function Dashboard() {
               </span>
             </div>
             <div className={styles.carteiraCardBody}>
-              <p className={styles.carteiraLabel}>Saldo por moeda</p>
               {carteiraLoading ? (
                 <p className={styles.carteiraSaldo}>Carregando...</p>
-              ) : carteira && carteira.saldos?.length ? (
+              ) : carteira && carteira.saldo_total !== null && carteira.saldo_total !== undefined ? (
                 <div className={styles.carteiraSaldos}>
-                  {carteira.saldos.map((saldo) => (
-                    <div className={styles.carteiraSaldoItem} key={`${saldo.id_moeda}-${saldo.nome_moeda}`}>
-                      <span className={styles.carteiraSaldoName}>{saldo.nome_moeda || "Sem moeda"}</span>
-                      <span className={styles.carteiraSaldoValue}>{formatCurrency(saldo.saldo_total, getCurrencyCode(saldo.nome_moeda))}</span>
-                    </div>
-                  ))}
+                  <div className={styles.carteiraSaldoItem}>
+                    <span className={styles.carteiraSaldoName}>Saldo da carteira</span>
+                    <span className={styles.carteiraSaldoValue}>
+                      {formatCurrency(carteira.saldo_total, getCurrencyCode(carteira.saldos?.[0]?.nome_moeda))}
+                    </span>
+                  </div>
                 </div>
+              ) : carteira && carteira.saldos?.length ? (
+                <>
+                  <p className={styles.carteiraLabel}>Saldos por moeda</p>
+                  <div className={styles.carteiraSaldos}>
+                    {carteira.saldos.map((saldo) => (
+                      <div className={styles.carteiraSaldoItem} key={`${saldo.id_moeda}-${saldo.nome_moeda}`}>
+                        <span className={styles.carteiraSaldoName}>{saldo.nome_moeda || "Moeda não informada"}</span>
+                        <span className={styles.carteiraSaldoValue}>{formatCurrency(saldo.saldo_total, getCurrencyCode(saldo.nome_moeda))}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
               ) : (
-                <p className={styles.carteiraSaldo}>R$ 0,00</p>
+                <p className={styles.carteiraSaldo}>Nenhuma conta cadastrada</p>
               )}
             </div>
           </div>
