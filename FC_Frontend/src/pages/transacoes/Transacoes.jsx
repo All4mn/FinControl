@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { Archive, ArrowDownLeft, ArrowUpRight, Pencil, Plus, Search, X } from "lucide-react";
+import { Archive, ArrowDownLeft, ArrowUpRight, Pencil, Plus, RefreshCw, Search, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "../../components/componentesPadrao/headerLogged/HeaderLogged.jsx";
 import Footer from "../../components/componentesPadrao/footer/Footer.jsx";
@@ -8,6 +8,24 @@ import { dataTransacaoParaDataLocal } from "../../utils/dataTransacao.js";
 import styles from "./Transacoes.module.css";
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
+
+// O handler global (app.js) responde { status, message }; os controllers,
+// { sucesso, mensagem }. Lemos os dois.
+const mensagemDoErro = (falha, padrao) =>
+  falha.response?.data?.mensagem || falha.response?.data?.message || padrao;
+
+const redirecionarParaLogin = () => {
+  window.location.href = "/login";
+};
+
+// A API devolve as transações de todas as contas; a UI só mostra as ativas.
+const buscarTransacoes = async (idsContasPermitidas) => {
+  const resposta = await axios.get(`${API_BASE_URL}/transacoes`, { withCredentials: true });
+  const permitidas = new Set(idsContasPermitidas.map(Number));
+  return (resposta.data.dados || []).filter(
+    (transacao) => transacao.arquivado !== true && permitidas.has(Number(transacao.id_conta)),
+  );
+};
 
 const moedaParaCodigo = (nome) => {
   const valor = String(nome || "").toLowerCase();
@@ -74,54 +92,86 @@ export default function Transacoes() {
   const [busca, setBusca] = useState("");
   const [erro, setErro] = useState("");
 
-  const carregarTransacoes = async (idsContasPermitidas) => {
-    const resposta = await axios.get(`${API_BASE_URL}/transacoes`, { withCredentials: true });
-    const permitidas = new Set(idsContasPermitidas.map(Number));
-    const transacoesDoUsuario = (resposta.data.dados || []).filter((transacao) =>
-      transacao.arquivado !== true && permitidas.has(Number(transacao.id_conta)),
-    );
-    setTransacoes(transacoesDoUsuario);
-  };
-
-  useEffect(() => {
-    const carregarDados = async () => {
-      try {
-        setTransacoes([]);
-        setContas([]);
-        const respostaUsuario = await axios.get(`${API_BASE_URL}/usuarios/me`, { withCredentials: true });
-        if (!respostaUsuario.data.sucesso) {
-          window.location.href = "/login";
-          return;
-        }
-
-        const dadosUsuario = respostaUsuario.data.dados;
-        setUsuario(dadosUsuario);
-        const [respostaContas, respostaCategorias, respostaMetodos] = await Promise.all([
-          axios.get(`${API_BASE_URL}/contas/search/${dadosUsuario.id_usuario}`, { withCredentials: true }),
-          axios.get(`${API_BASE_URL}/categorias`, { withCredentials: true }),
-          axios.get(`${API_BASE_URL}/metodos`, { withCredentials: true }),
-        ]);
-
-        const contasDoUsuario = respostaContas.data.dados || [];
-        setContas(contasDoUsuario);
-        setCategorias(respostaCategorias.data.dados || []);
-        setMetodos(respostaMetodos.data.dados || []);
-        await carregarTransacoes(contasDoUsuario.map((conta) => conta.id_conta));
-      } catch (falha) {
-        setTransacoes([]);
-        if (falha.response?.status === 401) {
-          window.location.href = "/login";
-          return;
-        }
-        setFalhaCarregamento(true);
-        setErro(falha.response?.data?.mensagem || "Não foi possível carregar as transações.");
-      } finally {
-        setCarregando(false);
+  // O reset de falha fica em recarregar(), não aqui: no mount os valores
+  // iniciais já servem. Sem o botão de retry, falhaCarregamento ficava travado
+  // em true e a tela não saía mais do aviso de erro.
+  const carregarDados = useCallback(async () => {
+    try {
+      const respostaUsuario = await axios.get(`${API_BASE_URL}/usuarios/me`, { withCredentials: true, timeout: 20000 });
+      if (!respostaUsuario.data.sucesso) {
+        redirecionarParaLogin();
+        return;
       }
-    };
 
-    carregarDados();
+      const dadosUsuario = respostaUsuario.data.dados;
+      setUsuario(dadosUsuario);
+
+      // allSettled, não all: com all, uma falha só em categorias/métodos descartava
+      // também as contas e travava o lançamento de transações.
+      const [respostaContas, respostaCategorias, respostaMetodos] = await Promise.allSettled([
+        axios.get(`${API_BASE_URL}/contas/search/${dadosUsuario.id_usuario}?apenas_ativas=true`, { withCredentials: true, timeout: 20000 }),
+        axios.get(`${API_BASE_URL}/categorias`, { withCredentials: true, timeout: 20000 }),
+        axios.get(`${API_BASE_URL}/metodos`, { withCredentials: true, timeout: 20000 }),
+      ]);
+
+      if (respostaContas.status === "rejected") throw respostaContas.reason;
+
+      const contasDoUsuario = respostaContas.value.data.dados || [];
+      setContas(contasDoUsuario);
+      setCategorias(respostaCategorias.status === "fulfilled" ? respostaCategorias.value.data.dados || [] : []);
+      setMetodos(respostaMetodos.status === "fulfilled" ? respostaMetodos.value.data.dados || [] : []);
+
+      // Falha só nas transações não impede criar novas: mantém as contas e avisa.
+      try {
+        setTransacoes(await buscarTransacoes(contasDoUsuario.map((conta) => conta.id_conta)));
+      } catch (falha) {
+        if (falha.response?.status === 401) {
+          redirecionarParaLogin();
+          return;
+        }
+        setTransacoes([]);
+        setErro(mensagemDoErro(falha, "Não foi possível carregar as transações."));
+      }
+    } catch (falha) {
+      if (falha.response?.status === 401) {
+        redirecionarParaLogin();
+        return;
+      }
+      // 404 com apenas_ativas = "nenhuma conta ativa" (usuário arquivou todas), não
+      // falha: mostra o convite de criar conta em vez do estado de erro.
+      if (falha.response?.status === 404) {
+        setContas([]);
+        setTransacoes([]);
+        return;
+      }
+      setContas([]);
+      setTransacoes([]);
+      setFalhaCarregamento(true);
+      setErro(mensagemDoErro(falha, "Não foi possível conectar ao FinControl. Verifique se o servidor está disponível."));
+    } finally {
+      setCarregando(false);
+    }
   }, []);
+
+  const recarregar = useCallback(async () => {
+    setCarregando(true);
+    setFalhaCarregamento(false);
+    setErro("");
+    await carregarDados();
+  }, [carregarDados]);
+
+  // Fora do corpo síncrono do efeito, para não gerar renders em cascata. O guard
+  // evita setState após o desmonte, que a versão anterior não tinha.
+  useEffect(() => {
+    let ativo = true;
+    Promise.resolve().then(() => {
+      if (ativo) return carregarDados();
+      return undefined;
+    });
+    return () => {
+      ativo = false;
+    };
+  }, [carregarDados]);
 
   const transacoesFiltradas = useMemo(() => {
     const consulta = busca.trim().toLocaleLowerCase("pt-BR");
@@ -160,6 +210,7 @@ export default function Transacoes() {
 
   const abrirNovo = () => {
     setErro("");
+    setFalhaCarregamento(false);
     setTransacaoEditando(null);
     setForm({ ...formInicial(), id_conta: contas[0] ? String(contas[0].id_conta) : "" });
     setFormAberto(true);
@@ -210,18 +261,19 @@ export default function Transacoes() {
     };
 
     try {
+      // timeout: sem ele, uma requisição que nunca responde deixa `salvando`
+      // em true para sempre e o formulário trava sem permitir nova tentativa.
+      const config = { withCredentials: true, timeout: 20000 };
       if (transacaoEditando) {
-        await axios.put(`${API_BASE_URL}/transacoes/${transacaoEditando.id_transacao}`, dados, { withCredentials: true });
+        await axios.put(`${API_BASE_URL}/transacoes/${transacaoEditando.id_transacao}`, dados, config);
       } else {
-        await axios.post(`${API_BASE_URL}/transacoes`, dados, { withCredentials: true });
+        await axios.post(`${API_BASE_URL}/transacoes`, dados, config);
       }
-      await carregarTransacoes(contas.map((conta) => conta.id_conta));
+      setTransacoes(await buscarTransacoes(contas.map((conta) => conta.id_conta)));
       fecharForm();
     } catch (falha) {
       setErro(
-        falha.response?.data?.mensagem ||
-          falha.response?.data?.message ||
-          "Não foi possível salvar a transação. Verifique sua conexão e tente novamente.",
+        mensagemDoErro(falha, "Não foi possível salvar a transação. Verifique sua conexão e tente novamente."),
       );
     } finally {
       setSalvando(false);
@@ -231,10 +283,10 @@ export default function Transacoes() {
   const arquivarTransacao = async (transacao) => {
     if (!window.confirm(`Arquivar a transação "${transacao.descricao}"?`)) return;
     try {
-      await axios.put(`${API_BASE_URL}/transacoes/${transacao.id_transacao}/archive`, {}, { withCredentials: true });
-      await carregarTransacoes(contas.map((conta) => conta.id_conta));
+      await axios.put(`${API_BASE_URL}/transacoes/${transacao.id_transacao}/archive`, {}, { withCredentials: true, timeout: 20000 });
+      setTransacoes(await buscarTransacoes(contas.map((conta) => conta.id_conta)));
     } catch (falha) {
-      setErro(falha.response?.data?.mensagem || "Não foi possível arquivar a transação.");
+      setErro(mensagemDoErro(falha, "Não foi possível arquivar a transação."));
     }
   };
 
@@ -284,7 +336,10 @@ export default function Transacoes() {
           {falhaCarregamento ? (
             <div className={styles.vazio}>
               <h3>Não foi possível conectar ao FinControl</h3>
-              <p>Confira se o servidor está disponível e atualize a página.</p>
+              <p>Isso costuma ser o servidor ou o banco fora do ar por alguns instantes. Nenhum dado foi perdido.</p>
+              <button type="button" className={styles.linkAcao} onClick={recarregar}>
+                <RefreshCw size={16} aria-hidden="true" /> Tentar novamente
+              </button>
             </div>
           ) : !contas.length ? (
             <div className={styles.vazio}>
