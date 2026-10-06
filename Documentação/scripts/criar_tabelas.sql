@@ -30,7 +30,8 @@ CREATE TABLE IF NOT EXISTS conta (
   id_usuario INT REFERENCES usuario(id_usuario) ON DELETE CASCADE,
   id_moeda INT REFERENCES moeda(id_moeda) ON DELETE SET NULL,
   nome_conta VARCHAR(100) NOT NULL,
-  saldo_conta NUMERIC(14,2) DEFAULT 0
+  saldo_conta NUMERIC(14,2) DEFAULT 0,
+  ativo BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 CREATE TABLE IF NOT EXISTS carteira (
@@ -86,3 +87,6 @@ CREATE TABLE IF NOT EXISTS status_usuario (
 -- Índices adicionais (opcional)
 CREATE INDEX IF NOT EXISTS idx_transacao_data ON transacao(data);
 CREATE INDEX IF NOT EXISTS idx_conta_usuario ON conta(id_usuario);
+
+-- Contas arquivadas saem do saldo consolidado; índice parcial cobre esse filtro.
+CREATE INDEX IF NOT EXISTS idx_conta_ativo ON conta(id_usuario) WHERE ativo = TRUE;
