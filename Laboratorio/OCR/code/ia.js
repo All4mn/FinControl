@@ -8,8 +8,6 @@ dotenv.config()
 
 
 const groq = new Groq({
-    apiKey:process.env.GROQ_API_KEY
-    //apiKey:'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'
 })
 
 export const main = async(data)=>{

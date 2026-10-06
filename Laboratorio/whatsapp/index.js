@@ -27,8 +27,8 @@ client.on('message', async(msg) => {
 
     //telefone tentativa d capturar
 
-    const contatoUsuario = await client.getContact();
-    const telefoneUsuario = contatoUsuario.number;
+    const contatoUsuario = await msg.getContact(); // antes estava client.getContact() (não é uma função)
+    const telefoneUsuario = contatoUsuario.number; //então kk ta mema coisa
 
 
     console.log(`Numero: ${telefoneUsuario}
@@ -45,7 +45,7 @@ client.on('message', async(msg) => {
 
     try {
         
-        const pendente = dadosPendentes.get(telefone)
+        const pendente = dadosPendentes.get(telefone) //telefone is not defined
         if (pendente && msg.type === 'chat') {
             const resposta = msg.body.trim().toLowerCase()
  
@@ -90,7 +90,7 @@ client.on('message', async(msg) => {
             }
  
             dadosPendentes.set(telefone, { usuarioId: usuario.id, dados })
- 
+ //não entendi isso
             return msg.reply(
             `Confirme os dados:
             💰 Valor: R$ ${dados.valor.toFixed(2)}
@@ -109,7 +109,9 @@ client.on('message', async(msg) => {
  
     } catch (error) {
         console.error(error)
-        msg.reply('Ocorreu um erro ao processar sua mensagem.')
+        // msg.reply('Ocorreu um erro ao processar sua mensagem.')
+        //comentando pq senão sai do controle
+        
     }
 });
 

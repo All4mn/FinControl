@@ -1,6 +1,10 @@
-import database from "../config/db.js";
-import { TransacaoRepository } from "../models/repositories/transacao.repository.js";
+// import database from "../config/db.js";
+import database from '../../FC_Backend_VS/src/config/db.js'
+// import { TransacaoRepository } from "../models/repositories/transacao.repository.js";
+import { TransacaoRepository } from '../../FC_Backend_VS/src/features/transacao/transacao.repository.js'
  
+
+//lembrar que vamos importar funções do repositorio do backend para não descentralizar responsabilidades
 const transacaoRepository = new TransacaoRepository();
  
 // comparação p saber se o telefone é válido e brasileiro (padroniza o formato p DDD E nuemreo)
