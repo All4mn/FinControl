@@ -136,6 +136,7 @@ export const usuario = pgTable("usuario", {
 	googleIdUsuario: varchar("google_id_usuario"),
 	idStatusUsuario: integer("id_status_usuario").notNull(),
 	isAdmin: boolean("is_admin").default(false).notNull(),
+	lid:varchar('lid')
 }, (table) => [
 	foreignKey({
 			columns: [table.idStatusUsuario],
