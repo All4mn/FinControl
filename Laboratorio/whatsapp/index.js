@@ -31,9 +31,10 @@ client.on('message', async(msg) => {
     const telefoneUsuario = contatoUsuario.number; //então kk ta mema coisa
 
 
-    console.log(`Numero: ${telefoneUsuario}
-        Mensagem: ${msg.body}
-        Tipo: ${msg.type}`);
+    // console.log(`Numero: ${telefoneUsuario}
+    //     Mensagem: ${msg.body}
+    //     Tipo: ${msg.type}`);
+console.log(msg._data);
 
         // Número de Telefone: ${client.info.wid.user}
         // console.log(msg.type);
@@ -45,19 +46,19 @@ client.on('message', async(msg) => {
 
     try {
         
-        const pendente = dadosPendentes.get(telefone) //telefone is not defined
+        const pendente = dadosPendentes.get(telefoneUsuario) //telefone is not defined
         if (pendente && msg.type === 'chat') {
             const resposta = msg.body.trim().toLowerCase()
  
             if (['1', '2'].includes(resposta)) {
                 const tipo = resposta === '1' ? 'despesa' : 'receita'
                 await registrarLancamento(pendente.usuarioId, { ...pendente.dados, tipo })
-                dadosPendentes.delete(telefone)
+                dadosPendentes.delete(telefoneUsuario)
                 return msg.reply(`✅ ${tipo} lançada com sucesso!`)
             }
  
             if (['não', 'nao', 'n'].includes(resposta)) {
-                dadosPendentes.delete(telefone)
+                dadosPendentes.delete(telefoneUsuario)
                 return msg.reply('Ok, operação cancelada. Pode enviar outro comprovante quando quiser.')
             }
             
@@ -66,7 +67,7 @@ client.on('message', async(msg) => {
        
         if (msg.type === 'image' && msg.hasMedia) {
             
-            const usuario = await buscarUsuarioPorTelefone(telefone)
+            const usuario = await buscarUsuarioPorTelefone(telefoneUsuario)
             if (!usuario) {
                 return msg.reply('Não foi encontrado seu número cadastrado na plataforma. Confira o telefone no seu cadastro.')
             }
@@ -89,7 +90,7 @@ client.on('message', async(msg) => {
                 return msg.reply('Não foi possível extrair os dados do comprovante. Por favor, envie outro comprovante ou verifique se a imagem está legível.')
             }
  
-            dadosPendentes.set(telefone, { usuarioId: usuario.id, dados })
+            dadosPendentes.set(telefoneUsuario, { usuarioId: usuario.id, dados })
  //não entendi isso
             return msg.reply(
             `Confirme os dados:

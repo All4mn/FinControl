@@ -6,6 +6,9 @@ import { TransacaoRepository } from '../../FC_Backend_VS/src/features/transacao/
 
 //lembrar que vamos importar funções do repositorio do backend para não descentralizar responsabilidades
 const transacaoRepository = new TransacaoRepository();
+
+console.log(database?'true':'false');
+
  
 // comparação p saber se o telefone é válido e brasileiro (padroniza o formato p DDD E nuemreo)
 function padronizarTelefone(numero) {
