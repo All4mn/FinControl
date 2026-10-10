@@ -60,4 +60,9 @@ DELETE {{url}}/usuarios/1
 PATCH {{url}}/usuarios/desativar/27
 
 ###
-GET {{url}}/usuarios/lid/a
+GET {{url}}/usuarios/lid/347cb4
+###
+PUT {{url}}/usuarios/lid/token/12
+
+###
+GET {{url}}/usuarios/lid/id/92

@@ -26,6 +26,9 @@ export async function usuarioRoutes(app) {
   app.put('/lid/token/:id', async (req,res)=>{
   return usuarioController.insertUserToken(req,res)
   })
+  app.get('/lid/id/:id', async (req,res)=>{
+  return usuarioController.getLidById(req,res)
+  })
   app.get('/lid/:lid', async (req ,res)=>{
   return  usuarioController.getLid(req,res)
   })

@@ -218,6 +218,19 @@ export class UsuarioRepository {
     return rows
   }
 
+  async insertUserToken(id,Token){
+    const rows = await db
+    .update(usuario)
+    .set({lid:Token})
+    .where(eq(usuario.idUsuario, id))
+    .returning()
+    return rows
+  }
+
+  async getLidById(id){
+    const rows = await db.select({lid: usuario.lid,}).from(usuario).where(eq(usuario.idUsuario, id))
+    return rows[0].lid
+  }
   // return req
   
 }

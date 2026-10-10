@@ -1,21 +1,22 @@
-import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import PerfilModal from '../perfilModal/PerfilModal';
-import styles from './HeaderLogged.module.css';
+import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
+import PerfilModal from "../perfilModal/PerfilModal";
+import styles from "./HeaderLogged.module.css";
 
-const API_BASE_URL = import.meta.env.VITE_BACKEND_RENDER_URL || 'http://localhost:3000';
+const API_BASE_URL =
+  import.meta.env.VITE_BACKEND_RENDER_URL || "http://localhost:3000";
 
 export default function Header({ usuario, logado = false }) {
   const [buscaAberta, setBuscaAberta] = useState(false);
-  const [termoBusca, setTermoBusca] = useState('');
+  const [termoBusca, setTermoBusca] = useState("");
   const [menuAberto, setMenuAberto] = useState(false);
   const [modalPerfilAberto, setModalPerfilAberto] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
-  const userName = usuario?.nome_usuario || usuario?.nome || 'Usuário';
-  const userEmail = usuario?.email_usuario || usuario?.email || '';
+  const userName = usuario?.nome_usuario || usuario?.nome || "Usuário";
+  const userEmail = usuario?.email_usuario || usuario?.email || "";
 
   const toggleBusca = () => setBuscaAberta(!buscaAberta);
   const toggleMenu = () => setMenuAberto(!menuAberto);
@@ -28,57 +29,143 @@ export default function Header({ usuario, logado = false }) {
         { withCredentials: true },
       );
     } catch (err) {
-      console.error('Erro ao sair:', err);
+      console.error("Erro ao sair:", err);
     } finally {
-      navigate('/login');
+      navigate("/login");
     }
   };
 
   const navLinks = [
-    { href: '/dashboard', label: 'Início', icon: 'home' },
-    { href: '/dashboard/transacoes', label: 'Transações', icon: 'wallet' },
-    { href: '/dashboard/relatorios', label: 'Relatórios', icon: 'chart' },
-    { href: '/dashboard/arquivados', label: 'Arquivados', icon: 'archive' },
-    { href: '/dashboard/conta', label: 'Nova Conta', icon: 'plus' },
+    { href: "/dashboard", label: "Início", icon: "home" },
+    { href: "/dashboard/transacoes", label: "Transações", icon: "wallet" },
+    { href: "/dashboard/relatorios", label: "Relatórios", icon: "chart" },
+    { href: "/dashboard/arquivados", label: "Arquivados", icon: "archive" },
+    { href: "/dashboard/conta", label: "Nova Conta", icon: "plus" },
+    { href:'https://wa.link/1e78wg', label: "Whatsapp", icon:"chat"}
   ];
 
   const renderIcon = (icon) => {
     switch (icon) {
-      case 'home':
+      case "home":
         return (
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
             <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
           </svg>
         );
-      case 'chart':
+      case "chart":
         return (
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M3 3v16a2 2 0 0 0 2 2h16" />
             <path d="m19 9-5 5-4-4-3 3" />
           </svg>
         );
-      case 'archive':
+      case "archive":
         return (
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <rect width="20" height="5" x="2" y="3" rx="1" />
             <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" />
             <path d="M10 12h4" />
           </svg>
         );
-      case 'plus':
+      case "plus":
         return (
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M5 12h14" />
             <path d="M12 5v14" />
           </svg>
         );
-      case 'wallet':
+      case "wallet":
         return (
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M21 12.23V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-2.77" />
             <path d="M21 12.23h-6a2 2 0 0 1 0-4h6" />
             <circle cx="16" cy="10" r="1" />
+          </svg>
+        );
+
+      case "chat":
+        return (
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+            <g
+              id="SVGRepo_tracerCarrier"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            ></g>
+            <g id="SVGRepo_iconCarrier">
+              {" "}
+              <g clip-path="url(#clip0_15_90)">
+                {" "}
+                <rect width="24" height="24" fill="white"></rect>{" "}
+                <path
+                  d="M20 12C20 16.4183 16.4183 20 12 20C10.5937 20 9.27223 19.6372 8.12398 19C7.53267 18.6719 4.48731 20.4615 3.99998 20C3.44096 19.4706 5.4583 16.6708 5.07024 16C4.38956 14.8233 3.99999 13.4571 3.99999 12C3.99999 7.58172 7.58171 4 12 4C16.4183 4 20 7.58172 20 12Z"
+                  stroke="#000000"
+                  stroke-linejoin="round"
+                ></path>{" "}
+              </g>{" "}
+              <defs>
+                {" "}
+                <clipPath id="clip0_15_90">
+                  {" "}
+                  <rect width="24" height="24" fill="white"></rect>{" "}
+                </clipPath>{" "}
+              </defs>{" "}
+            </g>
           </svg>
         );
       default:
@@ -89,9 +176,19 @@ export default function Header({ usuario, logado = false }) {
   return (
     <header className={styles.header}>
       <div className={styles.container}>
-        <Link to={logado ? '/dashboard' : '/'} className={styles.logo}>
+        <Link to={logado ? "/dashboard" : "/"} className={styles.logo}>
           <div className={styles.logoIcon}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2V5z" />
               <path d="M2 9v1c0 1.1.9 2 2 2h1" />
               <path d="M16 11h.01" />
@@ -107,22 +204,34 @@ export default function Header({ usuario, logado = false }) {
                 <Link
                   key={link.href}
                   to={link.href}
-                  className={`${styles.navLink} ${location.pathname === link.href ? styles.navLinkAtivo : ''}`}
+                  className={`${styles.navLink} ${location.pathname === link.href ? styles.navLinkAtivo : ""}`}
                 >
                   {renderIcon(link.icon)}
                   <span>{link.label}</span>
-                </Link>
+              </Link>
               ))}
             </nav>
 
             <div className={styles.acoes}>
-              <div className={`${styles.buscaContainer} ${buscaAberta ? styles.buscaAberta : ''}`}>
+              <div
+                className={`${styles.buscaContainer} ${buscaAberta ? styles.buscaAberta : ""}`}
+              >
                 <button
                   className={styles.btnIcone}
                   onClick={toggleBusca}
                   aria-label="Buscar"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <circle cx="11" cy="11" r="8" />
                     <path d="m21 21-4.3-4.3" />
                   </svg>
@@ -140,7 +249,17 @@ export default function Header({ usuario, logado = false }) {
               </div>
 
               <Link to="/dashboard/conta" className={styles.btnCompartilhar}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
                   <polyline points="16 6 12 2 8 6" />
                   <line x1="12" x2="12" y1="2" y2="15" />
@@ -149,7 +268,11 @@ export default function Header({ usuario, logado = false }) {
               </Link>
 
               <div className={styles.perfilContainer}>
-                <button className={styles.btnPerfil} onClick={toggleMenu} title="Abrir menu">
+                <button
+                  className={styles.btnPerfil}
+                  onClick={toggleMenu}
+                  title="Abrir menu"
+                >
                   <div className={styles.avatar}>
                     {userName.charAt(0).toUpperCase()}
                   </div>
@@ -167,24 +290,67 @@ export default function Header({ usuario, logado = false }) {
                         setMenuAberto(false);
                         setModalPerfilAberto(true);
                       }}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        width: "100%",
+                        textAlign: "left",
+                      }}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                         <circle cx="12" cy="7" r="4" />
                       </svg>
                       Meu Perfil
                     </button>
-                    <Link to="/configuracoes" className={styles.menuItem} onClick={() => setMenuAberto(false)}>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <Link
+                      to="/configuracoes"
+                      className={styles.menuItem}
+                      onClick={() => setMenuAberto(false)}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
                         <circle cx="12" cy="12" r="3" />
                       </svg>
                       Configurações
                     </Link>
                     <div className={styles.menuDivisor} />
-                    <button className={styles.menuItemSair} onClick={handleLogout}>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <button
+                      className={styles.menuItemSair}
+                      onClick={handleLogout}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                         <polyline points="16 17 21 12 16 7" />
                         <line x1="21" x2="9" y1="12" y2="12" />
@@ -195,7 +361,6 @@ export default function Header({ usuario, logado = false }) {
                 )}
               </div>
             </div>
-
           </>
         )}
 

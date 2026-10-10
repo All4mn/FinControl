@@ -588,9 +588,17 @@ export class UsuarioController {
     return res.status(200).send({ sucesso: true, mensagem: response});
   }
 
+  async getLidById(req,res) {
+    const {id}= req.params
+
+    const response = await this.service.getLidById(id)
+
+    return res.status(200).send({status:true,dados:response})
+  }
+
   async insertUserToken(req, res){
     const {id} = req.params
-  const response = await this.service.getUserByToken(req);
+  const response = await this.service.insertUserToken(id);
   return res.status(200).send({ sucesso: true, mensagem: response});
   }
 }

@@ -3,8 +3,16 @@
 // Lógica de negócios para usuario
 // =============================================================================
 
+import { createCrypto } from "google-auth-library/build/src/crypto/crypto.js";
 import { CarteiraRepository } from "../carteira/carteira.repository.js";
 import { ContaRepository } from "../conta/conta.repository.js";
+
+import crypto from "crypto";
+
+const createHash = async () => {
+  const hash = crypto.randomBytes(3).toString("hex");
+  return hash;
+};
 
 export class UsuarioService {
   constructor(repository) {
@@ -153,9 +161,31 @@ export class UsuarioService {
 
   async insertUserToken(id) {
     if (!id) throw new Error("Token não especificado");
-    const response = await this.repository.insertUserToken(token);
+    const hash = await createHash();
+    console.log(hash);
+
+    const response = await this.repository.insertUserToken(id, hash);
     if (!response || response.length == 0)
       throw new Error("Erro ao criar um token");
+    return response;
+  }
+
+  async getLidById(id) {
+    if (!id || isNaN(id)) throw new Error("Id invalido ou inexistente");
+    const response = await this.repository.getLidById(id);
+    console.log(response);
+    
+    if (!response || response.length == 0) {
+      console.log('usuario nao tem lid nem hash, inserindo uma hash temporaria');
+      
+      const hash = await createHash();
+      const insert = await this.repository.insertUserToken(id, hash);
+      if (!insert || insert.length == 0)
+        throw new Error("erro ao vincular uma hash ao usuario");
+      console.log('hash inserida: ', hash);
+      
+      return insert;
+    }
     return response;
   }
 }
