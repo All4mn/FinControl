@@ -23,4 +23,10 @@ export async function usuarioRoutes(app) {
   app.delete("/deletar-conta", usuarioController.deletarConta);
   app.put("/:id", usuarioController.atualizar);
   app.delete("/:id", usuarioController.deletar);
+  app.put('/lid/token/:id', async (req,res)=>{
+  return usuarioController.insertUserToken(req,res)
+  })
+  app.get('/lid/:lid', async (req ,res)=>{
+  return  usuarioController.getLid(req,res)
+  })
 }

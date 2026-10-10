@@ -196,4 +196,28 @@ export class UsuarioRepository {
 
     return rows.length > 0;
   }
+
+  async getLid(lid){
+    const rows =  await db
+    .select()
+    .from(usuario)
+    .where(eq(usuario.lid,lid))
+    
+    return rows[0] ? rows[0] : null
+  }
+
+  async insertLid(lid){
+    const rows = await db
+    .insert(usuario)
+    .values({
+      lid:lid
+    })
+    .where()
+    .returning()
+
+    return rows
+  }
+
+  // return req
+  
 }

@@ -578,4 +578,19 @@ export class UsuarioController {
       return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
     }
   }
+
+  async getLid(req, res) {
+    const { lid } = req.params
+    console.log(lid ,' esse é o params');
+    
+    const response = await this.service.getLid(lid);
+
+    return res.status(200).send({ sucesso: true, mensagem: response});
+  }
+
+  async insertUserToken(req, res){
+    const {id} = req.params
+  const response = await this.service.getUserByToken(req);
+  return res.status(200).send({ sucesso: true, mensagem: response});
+  }
 }

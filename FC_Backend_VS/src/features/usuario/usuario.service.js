@@ -38,7 +38,12 @@ export class UsuarioService {
     return await this.repository.findByGoogleId(googleId);
   }
 
-  async create({ nome_usuario, email_usuario, senha_usuario, telefone_usuario }) {
+  async create({
+    nome_usuario,
+    email_usuario,
+    senha_usuario,
+    telefone_usuario,
+  }) {
     if (!nome_usuario || nome_usuario.trim() === "") {
       throw new Error("Nome de usuário é obrigatório");
     }
@@ -132,5 +137,25 @@ export class UsuarioService {
     await this.contaRepository.archiveByUsuario(id);
     await this.carteiraRepository.archiveByUsuario(id);
     return await this.repository.desativar(id);
+  }
+
+  async getLid(lid) {
+    if (!lid) throw new Error("Lid não oferecido");
+    const response = await this.repository.getLid(lid);
+    if (!response || response.length == 0) {
+      console.log("A pessoa não tem lid, criando um agora");
+      const insert = await this.repository.insertLid(lid);
+
+      return insert;
+    }
+    return response;
+  }
+
+  async insertUserToken(id) {
+    if (!id) throw new Error("Token não especificado");
+    const response = await this.repository.insertUserToken(token);
+    if (!response || response.length == 0)
+      throw new Error("Erro ao criar um token");
+    return response;
   }
 }

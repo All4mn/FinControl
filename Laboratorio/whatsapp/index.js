@@ -4,6 +4,8 @@ import { reader } from '../OCR/code/index.js'
 
 import { main } from '../OCR/code/ia.js'
 
+import axios from 'axios'
+
 const { Client, LocalAuth } = pkg
 
 const client = new Client({
@@ -24,49 +26,75 @@ client.on('ready', () => {
 //         msg.reply('pong');
 //     }
 // });
-client.on('message', async(msg) => {
-    console.log(`Numero: ${msg.from}
-        Mensagem: ${msg.body}
-        tipo: ${msg.type}`)
-    // console.log(msg.type);
+// client.on('message', async(msg) => {
+//     console.log(`Numero: ${msg.from}
+//         Mensagem: ${msg.body}
+//         tipo: ${msg.type}`)
+//     // console.log(msg.type);
     
-    if (msg.body === '!ping') {
-        msg.reply('pong');
-    }
+//     if (msg.body === '!ping') {
+//         msg.reply('pong');
+//     }
 
-    try {
-        if(msg.type === 'image' && msg.hasMedia){
-            msg.reply('foto')
-            const media = await msg.downloadMedia()
-            // console.log(media);
+//     try {
+//         if(msg.type === 'image' && msg.hasMedia){
+//             msg.reply('foto')
+//             const media = await msg.downloadMedia()
+//             // console.log(media);
             
-            if(!media){
-                msg.reply('não consegui baixar')
-            }
-            const buffer = Buffer.from(media.data,'base64')
+//             if(!media){
+//                 msg.reply('não consegui baixar')
+//             }
+//             const buffer = Buffer.from(media.data,'base64')
 
-             const resultado = await reader(buffer);
-             console.log(resultado)
+//              const resultado = await reader(buffer);
+//              console.log(resultado)
 
-            const interpret = await main(resultado)
-            console.log(interpret)
-
-
+//             const interpret = await main(resultado)
+//             console.log(interpret)
 
             
-        }else{
-            // msg.reply('a mensagem não é uma imagem ou não possui midia')
-        }
+//         }else{
+//             // msg.reply('a mensagem não é uma imagem ou não possui midia')
+//         }
 
         
-    } catch (error) {
-        console.error(error)
+//     } catch (error) {
+//         console.error(error)
+//     }
+
+//     // if (msg.body === "!ola") {
+//     //     msg.reply('vai toma no cu');
+//     // }
+
+// });
+
+client.on('message_create',async(msg)=>{
+
+    if(msg.type === 'e2e_notification') return
+
+    if(msg.fromMe){
+        console.log('eu que falei');
+        // console.log(msg._data);
+        
+        // return
+    }
+    console.log(`remetente: ${msg.from}
+        destino: ${msg.to}
+        conteudo: ${msg.body}`);
+       
+
+    if(msg.body =='!lid'){
+        msg.reply(msg.to)
     }
 
-    // if (msg.body === "!ola") {
-    //     msg.reply('vai toma no cu');
-    // }
+    if(msg.body == '!axios'){
+        const response = await axios.get(`http://localhost:3000/usuarios/lid/${msg.to}`)
 
-});
+        console.log(response.data);
+        
+    }
+
+})
 
 client.initialize();
