@@ -5,7 +5,7 @@
 **Integrante:** Heitor Henrique Sampaio Chagas  
 **Projeto:** FinControl — Sistema de Controle Financeiro Pessoal  
 **Equipe:** Money Control  
-**Data:** outubro de 2026
+**Data:** outubro de 2026 
 
 ---
 
