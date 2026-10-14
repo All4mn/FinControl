@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import PerfilModal from "../perfilModal/PerfilModal";
@@ -12,6 +12,8 @@ export default function Header({ usuario, logado = false }) {
   const [termoBusca, setTermoBusca] = useState("");
   const [menuAberto, setMenuAberto] = useState(false);
   const [modalPerfilAberto, setModalPerfilAberto] = useState(false);
+  const [userData, setUserData] = useState(null)
+  const [hash, setHash] = useState(null)
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -20,6 +22,29 @@ export default function Header({ usuario, logado = false }) {
 
   const toggleBusca = () => setBuscaAberta(!buscaAberta);
   const toggleMenu = () => setMenuAberto(!menuAberto);
+
+  useEffect (()=>{
+    const getUserData =async()=>{
+
+      try{
+        const response = await axios.get(`${API_BASE_URL}/usuarios/me`,{
+          withCredentials:true
+      }) 
+      setUserData(response)
+      if(response){
+        console.log(response.data);
+        
+      }else{
+        throw new Error('erro em buscar as informações do usuario')
+      }
+    }catch{
+      console.error('error');
+      
+    };
+  } 
+
+  getUserData()
+  },[])
 
   const handleLogout = async () => {
     try {
@@ -41,7 +66,7 @@ export default function Header({ usuario, logado = false }) {
     { href: "/dashboard/relatorios", label: "Relatórios", icon: "chart" },
     { href: "/dashboard/arquivados", label: "Arquivados", icon: "archive" },
     { href: "/dashboard/conta", label: "Nova Conta", icon: "plus" },
-    { href:'https://wa.link/1e78wg', label: "Whatsapp", icon:"chat"}
+    { href:`https://wa.link/1e78wg?text=${hash}`, label: "Whatsapp", icon:"chat"}
   ];
 
   const renderIcon = (icon) => {
@@ -174,7 +199,21 @@ export default function Header({ usuario, logado = false }) {
   };
 
   const redirectWhatsappWithToken = async ()=>{
-    console.log();
+    // console.log(userData);
+    
+    try {
+      if(!userData.data.dados.id_usuario) throw new Error('Id do usuário inexistente')
+      const response = await axios.get(`${API_BASE_URL}/usuarios/lid/id/${userData.data.dados.id_usuario}`)
+      if(!response){
+        throw new Error('Erro ao captar o lid do usuario pelo ID')
+      }
+      console.log(response);
+      
+      await navigator.clipboard.writeText(response.data.dados)
+      setHash(response.data.dados)
+    } catch (error) {
+      console.error(error);
+    }
     
   }
 
