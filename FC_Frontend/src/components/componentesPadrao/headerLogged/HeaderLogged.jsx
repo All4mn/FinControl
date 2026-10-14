@@ -173,6 +173,11 @@ export default function Header({ usuario, logado = false }) {
     }
   };
 
+  const redirectWhatsappWithToken = async ()=>{
+    console.log();
+    
+  }
+
   return (
     <header className={styles.header}>
       <div className={styles.container}>
@@ -197,14 +202,18 @@ export default function Header({ usuario, logado = false }) {
           <span className={styles.logoText}>FinControl</span>
         </Link>
 
-        {logado && (
+        {logado && ( 
           <>
             <nav className={styles.nav}>
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   to={link.href}
+                  target={link.label === 'Whatsapp'?'_blank':'_self'}
                   className={`${styles.navLink} ${location.pathname === link.href ? styles.navLinkAtivo : ""}`}
+                  onClick={link.label == 'Whatsapp'? ()=>{redirectWhatsappWithToken();
+                  }:()=>{console.log('teste sem zap');
+                  }}
                 >
                   {renderIcon(link.icon)}
                   <span>{link.label}</span>
