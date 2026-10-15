@@ -30,7 +30,10 @@ export default function Header({ usuario, logado = false }) {
         const response = await axios.get(`${API_BASE_URL}/usuarios/me`,{
           withCredentials:true
       }) 
+      console.log(response.data.dados.lid);
+      
       setUserData(response)
+      setHash(response.data.dados.lid)
       if(response){
         console.log(response.data);
         
@@ -45,6 +48,7 @@ export default function Header({ usuario, logado = false }) {
 
   getUserData()
   },[])
+
 
   const handleLogout = async () => {
     try {
@@ -66,7 +70,7 @@ export default function Header({ usuario, logado = false }) {
     { href: "/dashboard/relatorios", label: "Relatórios", icon: "chart" },
     { href: "/dashboard/arquivados", label: "Arquivados", icon: "archive" },
     { href: "/dashboard/conta", label: "Nova Conta", icon: "plus" },
-    { href:`https://wa.link/1e78wg?text=${hash}`, label: "Whatsapp", icon:"chat"}
+    { href:`https://wa.me/5544999219153?text=`, label: "Whatsapp", icon:"chat"}
   ];
 
   const renderIcon = (icon) => {
@@ -200,22 +204,31 @@ export default function Header({ usuario, logado = false }) {
 
   const redirectWhatsappWithToken = async ()=>{
     // console.log(userData);
-    
-    try {
-      if(!userData.data.dados.id_usuario) throw new Error('Id do usuário inexistente')
-      const response = await axios.get(`${API_BASE_URL}/usuarios/lid/id/${userData.data.dados.id_usuario}`)
-      if(!response){
-        throw new Error('Erro ao captar o lid do usuario pelo ID')
+    // const win = window.open('', '_blank');
+    if(!userData.data.dados.lid){
+      try {
+        if(!userData.data.dados.id_usuario) throw new Error('Id do usuário inexistente')
+          const response = await axios.get(`${API_BASE_URL}/usuarios/lid/id/${userData.data.dados.id_usuario}`)
+        if(!response){
+          throw new Error('Erro ao captar o lid do usuario pelo ID')
       }
-      console.log(response);
+      console.log(response, 'isso é a resposta ao primeiro clique');
+      setHash(response.data.dados[0].lid)
+      console.log(response.data.dados[0].lid,'aaaaaaaaaaaaaaaaaaa')
       
       await navigator.clipboard.writeText(response.data.dados)
-      setHash(response.data.dados)
     } catch (error) {
       console.error(error);
     }
+  }else{
+    console.log('o caba tem token')
+    await navigator.clipboard.writeText(userData.data.dados.lid)
+    setHash(userData.data.dados.lid)
     
   }
+  // win.location.href = `https://wa.me/5544999219153?text=${hash}`
+    
+}
 
   return (
     <header className={styles.header}>
@@ -247,7 +260,8 @@ export default function Header({ usuario, logado = false }) {
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
-                  to={link.href}
+                  to={link.label == 'Whatsapp'? `${link.href}!${hash}`: link.href}
+                  // to={link.label == 'Whatsapp'? '' : link.href}
                   target={link.label === 'Whatsapp'?'_blank':'_self'}
                   className={`${styles.navLink} ${location.pathname === link.href ? styles.navLinkAtivo : ""}`}
                   onClick={link.label == 'Whatsapp'? ()=>{redirectWhatsappWithToken();
