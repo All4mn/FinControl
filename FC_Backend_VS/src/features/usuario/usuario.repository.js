@@ -39,7 +39,7 @@ export class UsuarioRepository {
    */
   async findAll() {
     const rows = await db
-      .select()
+      .select(camposPublicos)
       .from(usuario)
       .orderBy(desc(usuario.idUsuario));
     return mapRows(rows);
@@ -65,10 +65,9 @@ export class UsuarioRepository {
    */
   async findById(id) {
     const rows = await db
-      .select()
+      .select(camposPublicos)
       .from(usuario)
       .where(eq(usuario.idUsuario, id));
-
     return rows[0] ? mapRow(rows[0]) : null;
   }
 
@@ -109,11 +108,24 @@ export class UsuarioRepository {
 
   async buscarPorEmail(email) {
     const rows = await db
+      .select(camposPublicos)
+      .from(usuario)
+      .where(eq(usuario.emailUsuario, email));
+
+    return rows[0] ?? null;
+  }
+
+  async buscarPorEmailComSenha(email) {
+    const rows = await db
       .select({
         id_usuario: usuario.idUsuario,
         nome_usuario: usuario.nomeUsuario,
         email_usuario: usuario.emailUsuario,
         senha_usuario: usuario.senhaUsuario,
+        telefone_usuario: usuario.telefoneUsuario,
+        google_id_usuario: usuario.googleIdUsuario,
+        id_status_usuario: usuario.idStatusUsuario,
+        is_admin: usuario.isAdmin,
       })
       .from(usuario)
       .where(eq(usuario.emailUsuario, email));

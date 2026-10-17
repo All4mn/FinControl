@@ -22,7 +22,19 @@ import { AppError } from "./Errors/AppError.js";
 
 dotenv.config();
 
-const app = fastify({ logger: true });
+if (process.env.NODE_ENV === "production") {
+  const required = ["JWT_SECRET", "COOKIE_SECRET", "DATABASE_URL"];
+  const missing = required.filter((k) => !process.env[k]);
+  if (missing.length > 0) {
+    console.error(`Variáveis obrigatórias ausentes: ${missing.join(", ")}`);
+    process.exit(1);
+  }
+}
+
+const app = fastify({
+  logger: process.env.NODE_ENV !== "production",
+  trustProxy: process.env.TRUST_PROXY === "true" || process.env.TRUST_PROXY === "1",
+});
 
 // Tratamento de erros global
 app.setErrorHandler((error, request, reply) => {
@@ -44,7 +56,7 @@ app.setErrorHandler((error, request, reply) => {
 });
 
 app.register(cookie, {
-  secret: process.env.COOKIE_SECRET || "cookie-secret-change-me",
+  secret: process.env.COOKIE_SECRET,
 });
 
 app.register(cors, {

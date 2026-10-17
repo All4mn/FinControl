@@ -2,7 +2,7 @@ import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
 
 // Configurações de autenticação e cookies
-const JWT_SECRET = process.env.JWT_SECRET || "jwt-secret-change-me";
+const JWT_SECRET = process.env.JWT_SECRET;
 const COOKIE_NAME = "session";
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -132,7 +132,6 @@ export class UsuarioController {
 
       // Gera token JWT e o armazena em um cookie seguro
       const token = createSessionToken(usuario.id_usuario);
-      console.log(token);
       setAuthCookie(res, token);
 
       return res
@@ -301,7 +300,6 @@ export class UsuarioController {
     try {
       // Tenta recuperar o cookie de sessão
       const token = req.cookies?.[COOKIE_NAME];
-      console.log(token);
       if (!token) {
         return res
 
