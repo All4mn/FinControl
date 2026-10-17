@@ -10,8 +10,6 @@ const validarId = (id) => {
   }
 };
 
-import { AppError } from "../../Errors/AppError.js";
-
 export class TransacaoService {
   constructor(repository) {
     this.repository = repository;

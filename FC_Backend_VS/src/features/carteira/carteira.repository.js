@@ -3,7 +3,7 @@
 // Acesso ao banco de dados para a tabela de carteira (via Drizzle ORM)
 // =============================================================================
 
-import { eq, and, desc, asc, sql } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { db } from "../../config/drizzle.js";
 import { carteira, conta, moeda, usuario } from "../../db/schema.js";
 
@@ -35,6 +35,7 @@ const camposCarteira = {
   id_moeda: conta.idMoeda,
   nome_moeda: moeda.nomeMoeda,
   saldo_total: saldoTotal,
+  ativo: carteira.ativo,
 };
 
 const gruposCarteira = [
@@ -43,7 +44,13 @@ const gruposCarteira = [
   carteira.nomeCarteira,
   conta.idMoeda,
   moeda.nomeMoeda,
+  carteira.ativo,
 ];
+
+const joinCarteiraConta = and(
+  eq(conta.idUsuario, carteira.idUsuario),
+  sql`${conta.ativo} = TRUE`,
+);
 
 // DÍVIDA CONHECIDA: o saldo soma por id_usuario, não por carteira_has_conta
 // como manda Documentacao-Carteira.md, porque hoje isso somaria saldo de outra
@@ -57,35 +64,29 @@ export class CarteiraRepository {
   }
 
   async findById(id) {
-    const response = await database.query(
-      `SELECT c.id_carteira,
-              c.id_usuario,
-              c.nome_carteira,
-              ct.id_moeda,
-              m.nome_moeda,
-              COALESCE(SUM(ct.saldo_conta), 0)::numeric(14,2) AS saldo_total,
-              c.ativo
-         FROM carteira c
-         LEFT JOIN conta ct ON ct.id_usuario = c.id_usuario AND ct.ativo = TRUE
-         LEFT JOIN moeda m ON m.id_moeda = ct.id_moeda
-        WHERE c.id_carteira = $1
-        GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira, ct.id_moeda, m.nome_moeda, c.ativo
-        ORDER BY m.nome_moeda`,
-      [id],
-    );
-    return response.rows;
+    const rows = await db
+      .select(camposCarteira)
+      .from(carteira)
+      .leftJoin(conta, joinCarteiraConta)
+      .leftJoin(moeda, eq(moeda.idMoeda, conta.idMoeda))
+      .where(eq(carteira.idCarteira, id))
+      .groupBy(...gruposCarteira)
+      .orderBy(moeda.nomeMoeda);
+    return rows;
   }
 
-  // 'client' opcional: roda dentro da transação de conta.service.create.
-  async create({ id_usuario, nome_carteira }, client = null) {
-    const executor = client || database;
-    const response = await executor.query(
-      `INSERT INTO carteira (id_usuario, nome_carteira, ativo)
-       VALUES ($1, $2, TRUE)
-       RETURNING *`,
-      [id_usuario, nome_carteira],
-    );
-    return response.rows[0];
+  // 'tx' opcional: roda dentro da transação de conta.service.create.
+  async create({ id_usuario, nome_carteira }, tx = null) {
+    const executor = tx || db;
+    const rows = await executor
+      .insert(carteira)
+      .values({
+        idUsuario: id_usuario,
+        nomeCarteira: nome_carteira,
+        ativo: true,
+      })
+      .returning();
+    return mapRow(rows[0]);
   }
 
   async update(id, { nome_carteira }) {
@@ -105,54 +106,57 @@ export class CarteiraRepository {
     return rows.length > 0;
   }
 
-  // 'client' opcional: roda dentro da transação de conta.service.create.
-  async findByUsuario(id_usuario, client = null) {
-    const executor = client || database;
-    const response = await executor.query(
-      `SELECT c.id_carteira,
-              c.id_usuario,
-              c.nome_carteira,
-              ct.id_moeda,
-              m.nome_moeda,
-              COALESCE(SUM(ct.saldo_conta), 0)::numeric(14,2) AS saldo_total,
-              c.ativo
-         FROM carteira c
-         LEFT JOIN conta ct ON ct.id_usuario = c.id_usuario AND ct.ativo = TRUE
-         LEFT JOIN moeda m ON m.id_moeda = ct.id_moeda
-        WHERE c.id_usuario = $1 AND c.ativo = TRUE
-        GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira, ct.id_moeda, m.nome_moeda, c.ativo
-        ORDER BY m.nome_moeda`,
-      [id_usuario],
-    );
-    return response.rows;
+  // 'tx' opcional: roda dentro da transação de conta.service.create.
+  async findByUsuario(id_usuario, tx = null) {
+    const executor = tx || db;
+    const rows = await executor
+      .select(camposCarteira)
+      .from(carteira)
+      .leftJoin(conta, joinCarteiraConta)
+      .leftJoin(moeda, eq(moeda.idMoeda, conta.idMoeda))
+      .where(
+        and(
+          eq(carteira.idUsuario, id_usuario),
+          sql`${carteira.ativo} = TRUE`,
+        ),
+      )
+      .groupBy(...gruposCarteira)
+      .orderBy(moeda.nomeMoeda);
+    return rows;
   }
 
   async findAllWithUsers() {
-    const response = await database.query(
-      `SELECT c.id_carteira,
-              c.id_usuario,
-              c.nome_carteira,
-              c.ativo,
-              u.nome_usuario,
-              u.email_usuario,
-              COALESCE(SUM(ct.saldo_conta), 0)::numeric(14,2) AS saldo_total
-         FROM carteira c
-         LEFT JOIN conta ct ON ct.id_usuario = c.id_usuario AND ct.ativo = TRUE
-         INNER JOIN usuario u ON u.id_usuario = c.id_usuario
-        GROUP BY c.id_carteira, c.id_usuario, c.nome_carteira, c.ativo, u.nome_usuario, u.email_usuario
-        ORDER BY c.id_carteira DESC`,
-    );
-    return response.rows;
+    const rows = await db
+      .select({
+        id_carteira: carteira.idCarteira,
+        id_usuario: carteira.idUsuario,
+        nome_carteira: carteira.nomeCarteira,
+        ativo: carteira.ativo,
+        nome_usuario: usuario.nomeUsuario,
+        email_usuario: usuario.emailUsuario,
+        saldo_total: saldoTotal,
+      })
+      .from(carteira)
+      .leftJoin(conta, joinCarteiraConta)
+      .innerJoin(usuario, eq(usuario.idUsuario, carteira.idUsuario))
+      .groupBy(
+        carteira.idCarteira,
+        carteira.idUsuario,
+        carteira.nomeCarteira,
+        carteira.ativo,
+        usuario.nomeUsuario,
+        usuario.emailUsuario,
+      )
+      .orderBy(desc(carteira.idCarteira));
+    return rows;
   }
 
   async archiveByUsuario(id_usuario) {
-    const response = await database.query(
-      `UPDATE carteira
-       SET ativo = FALSE
-       WHERE id_usuario = $1
-       RETURNING *`,
-      [id_usuario],
-    );
-    return response.rows;
+    const rows = await db
+      .update(carteira)
+      .set({ ativo: false })
+      .where(eq(carteira.idUsuario, id_usuario))
+      .returning();
+    return mapRows(rows);
   }
 }
