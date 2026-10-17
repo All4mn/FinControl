@@ -1,4 +1,5 @@
 @url = http://localhost:3000
+@id_transacao = 1
 
 # ==================== TRANSAÇÕES ====================
 
@@ -13,14 +14,38 @@ Content-Type: application/json
   "id_conta": 1,
   "id_categoria": 1,
   "id_metodo": 1,
-  "id_carteira": 2,
-  "valor": 150,
+  "id_carteira": 23,
+  "valor": 150.00,
   "descricao": "Compra no mercado",
   "quitado": false,
   "arquivado": false,
   "data": "2026-05-04 16:52:11.299",
   "entrada": "true"
 }
+
+### Buscar transação pelo ID
+GET {{url}}/transacoes/{{id_transacao}}
+
+### Editar transação
+PUT {{url}}/transacoes/{{id_transacao}}
+Content-Type: application/json
+
+{
+  "id_conta": 1,
+  "id_categoria": 1,
+  "id_metodo": 1,
+  "id_carteira": 23,
+  "valor": 175.00,
+  "descricao": "Compra no mercado atualizada",
+  "quitado": true,
+  "arquivado": false,
+  "data": "2026-05-04 16:52:11.299",
+  "entrada": "true"
+}
+
+### Remover transação
+DELETE {{url}}/transacoes/{{id_transacao}}
+
 
 ### Login Google
 POST {{url}}/usuarios/login-google

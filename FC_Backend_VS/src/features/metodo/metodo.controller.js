@@ -15,7 +15,8 @@ export class MetodoController {
       const metodos = await this.service.findAll();
       return res.status(200).send({ sucesso: true, dados: metodos });
     } catch (err) {
-      return res.status(500).send({ sucesso: false, mensagem: "Erro interno" });
+      console.error("Erro ao listar métodos:", err);
+      return res.status(500).send({ sucesso: false, mensagem: "Não foi possível carregar métodos. Verifique a conexão com o banco de dados." });
     }
   }
 

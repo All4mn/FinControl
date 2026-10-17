@@ -71,6 +71,13 @@ export class UsuarioService {
     return await this.repository.buscarPorEmail(email);
   }
 
+  async buscarPorEmailComSenha(email) {
+    if (!email || email.trim() === "") {
+      throw new Error("E-mail é obrigatório");
+    }
+    return await this.repository.buscarPorEmailComSenha(email);
+  }
+
   async createWithGoogle({
     google_id,
     nome_usuario,

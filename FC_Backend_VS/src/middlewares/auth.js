@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { AppError } from "../Errors/AppError.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || "jwt-secret-change-me";
+const JWT_SECRET = process.env.JWT_SECRET;
 const COOKIE_NAME = "session";
 
 export const verifySessionToken = (token) => jwt.verify(token, JWT_SECRET);
