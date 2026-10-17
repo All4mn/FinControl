@@ -3,7 +3,7 @@
 // Acesso ao banco de dados para a tabela de metodo (via Drizzle ORM)
 // =============================================================================
 
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, sql } from "drizzle-orm";
 import { db } from "../../config/drizzle.js";
 import { metodo } from "../../db/schema.js";
 
@@ -19,18 +19,31 @@ const mapRow = (row) =>
 
 const mapRows = (rows) => rows.map(mapRow);
 
+const semUndefined = (obj) =>
+  Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
+
 export class MetodoRepository {
   async findAll() {
-    const response = await database.query(
-      `SELECT id_metodo, nome_metodo
-       FROM (
-         SELECT DISTINCT ON (lower(btrim(nome_metodo))) id_metodo, nome_metodo
-         FROM metodo
-         ORDER BY lower(btrim(nome_metodo)), id_metodo
-       ) metodos_unicos
-       ORDER BY nome_metodo ASC`,
+    const normalized = sql`lower(btrim(${metodo.nomeMetodo}))`;
+    const rows = await db
+      .select({
+        id_metodo: metodo.idMetodo,
+        nome_metodo: metodo.nomeMetodo,
+      })
+      .from(metodo)
+      .orderBy(normalized, metodo.idMetodo);
+
+    const uniqueMap = new Map();
+    for (const r of rows) {
+      const key = String(r.nome_metodo ?? "").trim().toLowerCase();
+      if (!uniqueMap.has(key)) {
+        uniqueMap.set(key, r);
+      }
+    }
+    const unique = Array.from(uniqueMap.values()).sort((a, b) =>
+      String(a.nome_metodo ?? "").localeCompare(String(b.nome_metodo ?? "")),
     );
-    return response.rows;
+    return unique;
   }
 
   async findById(id) {

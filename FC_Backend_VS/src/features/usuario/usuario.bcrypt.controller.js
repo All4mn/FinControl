@@ -2,7 +2,7 @@ import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
-const JWT_SECRET = process.env.JWT_SECRET || "jwt-secret-change-me";
+const JWT_SECRET = process.env.JWT_SECRET;
 const COOKIE_NAME = "session";
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -60,7 +60,7 @@ export class UsuarioBcryptController {
           .send({ sucesso: false, mensagem: "Email e senha são obrigatórios" });
       }
 
-      const usuario = await this.service.buscarPorEmail(email_usuario);
+      const usuario = await this.service.buscarPorEmailComSenha(email_usuario);
       if (!usuario || !usuario.senha_usuario) {
         return res
           .status(401)
@@ -201,7 +201,7 @@ export class UsuarioBcryptController {
       if (!token) {
         return res
           .status(401)
-          .send({ sucesso: false, message: "Não autenticado" });
+          .send({ sucesso: false, mensagem: "Não autenticado" });
       }
 
       const payload = verifySessionToken(token);
