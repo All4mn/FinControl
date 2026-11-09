@@ -13,9 +13,15 @@ const client = new Client({
     authStrategy: new LocalAuth()
 })
 
+const now = new Date()
+console.log(now);
+
+
 client.on('qr', (qr) => {
     qrcode.generate(qr, { small: true });
 });
+
+
 
 client.on('ready', () => {
     console.log('Client is ready!');
@@ -71,6 +77,7 @@ client.on('ready', () => {
 // });
 
 client.on('message_create',async(msg)=>{
+    if(msg.timestamp)
 
     if(msg.type === 'e2e_notification') return
 
@@ -82,19 +89,20 @@ client.on('message_create',async(msg)=>{
     }
     console.log(`remetente: ${msg.from}
         destino: ${msg.to}
-        conteudo: ${msg.body}`);
+        conteudo: ${msg.body}
+        tempo: ${msg.timestamp}`);
     if(msg.body.startsWith('!')){
         console.log('testeee');
         
         const hash = msg.body.slice(1).trim()
 
-        const response = await axios.get(`http://localhost:3000/usuarios/lid/${hash}`)
+        // const response = await axios.get(`http://localhost:3000/usuarios/lid/${hash}`)
 
-        console.log(response.data);
-        const respostaCurta =  response.data.mensagem
-        console.log(respostaCurta);
+        // console.log(response.data);
+        // const respostaCurta =  response.data.mensagem
+        // console.log(respostaCurta);
         
-        msg.reply(`Ola! ${respostaCurta.nomeUsuario}, seu telefone é o ${respostaCurta.telefoneUsuario} e seu email é o ${respostaCurta.emailUsuario}, e o seu token lid é o ${respostaCurta.lid} e será trocado por ${msg.to}`)
+        // msg.reply(`Ola! ${respostaCurta.nomeUsuario}, seu telefone é o ${respostaCurta.telefoneUsuario} e seu email é o ${respostaCurta.emailUsuario}, e o seu token lid é o ${respostaCurta.lid} e será trocado por ${msg.to}`)
         // msg.reply(`Ola `)
 
         msg.reply(hash)
