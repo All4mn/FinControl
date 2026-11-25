@@ -5,7 +5,7 @@ import { reader } from "../OCR/code/index.js";
 import { main } from "../OCR/code/ia.js";
 
 import { InsertDB } from "./insertDB.js";
-
+import { findInDBByHash } from "./findInDBByHash.js";
 import axios from "axios";
 import { AsyncLocalStorage } from "async_hooks";
 import { error } from "console";
@@ -88,29 +88,18 @@ client.on("message_create", async (msg) => {
         conteudo: ${msg.body}
         tempo: ${msg.timestamp}`);
   if (msg.body.startsWith("!")) {
-    console.log("testeee");
-
     const hash = msg.body.slice(1).trim();
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/usuarios/lid/${hash}`,
-      );
-      if(!response || response.length ==0){
-        throw new Error()
-      }
-      console.log(response.data);
-      const respostaCurta = response.data.mensagem;
-      console.log(respostaCurta);
-
-      msg.reply(
-        `Ola! ${respostaCurta.nomeUsuario}, seu telefone é o ${respostaCurta.telefoneUsuario} e seu email é o ${respostaCurta.emailUsuario}, e o seu token lid é o ${respostaCurta.lid} e será trocado por ${msg.from}`,
-      );
-      msg.reply(await InsertDB(msg.from));
+    const lid = msg.from.replace('@lid','')
+    const respostaCurta = await findInDBByHash(hash);
+    // console.log(respostaCurta);
+    msg.reply(
+      `Ola! ${respostaCurta.nomeUsuario}, seu telefone é o ${respostaCurta.telefoneUsuario} e seu email é o ${respostaCurta.emailUsuario}, e o seu token lid é o ${respostaCurta.lid} e será trocado por ${msg.from}`,
+    );
+    console.log(lid, hash)
+    await InsertDB(lid,hash)
+    
 
     //   msg.reply(hash);
-    } catch (error) {
-        console.error(error)
-    }
   }
 
   if (msg.body == "!lid") {

@@ -604,6 +604,7 @@ export class UsuarioController {
 
   async updateHashToLid(req, res) {
     const { lid, hash } = req.params;
+    console.log(lid,hash)
     const response = await this.service.updateHashToLid(lid, hash);
     return res.status(200).send({ sucesso: true, mensagem: response });
   }

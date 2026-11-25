@@ -68,4 +68,4 @@ PUT {{url}}/usuarios/lid/token/12
 GET {{url}}/usuarios/lid/id/75
 
 ###
-PUT {{url}}/usuarios/update/b1231/b1230
+PUT {{url}}/usuarios/update/abc123/abc123
