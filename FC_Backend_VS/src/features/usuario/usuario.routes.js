@@ -26,10 +26,19 @@ export async function usuarioRoutes(app) {
   app.put('/lid/token/:id', async (req,res)=>{
   return usuarioController.insertUserToken(req,res)
   })
+
+  //inserir hash temporaria, colocada no
   app.get('/lid/id/:id', async (req,res)=>{
   return usuarioController.getLidById(req,res)
   })
+
+  //forma do bot reconhecer voce
   app.get('/lid/:lid', async (req ,res)=>{
   return  usuarioController.getLid(req,res)
+  })
+
+  //rota que substitui a sua hash temporaria pelo seu lid do whatsapp
+  app.put('/update/:lid/:hash', async (req,res)=>{
+  return usuarioController.updateHashToLid(req,res)
   })
 }

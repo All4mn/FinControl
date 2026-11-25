@@ -197,7 +197,7 @@ export class UsuarioRepository {
     return rows.length > 0;
   }
 
-  async getLid(lid){
+  async getLid(lid,hash){
     const rows =  await db
     .select()
     .from(usuario)
@@ -206,13 +206,11 @@ export class UsuarioRepository {
     return rows[0] ? rows[0] : null
   }
 
-  async insertLid(lid){
+  async insertLid(lid,hash){
     const rows = await db
-    .insert(usuario)
-    .values({
-      lid:lid
-    })
-    .where()
+    .update(usuario)
+    .set({lid:lid})
+    .where(eq(usuario.lid, hash))
     .returning()
 
     return rows
@@ -231,6 +229,14 @@ export class UsuarioRepository {
     const rows = await db.select({lid: usuario.lid,}).from(usuario).where(eq(usuario.idUsuario, id))
     return rows[0].lid
   }
-  // return req
+
+  async updateHashToLid(lid,hash){
+    const rows = await db
+    .update(usuario)
+    .set({lid:lid})
+    .where(eq(usuario.lid,hash))
+    .returning()
+  return rows
+  }
   
 }

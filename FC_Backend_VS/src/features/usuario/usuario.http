@@ -66,3 +66,6 @@ PUT {{url}}/usuarios/lid/token/12
 
 ###
 GET {{url}}/usuarios/lid/id/75
+
+###
+PUT {{url}}/usuarios/update/b1231/b1230

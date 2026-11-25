@@ -174,18 +174,28 @@ export class UsuarioService {
     if (!id || isNaN(id)) throw new Error("Id invalido ou inexistente");
     const response = await this.repository.getLidById(id);
     console.log(response);
-    
+
     if (!response || response.length == 0) {
-      console.log('usuario nao tem lid nem hash, inserindo uma hash temporaria');
-      
+      console.log(
+        "usuario nao tem lid nem hash, inserindo uma hash temporaria",
+      );
+
       const hash = await createHash();
       const insert = await this.repository.insertUserToken(id, hash);
       if (!insert || insert.length == 0)
         throw new Error("erro ao vincular uma hash ao usuario");
-      console.log('hash inserida: ', hash);
-      
+      console.log("hash inserida: ", hash);
+
       return insert;
     }
+    return response;
+  }
+
+  async updateHashToLid(lid, hash) {
+    if (!hash) throw new Error("não foi dado a hash");
+    if (!lid) throw new Error("não foi dado a lid");
+    const response = await this.repository.updateHashToLid(lid, hash);
+    if(!response ||response.length == 0) throw new Error("Erro ao substituir hash por lid")
     return response;
   }
 }

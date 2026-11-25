@@ -580,25 +580,31 @@ export class UsuarioController {
   }
 
   async getLid(req, res) {
-    const { lid } = req.params
-    console.log(lid ,' esse é o params');
-    
+    const { lid } = req.params;
+    console.log(lid, " esse é o params");
+
     const response = await this.service.getLid(lid);
 
-    return res.status(200).send({ sucesso: true, mensagem: response});
+    return res.status(200).send({ sucesso: true, mensagem: response });
   }
 
-  async getLidById(req,res) {
-    const {id}= req.params
+  async getLidById(req, res) {
+    const { id } = req.params;
 
-    const response = await this.service.getLidById(id)
+    const response = await this.service.getLidById(id);
 
-    return res.status(200).send({status:true,dados:response})
+    return res.status(200).send({ status: true, dados: response });
   }
 
-  async insertUserToken(req, res){
-    const {id} = req.params
-  const response = await this.service.insertUserToken(id);
-  return res.status(200).send({ sucesso: true, mensagem: response});
+  async insertUserToken(req, res) {
+    const { id } = req.params;
+    const response = await this.service.insertUserToken(id);
+    return res.status(200).send({ sucesso: true, mensagem: response });
+  }
+
+  async updateHashToLid(req, res) {
+    const { lid, hash } = req.params;
+    const response = await this.service.updateHashToLid(lid, hash);
+    return res.status(200).send({ sucesso: true, mensagem: response });
   }
 }
