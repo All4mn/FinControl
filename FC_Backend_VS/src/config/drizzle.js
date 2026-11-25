@@ -1,11 +1,9 @@
+import { databaseUrl } from "./env.js";
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 const pool = new Pool({
-  connectionString: process.env.DB_CONNECTION_STRING,
+  connectionString: databaseUrl(),
   ssl: {
     rejectUnauthorized: false,
   },

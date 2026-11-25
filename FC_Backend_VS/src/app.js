@@ -2,10 +2,10 @@
 // app.js
 // =============================================================================
 
+import { databaseUrl, isProduction, optionalEnv, requireEnv } from "./config/env.js";
 import fastify from "fastify";
 import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
-import dotenv from "dotenv";
 
 // Importando as rotas do Fastify
 import { usuarioRoutes } from "./features/usuario/usuario.routes.js";
@@ -20,11 +20,14 @@ import { logsRoutes } from "./features/logs/logs.routes.js";
 import { moedaRoutes } from "./features/moeda/moeda.routes.js";
 import { AppError } from "./Errors/AppError.js";
 
-dotenv.config();
-
-if (process.env.NODE_ENV === "production") {
-  const required = ["JWT_SECRET", "COOKIE_SECRET", "DATABASE_URL"];
-  const missing = required.filter((k) => !process.env[k]);
+if (isProduction()) {
+  const required = ["JWT_SECRET", "COOKIE_SECRET", "GOOGLE_CLIENT_ID"];
+  const missing = required.filter((chave) => !process.env[chave]);
+  try {
+    databaseUrl();
+  } catch {
+    missing.push("DATABASE_URL ou DB_CONNECTION_STRING");
+  }
   if (missing.length > 0) {
     console.error(`Variáveis obrigatórias ausentes: ${missing.join(", ")}`);
     process.exit(1);
@@ -32,8 +35,10 @@ if (process.env.NODE_ENV === "production") {
 }
 
 const app = fastify({
-  logger: process.env.NODE_ENV !== "production",
-  trustProxy: process.env.TRUST_PROXY === "true" || process.env.TRUST_PROXY === "1",
+  logger: !isProduction(),
+  trustProxy: ["true", "1"].includes(
+    optionalEnv("TRUST_PROXY", "false").toLowerCase(),
+  ),
 });
 
 // Tratamento de erros global
@@ -56,11 +61,15 @@ app.setErrorHandler((error, request, reply) => {
 });
 
 app.register(cookie, {
-  secret: process.env.COOKIE_SECRET,
+  secret: requireEnv("COOKIE_SECRET"),
 });
 
+const origemCors = isProduction()
+  ? requireEnv("FRONTEND_URL")
+  : optionalEnv("FRONTEND_URL", "http://localhost:5173");
+
 app.register(cors, {
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  origin: origemCors,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
