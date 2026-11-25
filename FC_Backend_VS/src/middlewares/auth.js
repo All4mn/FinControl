@@ -1,10 +1,5 @@
-import jwt from "jsonwebtoken";
+import { COOKIE_NAME, verifySessionToken } from "../config/session.js";
 import { AppError } from "../Errors/AppError.js";
-
-const JWT_SECRET = process.env.JWT_SECRET;
-const COOKIE_NAME = "session";
-
-export const verifySessionToken = (token) => jwt.verify(token, JWT_SECRET);
 
 export const requireAuth = async (req, reply) => {
   const token = req.cookies?.[COOKIE_NAME];

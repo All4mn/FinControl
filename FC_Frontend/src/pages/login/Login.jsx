@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import Header from "../../components/componentesPadrao/header/Header";
 import Footer from "../../components/componentesPadrao/footer/Footer";
 import styles from "./Login.module.css";
-import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
 import { useLogin } from "./useLogin";
 
 export default function Login() {
@@ -17,8 +17,6 @@ export default function Login() {
     toggleMostrarSenha,
     handleGoogleCredentialResponse,
   } = useLogin();
-
-  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   return (
     <div className={styles.page}>
@@ -163,16 +161,14 @@ export default function Login() {
             <span>ou</span>
           </div>
 
-          {GOOGLE_CLIENT_ID ? (
-            <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-              <GoogleLogin 
-                onSuccess={handleGoogleCredentialResponse} 
-                onError={() => setErro("Erro no login com Google. Tente novamente.")} 
-              />
-            </GoogleOAuthProvider>
-          ) : (
-            <p className={styles.erro}>Erro de configuração: ID do Google não encontrado no .env</p>
-          )}
+          <GoogleLogin
+            text="signin_with"
+            shape="rectangular"
+            width={300}
+            locale="pt-BR"
+            onSuccess={handleGoogleCredentialResponse}
+            onError={() => setErro("Erro no login com Google. Tente novamente.")}
+          />
 
           <p className={styles.linkCadastro}>
             Não tem uma conta? <Link to="/cadastro">Cadastre-se</Link>

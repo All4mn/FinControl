@@ -1,25 +1,14 @@
 import { OAuth2Client } from "google-auth-library";
-import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-
-const JWT_SECRET = process.env.JWT_SECRET;
-const COOKIE_NAME = "session";
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-const createSessionToken = (id_usuario) =>
-  jwt.sign({ id_usuario }, JWT_SECRET, { expiresIn: "1d" });
-
-const setAuthCookie = (reply, token) => {
-  reply.setCookie(COOKIE_NAME, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 60 * 60 * 24,
-  });
-};
-
-const verifySessionToken = (token) => jwt.verify(token, JWT_SECRET);
+import { requireEnv } from "../../config/env.js";
+import {
+  clearAuthCookie,
+  COOKIE_NAME,
+  createSessionToken,
+  setAuthCookie,
+  verifySessionToken,
+} from "../../config/session.js";
+import { ehHashBcrypt, normalizarEmail } from "./usuario.utils.js";
 
 export class UsuarioBcryptController {
   constructor(service) {
@@ -53,34 +42,61 @@ export class UsuarioBcryptController {
 
   async login(req, res) {
     try {
-      const { email_usuario, senha_usuario } = req.body;
-      if (!email_usuario || !senha_usuario) {
+      const email = normalizarEmail(req.body?.email_usuario);
+      const senha =
+        typeof req.body?.senha_usuario === "string"
+          ? req.body.senha_usuario
+          : "";
+
+      if (!email || !senha) {
         return res
           .status(400)
           .send({ sucesso: false, mensagem: "Email e senha são obrigatórios" });
       }
 
-      const usuario = await this.service.buscarPorEmailComSenha(email_usuario);
-      if (!usuario || !usuario.senha_usuario) {
-        return res
-          .status(401)
-          .send({ sucesso: false, mensagem: "Email ou senha incorretos" });
+      const usuario = await this.service.buscarPorEmailComSenha(email);
+      if (!usuario) {
+        return res.status(401).send({
+          sucesso: false,
+          mensagem:
+            "Não foi possível realizar login. Verifique as credenciais; contas legadas não são mais aceitas.",
+        });
       }
 
-      const senhaValida = await bcrypt.compare(
-        senha_usuario,
-        usuario.senha_usuario,
-      );
+      if (!usuario.senha_usuario) {
+        return res.status(401).send({
+          sucesso: false,
+          mensagem: "Esta conta usa login com Google. Use o botão do Google.",
+        });
+      }
+
+      if (!ehHashBcrypt(usuario.senha_usuario)) {
+        return res.status(401).send({
+          sucesso: false,
+          mensagem:
+            "Conta legada: não é mais possível realizar login. Cadastre-se novamente ou use o Google.",
+        });
+      }
+
+      if (usuario.id_status_usuario !== 1) {
+        return res.status(401).send({
+          sucesso: false,
+          mensagem: "Usuário inativo. Não é possível realizar login.",
+        });
+      }
+
+      const senhaValida = await bcrypt.compare(senha, usuario.senha_usuario);
       if (!senhaValida) {
-        return res
-          .status(401)
-          .send({ sucesso: false, mensagem: "Email ou senha incorretos" });
+        return res.status(401).send({
+          sucesso: false,
+          mensagem:
+            "Não foi possível realizar login. Verifique as credenciais; contas legadas não são mais aceitas.",
+        });
       }
 
       const token = createSessionToken(usuario.id_usuario);
       setAuthCookie(res, token);
 
-      // Remover campo de senha antes de enviar ao cliente
       const { senha_usuario: _, ...usuarioSemSenha } = usuario;
 
       return res.status(200).send({ sucesso: true, dados: usuarioSemSenha });
@@ -151,34 +167,72 @@ export class UsuarioBcryptController {
 
   async loginGoogle(req, res) {
     try {
-      const { idToken } = req.body;
-      if (!idToken) {
+      const idToken = req.body?.idToken;
+      if (typeof idToken !== "string" || !idToken) {
         return res
           .status(400)
           .send({ sucesso: false, mensagem: "idToken é obrigatório" });
       }
 
-      const ticket = await googleClient.verifyIdToken({
-        idToken,
-        audience: process.env.GOOGLE_CLIENT_ID,
-      });
-      const payload = ticket.getPayload();
+      const clientId = requireEnv("GOOGLE_CLIENT_ID");
+      let payload;
+      try {
+        const ticket = await new OAuth2Client(clientId).verifyIdToken({
+          idToken,
+          audience: clientId,
+        });
+        payload = ticket.getPayload();
+      } catch (err) {
+        console.warn("Token do Google rejeitado:", err.message);
+        return res.status(401).send({
+          sucesso: false,
+          mensagem: "Token do Google inválido ou expirado.",
+        });
+      }
+
       if (!payload) {
         return res
           .status(401)
-          .send({ sucesso: false, mensagem: "idToken inválido" });
+          .send({ sucesso: false, mensagem: "Token do Google inválido." });
       }
 
       const googleId = payload.sub;
-      const email = payload.email;
+      const email = normalizarEmail(payload.email);
       const nome = payload.name || payload.given_name || "Usuário Google";
+
+      if (!googleId || !email) {
+        return res.status(401).send({
+          sucesso: false,
+          mensagem: "Token do Google sem identificador ou e-mail.",
+        });
+      }
 
       let usuario = await this.service.findByGoogleId(googleId);
       if (!usuario) {
-        usuario = await this.service.createWithGoogle({
-          google_id: googleId,
-          nome_usuario: nome,
-          email_usuario: email,
+        const existente = await this.service.buscarPorEmail(email);
+        if (existente) {
+          await this.service.vincularGoogle(existente.id_usuario, googleId);
+        } else {
+          await this.service.createWithGoogle({
+            google_id: googleId,
+            nome_usuario: nome,
+            email_usuario: email,
+          });
+        }
+        usuario = await this.service.findByGoogleId(googleId);
+      }
+
+      if (!usuario) {
+        return res.status(500).send({
+          sucesso: false,
+          mensagem: "Não foi possível vincular a conta do Google.",
+        });
+      }
+
+      if (usuario.id_status_usuario !== 1) {
+        return res.status(401).send({
+          sucesso: false,
+          mensagem: "Usuário inativo. Não é possível realizar login.",
         });
       }
 
@@ -223,8 +277,8 @@ export class UsuarioBcryptController {
 
   async logout(req, res) {
     try {
+      clearAuthCookie(res);
       return res
-        .clearCookie(COOKIE_NAME, { path: "/" })
         .status(200)
         .send({ sucesso: true, mensagem: "Logout realizado" });
     } catch (err) {
@@ -383,8 +437,7 @@ export class UsuarioBcryptController {
           .send({ sucesso: false, mensagem: "Usuário não encontrado" });
       }
 
-      // Limpar cookie de sessão
-      res.clearCookie(COOKIE_NAME, { path: "/" });
+      clearAuthCookie(res);
 
       return res
         .status(200)

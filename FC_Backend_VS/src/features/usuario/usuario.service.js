@@ -38,6 +38,12 @@ export class UsuarioService {
     return await this.repository.findByGoogleId(googleId);
   }
 
+  async vincularGoogle(id_usuario, googleId) {
+    if (!id_usuario) throw new Error("ID do usuário é obrigatório");
+    if (!googleId) throw new Error("Google ID é obrigatório");
+    return await this.repository.vincularGoogle(id_usuario, googleId);
+  }
+
   async create({ nome_usuario, email_usuario, senha_usuario, telefone_usuario }) {
     if (!nome_usuario || nome_usuario.trim() === "") {
       throw new Error("Nome de usuário é obrigatório");

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { validarLogin } from "./LoginSchema";
@@ -44,11 +44,22 @@ export const useLogin = () => {
         { withCredentials: true }
       );
 
-      console.log("Login realizado:", response.data);
-      navigate("/dashboard");
+      if (response.data?.sucesso) {
+        navigate("/dashboard");
+        return;
+      }
+
+      setErro(response.data?.mensagem || "Não foi possível entrar. Tente novamente.");
     } catch (err) {
-      console.error("Erro no login:", err);
-      setErro("Email ou senha incorretos. Tente novamente.");
+      const mensagemBackend = err.response?.data?.mensagem || err.response?.data?.message;
+      const mensagemPadrao =
+        err.response?.status === 401
+          ? "Email ou senha incorretos. Tente novamente."
+          : err.response?.status >= 500
+            ? "Servidor indisponível. Tente novamente em instantes."
+            : "Não foi possível entrar. Tente novamente.";
+
+      setErro(mensagemBackend || mensagemPadrao);
     } finally {
       setCarregando(false);
     }
@@ -83,8 +94,12 @@ export const useLogin = () => {
         setErro(result.data.mensagem || "Erro no login com Google.");
       }
     } catch (err) {
-      console.error("Erro no login com Google:", err);
-      setErro(err.response?.data?.mensagem || "Erro ao fazer login com Google. Tente novamente.");
+      const mensagem =
+        err.response?.data?.mensagem ||
+        err.response?.data?.message ||
+        "Erro ao fazer login com Google. Tente novamente.";
+
+      setErro(mensagem);
     }
   };
 

@@ -3,9 +3,10 @@
 // Acesso ao banco de dados para a tabela de usuario (via Drizzle ORM)
 // =============================================================================
 
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, isNull, sql } from "drizzle-orm";
 import { db } from "../../config/drizzle.js";
 import { usuario } from "../../db/schema.js";
+import { normalizarEmail } from "./usuario.utils.js";
 
 // Converte chaves camelCase (retorno do Drizzle) para snake_case,
 // mantendo o mesmo formato que o restante da aplicação espera.
@@ -51,7 +52,7 @@ export class UsuarioRepository {
       .from(usuario)
       .where(
         and(
-          eq(usuario.emailUsuario, email_usuario),
+          sql`lower(trim(${usuario.emailUsuario})) = ${normalizarEmail(email_usuario)}`,
           eq(usuario.senhaUsuario, senha_usuario),
           eq(usuario.idStatusUsuario, 1),
         ),
@@ -79,6 +80,7 @@ export class UsuarioRepository {
       .select({
         ...camposPublicos,
         google_id_usuario: usuario.googleIdUsuario,
+        id_status_usuario: usuario.idStatusUsuario,
       })
       .from(usuario)
       .where(eq(usuario.googleIdUsuario, googleId));
@@ -95,7 +97,7 @@ export class UsuarioRepository {
       .values(
         semUndefined({
           nomeUsuario: nome_usuario,
-          emailUsuario: email_usuario,
+          emailUsuario: normalizarEmail(email_usuario),
           senhaUsuario: senha_usuario,
           telefoneUsuario: telefone_usuario,
           idStatusUsuario: 1,
@@ -110,7 +112,7 @@ export class UsuarioRepository {
     const rows = await db
       .select(camposPublicos)
       .from(usuario)
-      .where(eq(usuario.emailUsuario, email));
+      .where(sql`lower(trim(${usuario.emailUsuario})) = ${normalizarEmail(email)}`);
 
     return rows[0] ?? null;
   }
@@ -128,7 +130,7 @@ export class UsuarioRepository {
         is_admin: usuario.isAdmin,
       })
       .from(usuario)
-      .where(eq(usuario.emailUsuario, email));
+      .where(sql`lower(trim(${usuario.emailUsuario})) = ${normalizarEmail(email)}`);
 
     return rows[0] ?? null;
   }
@@ -147,7 +149,7 @@ export class UsuarioRepository {
       .values(
         semUndefined({
           nomeUsuario: nome_usuario,
-          emailUsuario: email_usuario,
+          emailUsuario: normalizarEmail(email_usuario),
           telefoneUsuario: telefone_usuario,
           googleIdUsuario: google_id,
           idStatusUsuario: 1,
@@ -156,6 +158,23 @@ export class UsuarioRepository {
       .returning({
         ...camposPublicos,
         google_id_usuario: usuario.googleIdUsuario,
+        id_status_usuario: usuario.idStatusUsuario,
+      });
+
+    return rows[0] ?? null;
+  }
+
+  async vincularGoogle(id_usuario, google_id) {
+    const rows = await db
+      .update(usuario)
+      .set({ googleIdUsuario: google_id })
+      .where(
+        and(eq(usuario.idUsuario, id_usuario), isNull(usuario.googleIdUsuario)),
+      )
+      .returning({
+        ...camposPublicos,
+        google_id_usuario: usuario.googleIdUsuario,
+        id_status_usuario: usuario.idStatusUsuario,
       });
 
     return rows[0] ?? null;
