@@ -2,12 +2,26 @@ import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
-const JWT_SECRET = process.env.JWT_SECRET;
 const COOKIE_NAME = "session";
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const getJwtSecret = () => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET não definido");
+  }
+  return secret;
+};
+
+const getGoogleClient = () => {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  if (!clientId) {
+    throw new Error("GOOGLE_CLIENT_ID não definido");
+  }
+  return new OAuth2Client(clientId);
+};
 
 const createSessionToken = (id_usuario) =>
-  jwt.sign({ id_usuario }, JWT_SECRET, { expiresIn: "1d" });
+  jwt.sign({ id_usuario }, getJwtSecret(), { expiresIn: "1d" });
 
 const setAuthCookie = (reply, token) => {
   reply.setCookie(COOKIE_NAME, token, {
@@ -19,7 +33,7 @@ const setAuthCookie = (reply, token) => {
   });
 };
 
-const verifySessionToken = (token) => jwt.verify(token, JWT_SECRET);
+const verifySessionToken = (token) => jwt.verify(token, getJwtSecret());
 
 export class UsuarioBcryptController {
   constructor(service) {
@@ -67,14 +81,35 @@ export class UsuarioBcryptController {
           .send({ sucesso: false, mensagem: "Email ou senha incorretos" });
       }
 
-      const senhaValida = await bcrypt.compare(
-        senha_usuario,
-        usuario.senha_usuario,
-      );
+      const senhaArmazenada = String(usuario.senha_usuario);
+      const senhaEhHashBcrypt = /^\$2[aby]\$\d{2}\$/.test(senhaArmazenada);
+
+      const senhaValida = senhaEhHashBcrypt
+        ? await bcrypt.compare(senha_usuario, senhaArmazenada)
+        : senha_usuario === senhaArmazenada;
+
       if (!senhaValida) {
         return res
           .status(401)
           .send({ sucesso: false, mensagem: "Email ou senha incorretos" });
+      }
+
+      if (!senhaEhHashBcrypt) {
+        try {
+          const senhaHash = await bcrypt.hash(senha_usuario, await bcrypt.genSalt(10));
+          await this.service.update(usuario.id_usuario, {
+            nome_usuario: usuario.nome_usuario,
+            email_usuario: usuario.email_usuario,
+            senha_usuario: senhaHash,
+            telefone_usuario: usuario.telefone_usuario,
+          });
+          usuario.senha_usuario = senhaHash;
+        } catch (migrationError) {
+          console.error(
+            "Falha ao migrar senha legada para bcrypt:",
+            migrationError.message,
+          );
+        }
       }
 
       const token = createSessionToken(usuario.id_usuario);
@@ -158,7 +193,7 @@ export class UsuarioBcryptController {
           .send({ sucesso: false, mensagem: "idToken é obrigatório" });
       }
 
-      const ticket = await googleClient.verifyIdToken({
+      const ticket = await getGoogleClient().verifyIdToken({
         idToken,
         audience: process.env.GOOGLE_CLIENT_ID,
       });

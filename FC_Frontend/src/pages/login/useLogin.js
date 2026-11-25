@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { validarLogin } from "./LoginSchema";
@@ -48,7 +48,7 @@ export const useLogin = () => {
       navigate("/dashboard");
     } catch (err) {
       console.error("Erro no login:", err);
-      setErro("Email ou senha incorretos. Tente novamente.");
+      setErro(err.response?.data?.mensagem || "Erro ao fazer login. Tente novamente.");
     } finally {
       setCarregando(false);
     }
