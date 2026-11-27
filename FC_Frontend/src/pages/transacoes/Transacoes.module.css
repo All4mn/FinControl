@@ -305,6 +305,7 @@
 
 .controles {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
 }
@@ -358,6 +359,54 @@
   color: #26392d;
   font: inherit;
   font-size: 0.84rem;
+}
+
+.periodo {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.campoData {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #758178;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.campoData input {
+  width: 100%;
+  min-height: 38px;
+  box-sizing: border-box;
+  padding: 0 9px;
+  border: 1px solid #dce5de;
+  border-radius: 5px;
+  background: #fff;
+  color: #26392d;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 450;
+  text-transform: none;
+}
+
+.limparDatas {
+  min-height: 38px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  padding: 0 8px;
+  background: transparent;
+  color: #197149;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.limparDatas:hover {
+  background: #edf3ef;
 }
 
 .tabelaRolagem {
@@ -505,6 +554,11 @@
   font-size: 0.9rem;
 }
 
+.erroForm {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
 .estado {
   padding: 28px 0;
   color: #66746b;
@@ -600,6 +654,17 @@
 
   .busca {
     width: 100%;
+  }
+
+  .periodo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    align-items: end;
+  }
+
+  .limparDatas {
+    grid-column: 1 / -1;
   }
 
   .formSection {
