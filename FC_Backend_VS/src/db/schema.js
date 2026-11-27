@@ -17,7 +17,7 @@ export const logs = pgTable("logs", {
 export const transacao = pgTable("transacao", {
 	idTransacao: serial("id_transacao").primaryKey().notNull(),
 	idConta: integer("id_conta").notNull(),
-	idCategoria: integer("id_categoria").notNull(),
+	idCategoria: integer("id_categoria"),
 	idMetodo: integer("id_metodo").notNull(),
 	idCarteira: integer("id_carteira"),
 	valor: numeric({ precision: 12, scale:  2 }).notNull(),

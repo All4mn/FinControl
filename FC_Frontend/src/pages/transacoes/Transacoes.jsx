@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import { Archive, ArrowDownLeft, ArrowUpRight, Pencil, Plus, RefreshCw, Search, X } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -90,7 +90,11 @@ export default function Transacoes() {
   const [form, setForm] = useState(formInicial);
   const [tipoFiltro, setTipoFiltro] = useState("todas");
   const [busca, setBusca] = useState("");
+  const [dataInicio, setDataInicio] = useState("");
+  const [dataFim, setDataFim] = useState("");
   const [erro, setErro] = useState("");
+  const [erroForm, setErroForm] = useState("");
+  const metodoSelectRef = useRef(null);
 
   // O reset de falha fica em recarregar(), não aqui: no mount os valores
   // iniciais já servem. Sem o botão de retry, falhaCarregamento ficava travado
@@ -175,17 +179,21 @@ export default function Transacoes() {
 
   const transacoesFiltradas = useMemo(() => {
     const consulta = busca.trim().toLocaleLowerCase("pt-BR");
+    const inicio = dataInicio ? new Date(`${dataInicio}T00:00:00`) : null;
+    const fim = dataFim ? new Date(`${dataFim}T23:59:59.999`) : null;
     return transacoes.filter((transacao) => {
+      const data = dataTransacaoParaDataLocal(transacao.data);
       const correspondeTipo = tipoFiltro === "todas" || transacao.entrada === (tipoFiltro === "entradas");
+      const correspondeData = (!inicio || data >= inicio) && (!fim || data <= fim);
       const correspondeBusca = !consulta || [
         transacao.descricao,
         transacao.nome_conta,
         transacao.nome_categoria,
         transacao.nome_metodo,
       ].some((valor) => String(valor || "").toLocaleLowerCase("pt-BR").includes(consulta));
-      return correspondeTipo && correspondeBusca;
+      return correspondeTipo && correspondeData && correspondeBusca;
     });
-  }, [busca, tipoFiltro, transacoes]);
+  }, [busca, dataFim, dataInicio, tipoFiltro, transacoes]);
 
   const resumo = useMemo(() => {
     const agora = new Date();
@@ -210,6 +218,7 @@ export default function Transacoes() {
 
   const abrirNovo = () => {
     setErro("");
+    setErroForm("");
     setFalhaCarregamento(false);
     setTransacaoEditando(null);
     setForm({ ...formInicial(), id_conta: contas[0] ? String(contas[0].id_conta) : "" });
@@ -218,6 +227,7 @@ export default function Transacoes() {
 
   const abrirEdicao = (transacao) => {
     setErro("");
+    setErroForm("");
     setTransacaoEditando(transacao);
     setForm({
       descricao: transacao.descricao || "",
@@ -236,15 +246,23 @@ export default function Transacoes() {
     setFormAberto(false);
     setTransacaoEditando(null);
     setErro("");
+    setErroForm("");
   };
 
   const alterarCampo = (evento) => {
     const { name, value, checked, type } = evento.target;
     setForm((anterior) => ({ ...anterior, [name]: type === "checkbox" ? checked : value }));
+    if (name === "id_metodo") setErroForm("");
   };
 
   const salvarTransacao = async (evento) => {
     evento.preventDefault();
+    setErroForm("");
+    if (!form.id_metodo) {
+      setErroForm("Selecione um método de pagamento para a transação.");
+      metodoSelectRef.current?.focus();
+      return;
+    }
     setSalvando(true);
     setErro("");
     const dados = {
@@ -272,7 +290,7 @@ export default function Transacoes() {
       setTransacoes(await buscarTransacoes(contas.map((conta) => conta.id_conta)));
       fecharForm();
     } catch (falha) {
-      setErro(
+      setErroForm(
         mensagemDoErro(falha, "Não foi possível salvar a transação. Verifique sua conexão e tente novamente."),
       );
     } finally {
@@ -330,6 +348,21 @@ export default function Transacoes() {
                 <Search size={17} aria-hidden="true" />
                 <input value={busca} onChange={(evento) => setBusca(evento.target.value)} placeholder="Buscar movimentação" aria-label="Buscar movimentação" />
               </label>
+              <div className={styles.periodo} role="group" aria-label="Filtrar por período">
+                <label className={styles.campoData}>
+                  <span>De</span>
+                  <input type="date" value={dataInicio} max={dataFim || undefined} onChange={(evento) => setDataInicio(evento.target.value)} aria-label="Data inicial" />
+                </label>
+                <label className={styles.campoData}>
+                  <span>Até</span>
+                  <input type="date" value={dataFim} min={dataInicio || undefined} onChange={(evento) => setDataFim(evento.target.value)} aria-label="Data final" />
+                </label>
+                {(dataInicio || dataFim) && (
+                  <button type="button" className={styles.limparDatas} onClick={() => { setDataInicio(""); setDataFim(""); }}>
+                    Limpar
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -390,6 +423,9 @@ export default function Transacoes() {
               <button className={styles.botaoFechar} type="button" onClick={fecharForm} aria-label="Fechar formulário"><X size={19} /></button>
             </div>
             <form className={styles.formulario} onSubmit={salvarTransacao}>
+              {erroForm && (
+                <p id="erro-metodo" className={`${styles.erro} ${styles.erroForm}`} role="alert">{erroForm}</p>
+              )}
               <fieldset className={styles.tipoControle}>
                 <legend>Tipo</legend>
                 <label className={form.entrada ? styles.tipoAtivoEntrada : ""}>
@@ -422,16 +458,23 @@ export default function Transacoes() {
                 <input name="data" type="date" value={form.data} onChange={alterarCampo} required />
               </label>
               <label className={styles.campo}>
-                <span>Categoria</span>
+                <span>Categoria (opcional)</span>
                 <select name="id_categoria" value={form.id_categoria} onChange={alterarCampo}>
                   <option value="">Sem categoria</option>
                   {categorias.map((categoria) => <option key={categoria.id_categoria} value={categoria.id_categoria}>{categoria.nome_categoria}</option>)}
                 </select>
               </label>
               <label className={styles.campo}>
-                <span>Método</span>
-                <select name="id_metodo" value={form.id_metodo} onChange={alterarCampo}>
-                  <option value="">Sem método</option>
+                <span>Método (obrigatório)</span>
+                <select
+                  ref={metodoSelectRef}
+                  name="id_metodo"
+                  value={form.id_metodo}
+                  onChange={alterarCampo}
+                  aria-invalid={Boolean(erroForm)}
+                  aria-describedby={erroForm ? "erro-metodo" : undefined}
+                >
+                  <option value="">Selecione um método</option>
                   {metodosUnicos(metodos, form.id_metodo).map((metodo) => <option key={metodo.id_metodo} value={metodo.id_metodo}>{metodo.nome_metodo}</option>)}
                 </select>
               </label>

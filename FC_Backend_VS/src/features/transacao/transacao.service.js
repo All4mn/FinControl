@@ -10,6 +10,15 @@ const validarId = (id) => {
   }
 };
 
+const validarMetodo = (id_metodo) => {
+  if (id_metodo === undefined || id_metodo === null || String(id_metodo).trim() === "") {
+    throw new AppError("Selecione um método de pagamento para a transação", 400);
+  }
+  if (!/^[1-9]\d*$/.test(String(id_metodo))) {
+    throw new AppError("Método de pagamento inválido", 400);
+  }
+};
+
 export class TransacaoService {
   constructor(repository) {
     this.repository = repository;
@@ -52,6 +61,7 @@ export class TransacaoService {
   }, id_usuario) {
     if (!id_usuario) throw new AppError("Usuário não autenticado", 401);
     if (!id_conta) throw new AppError("Selecione uma conta", 400);
+    validarMetodo(id_metodo);
     if (valor === undefined || valor === null) {
       throw new AppError("Informe o valor da transação", 400);
     }
@@ -98,6 +108,7 @@ export class TransacaoService {
     validarId(id);
     if (!id_usuario) throw new AppError("Usuário não autenticado", 401);
     if (!id_conta) throw new AppError("Selecione uma conta", 400);
+    validarMetodo(id_metodo);
     if (valor === undefined || valor === null) {
       throw new AppError("Informe o valor da transação", 400);
     }
